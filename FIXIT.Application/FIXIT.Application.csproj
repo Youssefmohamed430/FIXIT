@@ -16,4 +16,9 @@
     <ProjectReference Include="..\FIXIT.Domain\FIXIT.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="IServices\" />
+    <Folder Include="Servicces\" />
+  </ItemGroup>
+
 </Project>

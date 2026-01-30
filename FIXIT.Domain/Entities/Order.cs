@@ -9,10 +9,10 @@ public class Order
     public JobPost? JobPost { get; set; }
     public int OfferId { get; set; }
     public Offer? Offer { get; set; }
-    public decimal TotalAmount { get; set; }
-    public decimal ProviderAmount { get; set; }
-    public decimal PlatformCommission { get; set; }
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public Price TotalAmount { get; set; }
+    public Price ProviderAmount { get; set; }
+    public Price PlatformCommission { get; set; }
+    public DateTime CreatedAt { get; set; } = EgyptTimeHelper.Now;
     public WorkStatus WorkStatus { get; set; } = WorkStatus.InProgress;
     public PaymentStatus PaymentStatus { get; set; } = PaymentStatus.Pending;
     public List<WalletTransaction>? walletTransactions { get; set; }

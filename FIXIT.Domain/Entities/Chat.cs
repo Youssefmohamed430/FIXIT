@@ -1,9 +1,11 @@
-﻿namespace FIXIT.Domain.Entities;
+﻿using Data_Access_Layer.Helpers;
+
+namespace FIXIT.Domain.Entities;
 
 public class Chat
 {
     public int Id { get; set; }
-    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime CreatedAt { get; set; } = EgyptTimeHelper.Now;
     public List<ChatParticipant>? Participants { get; set; }
     public List<ChatMessage>? Messages { get; set; }
 }

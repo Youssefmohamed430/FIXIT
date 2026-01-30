@@ -6,8 +6,8 @@ public class WalletTransaction
     public int Id { get; set; }
     public int WalletId { get; set; }
     public Wallet? Wallet { get; set; }
-    public decimal Amount { get; set; }
-    public DateTime TransactionDate { get; set; } = DateTime.UtcNow;
+    public Price Amount { get; set; }
+    public DateTime TransactionDate { get; set; } = EgyptTimeHelper.Now;
     public int OrderId { get; set; }
     public Order? Order { get; set; }
     public TransactionType Type { get; set; }

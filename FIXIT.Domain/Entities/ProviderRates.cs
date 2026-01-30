@@ -10,7 +10,7 @@ namespace FIXIT.Domain.Entities
     {
         public int Id { get; set; }
         public string ProviderId { get; set; }
-        public double Rate { get; set; }
+        public Rate Rate { get; set; }
         public string Comment { get; set; }
         public ServiceProvider? Provider { get; set; }
     }

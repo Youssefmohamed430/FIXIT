@@ -1,4 +1,6 @@
-﻿namespace FIXIT.Domain.Entities;
+﻿using Data_Access_Layer.Helpers;
+
+namespace FIXIT.Domain.Entities;
 
 public class ChatMessage
 {
@@ -9,5 +11,5 @@ public class ChatMessage
     public ApplicationUser? Sender { get; set; }
     public string Message { get; set; }
     public bool IsRead { get; set; } = false;
-    public DateTime SentAt { get; set; } = DateTime.UtcNow;
+    public DateTime SentAt { get; set; } = EgyptTimeHelper.Now;
 }

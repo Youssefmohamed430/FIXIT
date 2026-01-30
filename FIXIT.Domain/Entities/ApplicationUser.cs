@@ -18,5 +18,7 @@ namespace FIXIT.Domain.Entities
 
         public Customer? Customer { get; set; }
         public ServiceProvider? ServiceProvider { get; set; }
+        public List<UserNotification>? UserNotifications { get; set; }
+        public Wallet? Wallet { get; set; }
     }
 }

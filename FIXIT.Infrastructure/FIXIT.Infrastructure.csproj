@@ -22,4 +22,8 @@
     <ProjectReference Include="..\FIXIT.Domain\FIXIT.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Data\Configs\" />
+  </ItemGroup>
+
 </Project>

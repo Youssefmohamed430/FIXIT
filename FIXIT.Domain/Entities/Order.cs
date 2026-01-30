@@ -15,4 +15,14 @@ public class Order
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public WorkStatus WorkStatus { get; set; } = WorkStatus.InProgress;
     public PaymentStatus PaymentStatus { get; set; } = PaymentStatus.Pending;
+    public List<WalletTransaction>? walletTransactions { get; set; }
 }
+
+/*
+ * Steps to create wallet transactions for an order:
+ Order #123
+ ├─ WalletTransaction (Customer -1000)
+ ├─ WalletTransaction (Escrow +1000)
+ ├─ WalletTransaction (Platform +150)
+ └─ WalletTransaction (Provider +850)
+ */

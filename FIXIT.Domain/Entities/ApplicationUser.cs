@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using FIXIT.Domain.ValueObjects;
+using Microsoft.AspNetCore.Identity;
 using NetTopologySuite.Geometries;
 using System;
 using System.Collections.Generic;
@@ -12,6 +13,7 @@ namespace FIXIT.Domain.Entities
     {
         public required string Name { get; set; }
         public required Point Location { get; set; }
+        public ImgPath? Img { get; private set; }
         public bool IsDeleted { get; set; } = false;
 
         public Customer? Customer { get; set; }

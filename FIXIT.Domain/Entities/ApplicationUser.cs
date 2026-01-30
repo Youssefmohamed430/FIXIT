@@ -1,0 +1,20 @@
+﻿using Microsoft.AspNetCore.Identity;
+using NetTopologySuite.Geometries;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace FIXIT.Domain.Entities
+{
+    public class ApplicationUser : IdentityUser
+    {
+        public required string Name { get; set; }
+        public required Point Location { get; set; }
+        public bool IsDeleted { get; set; } = false;
+
+        public Customer? Customer { get; set; }
+        public ServiceProvider? ServiceProvider { get; set; }
+    }
+}

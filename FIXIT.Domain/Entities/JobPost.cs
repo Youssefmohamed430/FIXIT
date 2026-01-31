@@ -21,4 +21,5 @@ public class JobPost
     public Customer? Customer { get; set; }
     public List<Order>? orders { get; set; }
     public List<Offer>? Offers { get; set; }
+    public List<JobPostImg>? JobPostImgs { get; set; }
 }

@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.14.36616.10 d17.14
+VisualStudioVersion = 17.14.36616.10
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FIXIT.API", "FIXIT.API\FIXIT.API.csproj", "{B748975D-6957-4491-A2C0-EBADCDF6E884}"
 EndProject
@@ -12,8 +12,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FIXIT.Infrastructure", "FIXIT.Infrastructure\FIXIT.Infrastructure.csproj", "{26F698E9-F59F-4721-ADCF-2D94E2494DEA}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FIXIT.Presentation", "FIXIT.Presentation\FIXIT.Presentation.csproj", "{162DE466-9334-44EA-8B3E-5ECCBAD58BF8}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FIXIT.Blazor", "FIXIT.Blazor\FIXIT.Blazor.csproj", "{6F52E36C-BA62-4C28-8902-84473E81C941}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -41,10 +39,6 @@ Global
 		{162DE466-9334-44EA-8B3E-5ECCBAD58BF8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{162DE466-9334-44EA-8B3E-5ECCBAD58BF8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{162DE466-9334-44EA-8B3E-5ECCBAD58BF8}.Release|Any CPU.Build.0 = Release|Any CPU
-		{6F52E36C-BA62-4C28-8902-84473E81C941}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6F52E36C-BA62-4C28-8902-84473E81C941}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6F52E36C-BA62-4C28-8902-84473E81C941}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6F52E36C-BA62-4C28-8902-84473E81C941}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,16 +1,27 @@
-
 using FIXIT.Domain.Entities;
 using FIXIT.Infrastructure.Data.Context;
 using FIXIT.Presentation.ServiceRegistration;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+var config = new ConfigurationBuilder()
+                .AddJsonFile("appsettings.json")
+                .Build();
+
+var Connectionstring = config.GetSection("constr").Value;
+
+builder.Services.AddDbContext<AppDbContext>(options =>
+{
+    options.UseSqlServer(Connectionstring,
+    x => x.UseNetTopologySuite());
+});
 
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 
-builder.Services.AddApplicationServices(builder.Configuration);
+//builder.Services.AddApplicationServices(builder.Configuration);
 
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 {

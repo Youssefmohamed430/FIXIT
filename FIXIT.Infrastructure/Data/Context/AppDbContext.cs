@@ -1,10 +1,11 @@
-﻿using FIXIT.Domain.Entities;
+﻿namespace FIXIT.Infrastructure.Data.Context;
 
-namespace FIXIT.Infrastructure.Data.Context;
-
-public class AppDbContext(DbContextOptions<AppDbContext> options) 
-    : IdentityDbContext<ApplicationUser>(options)
+public class AppDbContext : IdentityDbContext<ApplicationUser>
 {
+
+    public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
+    {
+    }
     public DbSet<ChatParticipant> Chats { get; set; }
     public DbSet<ChatMessage> ChatMessages { get; set; }
     public DbSet<ChatParticipant> ChatParticipants { get; set; }
@@ -19,6 +20,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options)
     public DbSet<ServiceProvider> ServiceProviders { get; set; }
     public DbSet<Wallet> Wallets { get; set; }
     public DbSet<WalletTransaction> WalletTransactions { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);

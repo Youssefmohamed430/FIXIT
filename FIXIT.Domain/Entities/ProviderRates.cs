@@ -12,6 +12,7 @@ namespace FIXIT.Domain.Entities
         public string ProviderId { get; set; }
         public Rate Rate { get; set; }
         public string Comment { get; set; }
+        public bool IsDeleted { get; set; } = false;
         public ServiceProvider? Provider { get; set; }
     }
 }

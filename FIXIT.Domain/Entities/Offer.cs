@@ -10,8 +10,9 @@ public class Offer
     public OfferStatus status { get; set; } = OfferStatus.Pending;
     public int JobPostId { get; set; }
     public string ProviderId { get; set; }
+    public bool IsDeleted { get; set; } = false;
     public ServiceProvider? ServiceProvider { get; set; }
     public JobPost? JobPost { get; set; }
-    public Order? order { get; set; }
+    public List<Order>? orders { get; set; }
 
 }

@@ -8,4 +8,5 @@ public class Wallet
     public Price Balance { get; set; }
     public OwnerType ownerType { get; set; }
     public ApplicationUser? User { get; set; }
+    public List<WalletTransaction> WalletTransactions { get; set; }
 }

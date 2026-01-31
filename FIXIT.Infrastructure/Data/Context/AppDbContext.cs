@@ -5,7 +5,7 @@ namespace FIXIT.Infrastructure.Data.Context;
 public class AppDbContext(DbContextOptions<AppDbContext> options) 
     : IdentityDbContext<ApplicationUser>(options)
 {
-    public DbSet<Chat> Chats { get; set; }
+    public DbSet<ChatParticipant> Chats { get; set; }
     public DbSet<ChatMessage> ChatMessages { get; set; }
     public DbSet<ChatParticipant> ChatParticipants { get; set; }
     public DbSet<Customer> Customers { get; set; }

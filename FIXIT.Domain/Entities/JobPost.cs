@@ -17,6 +17,8 @@ public class JobPost
     public JobPostStatus Status { get; set; } = JobPostStatus.Open;   
     public DateTime CreatedAt { get; set; } = EgyptTimeHelper.Now;
     public string CustomerId { get; set; }
+    public bool IsDeleted { get; set; } = false;
     public Customer? Customer { get; set; }
-    public Order? order { get; set; }
+    public List<Order>? orders { get; set; }
+    public List<Offer>? Offers { get; set; }
 }

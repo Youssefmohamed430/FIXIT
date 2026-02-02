@@ -1,6 +1,9 @@
+using FIXIT.Application;
+using FIXIT.Application.Servicces;
+using FIXIT.Domain;
 using FIXIT.Domain.Entities;
+using FIXIT.Infrastructure;
 using FIXIT.Infrastructure.Data.Context;
-using FIXIT.Presentation.ServiceRegistration;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -14,6 +17,8 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(connectionString,
         x => x.UseNetTopologySuite());
 });
+builder.Services.AddTransient<IUnitOfWork, UnitOfWork>();
+builder.Services.AddScoped<IServiceManager, ServiceManager>();
 
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();

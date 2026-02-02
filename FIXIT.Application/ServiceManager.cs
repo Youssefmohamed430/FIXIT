@@ -1,18 +1,22 @@
-﻿using FIXIT.Domain;
+﻿using FIXIT.Application.IServices;
+using FIXIT.Application.Servicces;
+using FIXIT.Domain;
+using FIXIT.Domain.Entities;
+using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace FIXIT.Application
+namespace FIXIT.Application;
+
+public class ServiceManager
+    (IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager)
+    : IServiceManager
 {
-    public class ServiceManager(IUnitOfWork unitOfWork) : IServiceManager
-    {
-        //=======>>>> Example of dependency injection for future services  <<<<=========
 
-        // private readonly IUnitOfWork _unitOfWork;
+    private readonly Lazy<IAuthService> _authService;
 
-        //public IUnitOfWork UnitOfWork => unitOfWork;
-    }
+    public IAuthService AuthService => _authService.Value;
 }

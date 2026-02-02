@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace FIXIT.Application
+namespace FIXIT.Application.Servicces
 {
     public interface IServiceManager
     {

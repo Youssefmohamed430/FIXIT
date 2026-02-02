@@ -20,7 +20,8 @@ public class OfferConfiguration : IEntityTypeConfiguration<Offer>
 
         builder.HasOne(o => o.ServiceProvider)
                .WithMany(sp => sp.Offers)
-               .HasForeignKey(o => o.ProviderId);
+               .HasForeignKey(o => o.ProviderId)
+               .OnDelete(DeleteBehavior.Restrict);
 
         builder.HasOne(o => o.JobPost)
                 .WithMany(jp => jp.Offers)

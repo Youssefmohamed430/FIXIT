@@ -6,16 +6,13 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var config = new ConfigurationBuilder()
-                .AddJsonFile("appsettings.json")
-                .Build();
-
-var Connectionstring = config.GetSection("constr").Value;
+var connectionString =
+    builder.Configuration.GetConnectionString("constr");
 
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
-    options.UseSqlServer(Connectionstring,
-    x => x.UseNetTopologySuite());
+    options.UseSqlServer(connectionString,
+        x => x.UseNetTopologySuite());
 });
 
 builder.Services.AddControllers();

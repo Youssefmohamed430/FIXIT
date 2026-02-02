@@ -49,7 +49,8 @@ namespace FIXIT.Infrastructure.Data.Configs
 
             builder.HasOne(o => o.Offer)
                      .WithMany(of => of.orders)
-                     .HasForeignKey(o => o.OfferId);
+                     .HasForeignKey(o => o.OfferId)
+                     .OnDelete(DeleteBehavior.Restrict);
 
 
         }

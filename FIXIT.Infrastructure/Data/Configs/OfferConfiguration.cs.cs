@@ -25,7 +25,8 @@ public class OfferConfiguration : IEntityTypeConfiguration<Offer>
 
         builder.HasOne(o => o.JobPost)
                 .WithMany(jp => jp.Offers)
-                .HasForeignKey(o => o.JobPostId);
+                .HasForeignKey(o => o.JobPostId)
+                .OnDelete(DeleteBehavior.Restrict);
 
     }
 }

@@ -16,36 +16,31 @@ namespace FIXIT.Infrastructure.Data.Configs
             builder.OwnsOne(o => o.TotalAmount, priceBuilder =>
             {
                 priceBuilder.Property(p => p.Amount)
-                            .HasColumnName("Price_Amount")
-                            .IsRequired();
+                            .HasColumnName("TotalAmount_Amount");  
                 priceBuilder.Property(p => p.Currency)
-                            .HasColumnName("Price_Currency")
-                            .IsRequired();
+                            .HasColumnName("TotalAmount_Currency");  
             });
 
             builder.OwnsOne(o => o.ProviderAmount, priceBuilder =>
             {
                 priceBuilder.Property(p => p.Amount)
-                            .HasColumnName("Price_Amount")
-                            .IsRequired();
+                            .HasColumnName("ProviderAmount_Amount");
                 priceBuilder.Property(p => p.Currency)
-                            .HasColumnName("Price_Currency")
-                            .IsRequired();
+                            .HasColumnName("ProviderAmount_Currency");
             });
 
             builder.OwnsOne(o => o.PlatformCommission, priceBuilder =>
             {
                 priceBuilder.Property(p => p.Amount)
-                            .HasColumnName("Price_Amount")
-                            .IsRequired();
+                            .HasColumnName("PlatformCommission_Amount");
                 priceBuilder.Property(p => p.Currency)
-                            .HasColumnName("Price_Currency")
-                            .IsRequired();
+                            .HasColumnName("PlatformCommission_Currency");
             });
 
             builder.HasOne(o => o.JobPost)
                    .WithMany(jp => jp.orders)
-                   .HasForeignKey(o => o.JobPostId);
+                   .HasForeignKey(o => o.JobPostId)
+                   .OnDelete(DeleteBehavior.Restrict);  
 
             builder.HasOne(o => o.Offer)
                      .WithMany(of => of.orders)

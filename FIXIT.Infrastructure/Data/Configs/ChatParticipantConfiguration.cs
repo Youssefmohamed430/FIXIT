@@ -19,7 +19,8 @@ namespace FIXIT.Infrastructure.Data.Configs
 
             builder.HasOne(cp => cp.User)
                      .WithMany(u => u.ChatParticipants)
-                     .HasForeignKey(cp => cp.UserId);
+                     .HasForeignKey(cp => cp.UserId)
+                     .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

@@ -23,7 +23,8 @@ namespace FIXIT.Infrastructure.Data.Configs
 
             builder.HasOne(cm => cm.Sender)
                 .WithMany(u => u.ChatMessages)
-                .HasForeignKey(cm => cm.SenderId);
+                .HasForeignKey(cm => cm.SenderId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

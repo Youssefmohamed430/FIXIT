@@ -26,11 +26,13 @@ namespace FIXIT.Infrastructure.Data.Configs
 
             builder.HasOne(wt => wt.Wallet)
                    .WithMany(w => w.WalletTransactions)
-                   .HasForeignKey(wt => wt.WalletId);
+                   .HasForeignKey(wt => wt.WalletId)
+                   .OnDelete(DeleteBehavior.Restrict);
 
             builder.HasOne(wt => wt.Order)
                      .WithMany(o => o.walletTransactions)
-                     .HasForeignKey(wt => wt.OrderId);
+                     .HasForeignKey(wt => wt.OrderId)
+                     .OnDelete(DeleteBehavior.Restrict);
 
         }
     }

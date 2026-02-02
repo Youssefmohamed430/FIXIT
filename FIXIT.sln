@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FIXIT.Infrastructure", "FIX
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FIXIT.Presentation", "FIXIT.Presentation\FIXIT.Presentation.csproj", "{162DE466-9334-44EA-8B3E-5ECCBAD58BF8}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FIXIT.Blazor", "FIXIT.Blazor\FIXIT.Blazor.csproj", "{5C37680F-4E50-475A-BBDC-847A0FBA3CB7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{162DE466-9334-44EA-8B3E-5ECCBAD58BF8}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{162DE466-9334-44EA-8B3E-5ECCBAD58BF8}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{162DE466-9334-44EA-8B3E-5ECCBAD58BF8}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5C37680F-4E50-475A-BBDC-847A0FBA3CB7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5C37680F-4E50-475A-BBDC-847A0FBA3CB7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5C37680F-4E50-475A-BBDC-847A0FBA3CB7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5C37680F-4E50-475A-BBDC-847A0FBA3CB7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

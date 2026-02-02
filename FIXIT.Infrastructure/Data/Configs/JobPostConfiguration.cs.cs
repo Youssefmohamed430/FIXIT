@@ -18,6 +18,7 @@ public class JobPostConfiguration : IEntityTypeConfiguration<JobPost>
 
         builder.HasOne(Jp => Jp.Customer)
             .WithMany(C => C.posts)
-            .HasForeignKey(Jp => Jp.CustomerId);
+            .HasForeignKey(Jp => Jp.CustomerId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

@@ -24,5 +24,10 @@ public class WalletConfiguration : IEntityTypeConfiguration<Wallet>
                         .HasColumnName("Price_Currency")
                         .IsRequired();
         });
+
+        builder.HasOne(w => w.User)
+       .WithOne(u => u.Wallet)
+       .HasForeignKey<Wallet>(w => w.UserId)
+       .OnDelete(DeleteBehavior.Restrict);  
     }
 }

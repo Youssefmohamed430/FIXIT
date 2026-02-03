@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using FIXIT.Application.IServices;
 
-namespace FIXIT.Application.Servicces
+namespace FIXIT.Application.Servicces;
+
+public interface IServiceManager
 {
-    public interface IServiceManager
-    {
-    }
+    public IAuthService AuthService { get; }
 }

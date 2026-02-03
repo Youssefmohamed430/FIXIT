@@ -1,8 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using Microsoft.Extensions.Localization;
-using Newtonsoft.Json;
-
-namespace FIXIT.Domain;
+﻿namespace FIXIT.Domain;
 
 public class JsonStringLocalizer : IStringLocalizer
 {

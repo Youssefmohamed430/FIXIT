@@ -5,7 +5,10 @@ using FIXIT.Domain.Entities;
 using FIXIT.Infrastructure;
 using FIXIT.Infrastructure.Data.Context;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Localization;
+using System.Globalization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,6 +25,32 @@ builder.Services.AddScoped<IServiceManager, ServiceManager>();
 
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
+
+builder.Services.AddLocalization();
+builder.Services.AddSingleton<IStringLocalizerFactory, JsonStringLocalizerFactory>();
+
+
+var supportedCultures = new[]
+{
+    new CultureInfo("en"),
+    new CultureInfo("ar")
+};
+
+var localizationOptions = new RequestLocalizationOptions
+{
+    DefaultRequestCulture = new RequestCulture("en"),
+    SupportedCultures = supportedCultures,
+    SupportedUICultures = supportedCultures
+};
+
+localizationOptions.RequestCultureProviders = new List<IRequestCultureProvider>
+{
+    new QueryStringRequestCultureProvider(), // ?culture=ar
+    new AcceptLanguageHeaderRequestCultureProvider(),      // Accept-Language
+    new CookieRequestCultureProvider()       // Cookie
+};
+
+
 
 //builder.Services.AddApplicationServices(builder.Configuration);
 
@@ -44,6 +73,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseRequestLocalization(localizationOptions);
+
 
 app.UseAuthorization();
 

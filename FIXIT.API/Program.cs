@@ -1,19 +1,31 @@
-using FIXIT.Application;
+using DotNetEnv;
+using FIXIT.Application.IServices;
 using FIXIT.Application.Servicces;
 using FIXIT.Domain;
 using FIXIT.Domain.Entities;
+using FIXIT.Domain.Helpers;
 using FIXIT.Infrastructure;
 using FIXIT.Infrastructure.Data.Context;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Localization;
+using Microsoft.IdentityModel.Tokens;
 using System.Globalization;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+Env.Load();
+
+var config = new ConfigurationBuilder()
+                .AddJsonFile("appsettings.json")
+                .Build();
+
 var connectionString =
-    builder.Configuration.GetConnectionString("constr");
+    Environment.GetEnvironmentVariable("Constr");
 
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
@@ -22,6 +34,35 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 });
 builder.Services.AddTransient<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IServiceManager, ServiceManager>();
+builder.Services.AddScoped<JWTService>();
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+}).AddJwtBearer(o =>
+{
+    o.RequireHttpsMetadata = false;
+    o.SaveToken = false;
+    o.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuerSigningKey = true,
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidIssuer = config["JWT:Issuer"],
+        ValidAudience = config["JWT:Audience"],
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8
+        .GetBytes(Environment.GetEnvironmentVariable("JWTKey")!)),
+        ClockSkew = TimeSpan.Zero
+    };
+});
+
+builder.Services.AddAuthentication()
+                .AddGoogle(options =>
+                {
+                    options.ClientId = Environment.GetEnvironmentVariable("ClientId")!;
+                    options.ClientSecret = Environment.GetEnvironmentVariable("ClientSecret")!;
+                });
 
 builder.Services.AddControllers();
 builder.Services.AddOpenApi();
@@ -30,29 +71,17 @@ builder.Services.AddLocalization();
 builder.Services.AddSingleton<IStringLocalizerFactory, JsonStringLocalizerFactory>();
 
 
-var supportedCultures = new[]
+builder.Services.Configure<RequestLocalizationOptions>(options =>
 {
-    new CultureInfo("en"),
-    new CultureInfo("ar")
-};
+    var supportedCultures = new[]
+    {
+        new CultureInfo("en-US"),
+        new CultureInfo("ar-EG"),
+    };
 
-var localizationOptions = new RequestLocalizationOptions
-{
-    DefaultRequestCulture = new RequestCulture("en"),
-    SupportedCultures = supportedCultures,
-    SupportedUICultures = supportedCultures
-};
-
-localizationOptions.RequestCultureProviders = new List<IRequestCultureProvider>
-{
-    new QueryStringRequestCultureProvider(), // ?culture=ar
-    new AcceptLanguageHeaderRequestCultureProvider(),      // Accept-Language
-    new CookieRequestCultureProvider()       // Cookie
-};
-
-
-
-//builder.Services.AddApplicationServices(builder.Configuration);
+    options.DefaultRequestCulture = new RequestCulture(culture: supportedCultures[0]);
+    options.SupportedCultures = supportedCultures;
+});
 
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 {
@@ -73,6 +102,14 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+var supportedCultures = new[] { "en-US", "ar-EG"};
+
+var localizationOptions = new RequestLocalizationOptions()
+    .SetDefaultCulture(supportedCultures[0])
+    .AddSupportedCultures(supportedCultures)
+    .AddSupportedUICultures(supportedCultures);
+
 app.UseRequestLocalization(localizationOptions);
 
 

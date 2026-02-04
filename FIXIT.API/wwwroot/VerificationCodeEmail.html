@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Verification Account</title>
+    <style>
+        body {
+            background-color: #0e0e12;
+            margin: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        .container {
+            max-width: 350px;
+            margin: 40px auto;
+            background: #ffffff;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+            text-align: center;
+            padding: 30px 20px;
+        }
+
+        .logo-box img {
+            max-width: 100%;
+            display: block;
+            margin: 0 auto 20px;
+            border-radius: 12px;
+        }
+
+        .otp-box {
+            background-color: #13897d;
+            padding: 15px 25px;
+            font-size: 28px;
+            font-weight: bold;
+            letter-spacing: 8px;
+            color: #fff;
+            border-radius: 8px;
+            display: inline-block;
+            margin: 30px 0;
+        }
+
+        .footer {
+            margin-top: 40px;
+            font-size: 15px;
+            color: #ffffff;
+            background-color: #13897d;
+            padding: 15px;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo-box">
+            <img src="/Waselny.jpg" alt="Waselny Logo" />
+        </div>
+        <h1 style="color:#1d1b2e;">Email Confirmation</h1>
+        <p style="color:#555; font-size:16px;">
+            Use the following OTP code to verify your account at <strong>Waselny</strong>.
+            This code is valid for <strong>10 minutes</strong>.
+        </p>
+        <div class="otp-box">{{CODE}}</div>
+
+        <div class="footer">
+            © {{DATE}} Waselny. All rights reserved.
+        </div>
+    </div>
+</body>
+</html>

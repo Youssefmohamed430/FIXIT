@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 
-namespace Service_Layer.ServiceRegistration;
+namespace FIXIT.Presentation.ServiceRegistration;
 
 public static class CorsPolicyService
 {

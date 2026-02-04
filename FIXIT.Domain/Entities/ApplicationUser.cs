@@ -15,5 +15,6 @@ namespace FIXIT.Domain.Entities
         public Wallet? Wallet { get; set; }
         public List<ChatParticipant>? ChatParticipants { get; set; }
         public List<ChatMessage>? ChatMessages { get; set; }
+        public List<RefreshToken>? refreshTokens { get; set; }
     }
 }

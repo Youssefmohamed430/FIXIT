@@ -1,5 +1,4 @@
 ﻿using FIXIT.Application.IServices;
-using FIXIT.Application.Servicces;
 using FIXIT.Domain;
 using FIXIT.Domain.Entities;
 using Microsoft.AspNetCore.Identity;
@@ -9,7 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace FIXIT.Application;
+namespace FIXIT.Application.Servicces;
 
 public class ServiceManager
     (IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager)
@@ -17,6 +16,8 @@ public class ServiceManager
 {
 
     private readonly Lazy<IAuthService> _authService;
+    private readonly Lazy<IEmailService> _emailService;
 
     public IAuthService AuthService => _authService.Value;
+    public IEmailService EmailService => _emailService.Value;
 }

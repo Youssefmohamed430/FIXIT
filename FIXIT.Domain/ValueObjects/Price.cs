@@ -5,10 +5,10 @@ public sealed class Price : ValueObject
     public decimal Amount { get; }
     public string Currency { get; }
 
-    private Price(decimal amount, string currency)
+    private Price(decimal amount, string _currency)
     {
         Amount = amount;
-        Currency = currency;
+        Currency = _currency;
     }
 
     public static Price Create(decimal amount, string currency = "EGP")
@@ -16,12 +16,9 @@ public sealed class Price : ValueObject
         if (amount <= 0)
             throw new ArgumentException("Price must be greater than zero.");
 
-        if (string.IsNullOrWhiteSpace(currency))
-            throw new ArgumentException("Currency is required.");
-
         return new Price(
             Math.Round(amount, 2),
-            currency.ToUpper()
+            currency
         );
     }
 

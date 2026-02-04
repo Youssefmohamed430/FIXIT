@@ -1,12 +1,18 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿
+using FIXIT.Application.DTOs;
+using FIXIT.Domain;
+using FIXIT.Presentation.Controllers;
 
-namespace FIXIT.Application.IServices
+namespace FIXIT.Application.IServices;
+
+public interface IAuthService
 {
-    public interface IAuthService
-    {
-    }
+    Task<AuthModel> Login(LoginDTO loginDTO);
+    Task<AuthModel> Register(RegisterDTO registermodel);
+    Task<AuthModel> ForgotPassword(string Email);
+    Task<AuthModel> ResetPassword(ResetPassModelDto resetPassModel);
+    bool VerifyCode(string email, string submittedCode);
+    Task<AuthModel> CreateUser(string email);
+    Task<AuthModel> RefreshToken(string token);
+    Task<bool> RevokeTokenAsync(string token);
 }

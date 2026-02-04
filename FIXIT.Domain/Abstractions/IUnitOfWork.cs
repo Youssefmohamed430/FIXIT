@@ -1,6 +1,6 @@
 ﻿using FIXIT.Domain.IRepositries;
 
-namespace FIXIT.Domain;
+namespace FIXIT.Domain.Abstractions;
 
     public interface IUnitOfWork
     {

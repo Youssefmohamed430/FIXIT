@@ -1,4 +1,4 @@
-﻿namespace FIXIT.Domain;
+﻿namespace FIXIT.Domain.LocalizationsFiles;
 
 public class JsonStringLocalizerFactory : IStringLocalizerFactory
 {

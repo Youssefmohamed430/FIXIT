@@ -1,5 +1,6 @@
-﻿
-namespace FIXIT.Domain
+﻿using FIXIT.Domain.Abstractions;
+
+namespace FIXIT.Domain.Factories
 {
     public class AuthModelFactory
     {

@@ -1,4 +1,6 @@
-﻿namespace FIXIT.Domain.Entities;
+﻿using FIXIT.Domain.Abstractions;
+
+namespace FIXIT.Domain.Entities;
 
 public enum OfferStatus {Pending = 1, Accepted = 2, Rejected = 3 }
 public class Offer

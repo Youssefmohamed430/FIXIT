@@ -1,5 +1,5 @@
 ﻿using FIXIT.Application.IServices;
-using FIXIT.Domain;
+using FIXIT.Domain.Abstractions;
 using FIXIT.Domain.Entities;
 using Microsoft.AspNetCore.Identity;
 using System;

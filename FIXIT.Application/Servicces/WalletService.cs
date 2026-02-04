@@ -1,7 +1,6 @@
 ﻿
 using FIXIT.Application.DTOs;
 using FIXIT.Application.IServices;
-using FIXIT.Domain;
 using FIXIT.Domain.Abstractions;
 using FIXIT.Domain.Entities;
 using FIXIT.Domain.ValueObjects;

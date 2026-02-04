@@ -1,4 +1,4 @@
-﻿using Data_Access_Layer.Helpers;
+﻿using FIXIT.Domain.Abstractions;
 
 namespace FIXIT.Domain.Entities;
 

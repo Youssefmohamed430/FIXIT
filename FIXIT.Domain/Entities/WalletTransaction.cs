@@ -1,4 +1,6 @@
-﻿namespace FIXIT.Domain.Entities;
+﻿using FIXIT.Domain.Abstractions;
+
+namespace FIXIT.Domain.Entities;
 
 public enum TransactionType { Depit = 1, Credit = 2 }
 public class WalletTransaction

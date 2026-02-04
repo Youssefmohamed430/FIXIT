@@ -1,9 +1,10 @@
 using DotNetEnv;
 using FIXIT.Application.IServices;
 using FIXIT.Application.Servicces;
-using FIXIT.Domain;
+using FIXIT.Domain.Abstractions;
 using FIXIT.Domain.Entities;
 using FIXIT.Domain.Helpers;
+using FIXIT.Domain.LocalizationsFiles;
 using FIXIT.Infrastructure;
 using FIXIT.Infrastructure.Data.Context;
 using Microsoft.AspNetCore.Authentication.JwtBearer;

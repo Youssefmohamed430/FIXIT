@@ -61,8 +61,8 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddAuthentication()
                 .AddGoogle(options =>
                 {
-                    options.ClientId = Environment.GetEnvironmentVariable("ClientId")!;
-                    options.ClientSecret = Environment.GetEnvironmentVariable("ClientSecret")!;
+                    options.ClientId = Environment.GetEnvironmentVariable("ClientGoogleId")!;
+                    options.ClientSecret = Environment.GetEnvironmentVariable("ClientGoogleSecret")!;
                 });
 
 builder.Services.AddControllers();

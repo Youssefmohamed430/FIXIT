@@ -3,6 +3,7 @@ using FIXIT.Application.IServices;
 using FIXIT.Domain;
 using FIXIT.Domain.Abstractions;
 using FIXIT.Domain.Entities;
+using FIXIT.Domain.Factories;
 using FIXIT.Domain.Helpers;
 using FIXIT.Presentation.Controllers;
 using Mapster;

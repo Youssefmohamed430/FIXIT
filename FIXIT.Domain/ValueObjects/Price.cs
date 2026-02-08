@@ -5,6 +5,9 @@ public sealed class Price : ValueObject
     public decimal Amount { get; }
     public string Currency { get; }
 
+    private Price()
+    {}
+
     private Price(decimal amount, string _currency)
     {
         Amount = amount;

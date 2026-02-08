@@ -9,7 +9,10 @@ namespace FIXIT.Domain.ValueObjects;
 public sealed class ImgPath : ValueObject
 {
     public string Value { get; }
-
+    private ImgPath()
+    {
+        
+    }
     private ImgPath(string value)
     {
         Value = value;

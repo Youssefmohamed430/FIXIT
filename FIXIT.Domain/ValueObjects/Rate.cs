@@ -4,6 +4,10 @@ public sealed class Rate : ValueObject
 {
     public decimal Value { get; }
 
+    private Rate()
+    {
+        
+    }
     private Rate(decimal value)
     {
         Value = value;

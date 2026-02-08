@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Drawing;
 
 namespace FIXIT.Application.DTOs;
 
@@ -11,7 +12,7 @@ public class RegisterDTO
     [Required]
     [MinLength(10, ErrorMessage = "At Least ten Letters")]
     [RegularExpression(@"^[a-zA-Z0-9]+$", ErrorMessage = "Username must contain only letters and numbers")]
-    public string? Username { get; set; }
+    public string? UserName { get; set; }
     [Required]
     [EmailAddress(ErrorMessage = "In Valid Email")]
     public string? Email { get; set; }
@@ -25,4 +26,7 @@ public class RegisterDTO
     public string? Phone { get; set; }
     [Required]
     public string? Role { get; set; }
+    [Required]
+    public double Latitude { get; set; }
+    public double Longitude { get; set; }
 }

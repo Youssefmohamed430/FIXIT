@@ -3,36 +3,49 @@ using FIXIT.Domain.Abstractions;
 using FIXIT.Domain.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace FIXIT.Application.Servicces;
 
-public class ServiceManager: IServiceManager
+public class ServiceManager : IServiceManager
 {
+    private readonly IServiceProvider _serviceProvider;
+
     public IUnitOfWork UnitOfWork { get; }
     public UserManager<ApplicationUser> Usermanager { get; set; }
 
+    #region Lazy Services
     private readonly Lazy<IAuthService> _authService;
     private readonly Lazy<IEmailService> _emailService;
+    private readonly Lazy<IWallettService> _walletService;
+    #endregion
 
-
-    public ServiceManager(IServiceProvider serviceProvider, IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager)
+    #region Constructor
+    public ServiceManager(
+        IServiceProvider serviceProvider,
+        IUnitOfWork unitOfWork,
+        UserManager<ApplicationUser> userManager)
     {
+        _serviceProvider = serviceProvider;
         Usermanager = userManager;
         UnitOfWork = unitOfWork;
 
         _authService = new Lazy<IAuthService>(
-            () => serviceProvider.GetRequiredService<IAuthService>()
+            () => _serviceProvider.GetRequiredService<IAuthService>()
         );
+
         _emailService = new Lazy<IEmailService>(
-            () => serviceProvider.GetRequiredService<IEmailService>()
+            () => _serviceProvider.GetRequiredService<IEmailService>()
+        );
+
+        _walletService = new Lazy<IWallettService>(
+            () => _serviceProvider.GetRequiredService<IWallettService>()
         );
     }
+    #endregion
 
+    #region Service Properties
     public IAuthService AuthService => _authService.Value;
     public IEmailService EmailService => _emailService.Value;
+    public IWallettService WalletService => _walletService.Value;
+    #endregion
 }

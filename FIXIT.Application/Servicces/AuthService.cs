@@ -63,7 +63,7 @@ public class AuthService(UserManager<ApplicationUser> _userManager,IWallettServi
     #region Register
     public async Task<AuthModel> Register(RegisterDTO registermodel)
     {
-        if (await _userManager.FindByNameAsync(registermodel.Username) is not null)
+        if (await _userManager.FindByNameAsync(registermodel.UserName) is not null)
             return new AuthModel() { Message = "User Name Is Already Registerd" };
 
         if (await _userManager.FindByEmailAsync(registermodel.Email) is not null)
@@ -101,7 +101,7 @@ public class AuthService(UserManager<ApplicationUser> _userManager,IWallettServi
                 return new AuthModel() { Message = errors };
             }
 
-            if(model.Role == "Customer")
+            if(model.Role.ToLower() == "customer")
             {
                 await _userManager.AddToRoleAsync(user, "Customer");
                 var customer = user.Adapt<Customer>();
@@ -131,7 +131,7 @@ public class AuthService(UserManager<ApplicationUser> _userManager,IWallettServi
             unitOfWork.Commit();
 
             return new AuthModelFactory()
-                .CreateAuthModel(user.Id, model.Username, model.Email, JWTSecurityToken.ValidTo, new List<string> { "Passenger" }, new JwtSecurityTokenHandler().WriteToken(JWTSecurityToken), refreshToken.Token, refreshToken.ExpiresOn, "Code Verfied successfully!");
+                .CreateAuthModel(user.Id, model.UserName, model.Email, JWTSecurityToken.ValidTo, new List<string> { "Passenger" }, new JwtSecurityTokenHandler().WriteToken(JWTSecurityToken), refreshToken.Token, refreshToken.ExpiresOn, "Code Verfied successfully!");
         }
         catch (Exception ex)
         {

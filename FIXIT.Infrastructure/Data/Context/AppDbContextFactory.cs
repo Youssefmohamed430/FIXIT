@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using DotNetEnv;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
@@ -10,18 +11,16 @@ public class AppDbContextFactory : IDesignTimeDbContextFactory<AppDbContext>
 {
     public AppDbContext CreateDbContext(string[] args)
     {
-        var basePath = Directory.GetCurrentDirectory();
-        var config = new ConfigurationBuilder()
-            .SetBasePath(basePath)
-            .AddJsonFile("appsettings.json", optional: true)
-            .AddJsonFile("appsettings.Development.json", optional: true)
-            .Build();
+        Env.Load();
 
-        var connectionString = config.GetConnectionString("constr")
-            ?? throw new InvalidOperationException("Connection string 'constr' not found.");
+        var connectionString = Environment.GetEnvironmentVariable("constr");
+
+        if (string.IsNullOrWhiteSpace(connectionString))
+            throw new Exception("DB_CONNECTION is missing");
 
         var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
-        optionsBuilder.UseSqlServer(connectionString, x => x.UseNetTopologySuite());
+        optionsBuilder.UseSqlServer(connectionString,
+                x => x.UseNetTopologySuite());
 
         return new AppDbContext(optionsBuilder.Options);
     }

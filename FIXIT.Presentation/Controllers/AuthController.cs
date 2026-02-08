@@ -61,6 +61,9 @@ public class AuthController
         {
             var Userresult = await serviceManager.AuthService.CreateUser(email);
 
+            if(Userresult.IsAuthenticated == false)
+                return BadRequest(Userresult.Message); 
+
             SetRefreshTokenInCookie(Userresult.RefreshToken, Userresult.RefreshTokenExpiration);
 
             return Ok(Userresult);

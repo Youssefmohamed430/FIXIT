@@ -6,11 +6,14 @@ using FIXIT.Domain.Entities;
 using FIXIT.Domain.Helpers;
 using FIXIT.Domain.LocalizationsFiles;
 using FIXIT.Infrastructure;
+using FIXIT.Infrastructure.Data.Configs;
 using FIXIT.Infrastructure.Data.Context;
+using FIXIT.Presentation;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Localization;
 using Microsoft.IdentityModel.Tokens;
@@ -26,7 +29,15 @@ var config = new ConfigurationBuilder()
                 .Build();
 
 var connectionString =
-    Environment.GetEnvironmentVariable("Constr");
+    Environment.GetEnvironmentVariable("constr");
+
+builder.Services.AddScoped<HandleCachingResourcesFilter>();
+
+builder.Services.AddControllers(options =>
+{
+    options.Filters.Add<HandleCachingResourcesFilter>();
+});
+
 
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
@@ -34,6 +45,9 @@ builder.Services.AddDbContext<AppDbContext>(options =>
         x => x.UseNetTopologySuite());
 });
 builder.Services.AddTransient<IUnitOfWork, UnitOfWork>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IWallettService, WalletService>();
+builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IServiceManager, ServiceManager>();
 builder.Services.AddScoped<JWTService>();
 builder.Services.AddAuthentication(options =>
@@ -65,8 +79,8 @@ builder.Services.AddAuthentication()
                     options.ClientSecret = Environment.GetEnvironmentVariable("ClientGoogleSecret")!;
                 });
 
-builder.Services.AddControllers();
 builder.Services.AddOpenApi();
+builder.Services.AddMemoryCache();
 
 builder.Services.AddLocalization();
 builder.Services.AddSingleton<IStringLocalizerFactory, JsonStringLocalizerFactory>();
@@ -86,7 +100,7 @@ builder.Services.Configure<RequestLocalizationOptions>(options =>
 
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 {
-    options.SignIn.RequireConfirmedAccount = true; // Add this line
+    options.SignIn.RequireConfirmedAccount = true; 
     options.Password.RequireDigit = true;
     options.Password.RequiredLength = 8;
     options.Password.RequireNonAlphanumeric = false;
@@ -94,6 +108,9 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
     options.Password.RequireLowercase = true;
 }).AddEntityFrameworkStores<AppDbContext>()
          .AddDefaultTokenProviders();
+
+builder.Services.RegisterMapsterConfiguration();
+
 
 var app = builder.Build();
 
@@ -113,6 +130,7 @@ var localizationOptions = new RequestLocalizationOptions()
 
 app.UseRequestLocalization(localizationOptions);
 
+app.UseAuthentication();
 
 app.UseAuthorization();
 

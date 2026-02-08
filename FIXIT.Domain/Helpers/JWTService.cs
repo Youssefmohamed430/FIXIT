@@ -36,7 +36,8 @@ public class JWTService
         .Union(userClaims)
         .Union(roleClaims);
 
-        var symmetricSecurityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_jwt.Key));
+        var symmetricSecurityKey = new SymmetricSecurityKey(Encoding.UTF8
+            .GetBytes(Environment.GetEnvironmentVariable("JWTKey")!));
         var signingCredentials = new SigningCredentials(symmetricSecurityKey, SecurityAlgorithms.HmacSha256);
 
         var jwtSecurityToken = new JwtSecurityToken

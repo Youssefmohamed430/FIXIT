@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using FIXIT.Application.Servicces;
+using System.ComponentModel.DataAnnotations;
 using System.Drawing;
 
 namespace FIXIT.Application.DTOs;
@@ -25,7 +26,7 @@ public class RegisterDTO
     [RegularExpression(@"^\d+$", ErrorMessage = "Phone must contain numbers only")]
     public string? Phone { get; set; }
     [Required]
-    public string? Role { get; set; }
+    public UserRole? Role { get; set; }
     [Required]
     public double Latitude { get; set; }
     public double Longitude { get; set; }

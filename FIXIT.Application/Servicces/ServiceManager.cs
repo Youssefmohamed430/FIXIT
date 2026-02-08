@@ -46,6 +46,7 @@ public class ServiceManager : IServiceManager
     #region Service Properties
     public IAuthService AuthService => _authService.Value;
     public IEmailService EmailService => _emailService.Value;
-    public IWallettService WalletService => _walletService.Value;
+
+    IWallettService IServiceManager._walletService => _walletService.Value;
     #endregion
 }

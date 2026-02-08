@@ -2,32 +2,36 @@
 using Mapster;
 using Microsoft.Extensions.DependencyInjection;
 using NetTopologySuite.Geometries;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
+using ServiceProvider = FIXIT.Domain.Entities.ServiceProvider;
 
-namespace FIXIT.Infrastructure.Data.Configs
+namespace FIXIT.Infrastructure.Data.Configs;
+
+public static class MapsterConfiguration
 {
-    public static class MapsterConfiguration
+    public static void RegisterMapsterConfiguration(this IServiceCollection services)
     {
-        public static void RegisterMapsterConfiguration(this IServiceCollection services)
-        {
-            TypeAdapterConfig<ApplicationUser, RegisterDTO>
+        // FROM ApplicationUser TO RegisterDTO
+        TypeAdapterConfig<ApplicationUser, RegisterDTO>
             .NewConfig()
             .Map(dest => dest.Longitude,
                  src => src.Location != null ? src.Location.X : 0)
             .Map(dest => dest.Latitude,
                  src => src.Location != null ? src.Location.Y : 0);
 
-            TypeAdapterConfig<RegisterDTO, ApplicationUser>
+        // FROM RegisterDTO TO ApplicationUser
+        TypeAdapterConfig<RegisterDTO, ApplicationUser>
             .NewConfig()
-            .Map(dest => dest.Location,
-                 src => new Point(src.Longitude, src.Latitude) { SRID = 4326 });
+            .ConstructUsing(src => new ApplicationUser
+            {
+                Name = src.Name!,
+                UserName = src.UserName!,
+                Email = src.Email!,
+                PhoneNumber = src.Phone!,
+                Location = new Point(src.Longitude, src.Latitude) { SRID = 4326 }
+            })
+            .IgnoreNonMapped(true);
 
-            TypeAdapterConfig.GlobalSettings.Scan(Assembly.GetExecutingAssembly());
-        }
+        TypeAdapterConfig.GlobalSettings.Scan(Assembly.GetExecutingAssembly());
     }
 }

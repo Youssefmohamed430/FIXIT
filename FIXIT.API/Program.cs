@@ -19,6 +19,7 @@ using Microsoft.Extensions.Localization;
 using Microsoft.IdentityModel.Tokens;
 using System.Globalization;
 using System.Text;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -36,7 +37,12 @@ builder.Services.AddScoped<HandleCachingResourcesFilter>();
 builder.Services.AddControllers(options =>
 {
     options.Filters.Add<HandleCachingResourcesFilter>();
-});
+})
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters
+            .Add(new JsonStringEnumConverter());
+    });
 
 
 builder.Services.AddDbContext<AppDbContext>(options =>

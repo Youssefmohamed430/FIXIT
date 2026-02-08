@@ -18,10 +18,15 @@ using System.Security.Cryptography;
 using System.Text;
 
 namespace FIXIT.Application.Servicces;
+public enum UserRole
+{
+    Customer,
+    Provider
+}
 
-public class AuthService(UserManager<ApplicationUser> _userManager,IWallettService walletService,
+public class AuthService(UserManager<ApplicationUser> _userManager,IServiceManager serviceManager,
         JWTService _jwtservice, SignInManager<ApplicationUser> _signInManager,IConfiguration _configuration,
-        IMemoryCache _cache, ILogger<AuthService> logger, IUnitOfWork unitOfWork,IEmailService emailService)
+        IMemoryCache _cache, ILogger<AuthService> logger, IUnitOfWork unitOfWork)
         : IAuthService
 {
     #region Login
@@ -101,25 +106,25 @@ public class AuthService(UserManager<ApplicationUser> _userManager,IWallettServi
                 return new AuthModel() { Message = errors };
             }
 
-            if(model.Role.ToLower() == "customer")
+            switch (model.Role)
             {
-                await _userManager.AddToRoleAsync(user, "Customer");
-                var customer = user.Adapt<Customer>();
-                await unitOfWork.GetRepository<Customer>().AddAsync(customer);
-                await unitOfWork.SaveAsync();
-                logger.LogInformation("Customer account created successfully for {Email}", email);
-                await walletService.CreateWalletForUser
-                        (new WalletDTO { UserId = user.Id, ownerType = OwnerType.Customer });
-            }
-            else
-            {
-                await _userManager.AddToRoleAsync(user, "Provider");
-                var provider = user.Adapt<ServiceProvider>();
-                await unitOfWork.GetRepository<ServiceProvider>().AddAsync(provider);
-                await unitOfWork.SaveAsync();
-                logger.LogInformation("Service Provider account creatted successfully for {Email}",email);
-                await walletService.CreateWalletForUser
-                                        (new WalletDTO { UserId = user.Id, ownerType = OwnerType.Provider });
+                case UserRole.Customer:
+                    await HandleUserRoleAsync<Customer>(
+                        user,
+                        "Customer",
+                        OwnerType.Customer,
+                        "Customer account created successfully for {Email}"
+                    );
+                    break;
+
+                case UserRole.Provider:
+                    await HandleUserRoleAsync<ServiceProvider>(
+                        user,
+                        "Provider",
+                        OwnerType.Provider,
+                        "Service Provider account created successfully for {Email}"
+                    );
+                    break;
             }
 
             var JWTSecurityToken = await _jwtservice.CreateJwtToken(user);
@@ -131,7 +136,7 @@ public class AuthService(UserManager<ApplicationUser> _userManager,IWallettServi
             unitOfWork.Commit();
 
             return new AuthModelFactory()
-                .CreateAuthModel(user.Id, model.UserName, model.Email, JWTSecurityToken.ValidTo, new List<string> { "Passenger" }, new JwtSecurityTokenHandler().WriteToken(JWTSecurityToken), refreshToken.Token, refreshToken.ExpiresOn, "Code Verfied successfully!");
+                .CreateAuthModel(user.Id, model.UserName, model.Email, JWTSecurityToken.ValidTo, new List<string> { model.Role.ToString()! }, new JwtSecurityTokenHandler().WriteToken(JWTSecurityToken), refreshToken.Token, refreshToken.ExpiresOn, "Code Verfied successfully!");
         }
         catch (Exception ex)
         {
@@ -139,6 +144,29 @@ public class AuthService(UserManager<ApplicationUser> _userManager,IWallettServi
             logger.LogError(ex, "Error creating user for {Email}", email);
             return new AuthModel { Message = "An error occurred while creating the user." };
         }
+    }
+
+    private async Task HandleUserRoleAsync<TUserEntity>(
+    ApplicationUser user,
+    string roleName,
+    OwnerType ownerType,
+    string successLogMessage)
+    where TUserEntity : class
+    {
+        await _userManager.AddToRoleAsync(user, roleName);
+
+        var entity = user.Adapt<TUserEntity>();
+        await unitOfWork.GetRepository<TUserEntity>().AddAsync(entity);
+        await unitOfWork.SaveAsync();
+
+        await serviceManager._walletService.CreateWalletForUser(
+            new WalletDTO
+            {
+                UserId = user.Id,
+                ownerType = ownerType
+            });
+
+        logger.LogInformation(successLogMessage, user.Email);
     }
     #endregion
 
@@ -155,7 +183,7 @@ public class AuthService(UserManager<ApplicationUser> _userManager,IWallettServi
 
         string htmlBody = HandleForgotEmailBody(Email, token);
 
-        await emailService.SendEmailAsync(user.Email, "Reset Password", htmlBody);
+        await serviceManager.EmailService.SendEmailAsync(user.Email, "Reset Password", htmlBody);
 
         return new AuthModel { Message = "Reset password link has been sent.", IsAuthenticated = true };
     }
@@ -211,7 +239,7 @@ public class AuthService(UserManager<ApplicationUser> _userManager,IWallettServi
 
         try
         {
-            await emailService.SendEmailAsync(
+            await serviceManager.EmailService.SendEmailAsync(
                 email,
                 "Verification Account",
                 htmlBody

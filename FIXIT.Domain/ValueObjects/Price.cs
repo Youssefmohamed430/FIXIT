@@ -16,7 +16,7 @@ public sealed class Price : ValueObject
 
     public static Price Create(decimal amount, string currency = "EGP")
     {
-        if (amount <= 0)
+        if (amount < 0)
             throw new ArgumentException("Price must be greater than zero.");
 
         return new Price(

@@ -40,7 +40,7 @@ public class AuthController
     {
         var result = await serviceManager.AuthService.ForgotPassword(Email);
 
-        return result.IsAuthenticated ? Ok(result.Message) : BadRequest(result.Message);
+        return result.IsAuthenticated ? Ok(result) : BadRequest(result.Message);
     }
     [HttpPost("ResetPassword")]
     public async Task<IActionResult> ResetPassword(ResetPassModelDto resetPassModel)

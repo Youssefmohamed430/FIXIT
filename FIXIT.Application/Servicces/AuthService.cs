@@ -68,10 +68,12 @@ public class AuthService(UserManager<ApplicationUser> _userManager,IServiceManag
     #region Register
     public async Task<AuthModel> Register(RegisterDTO registermodel)
     {
-        if (await _userManager.FindByNameAsync(registermodel.UserName) is not null)
+        var userByUserName = await _userManager.FindByNameAsync(registermodel.UserName!);
+        if (userByUserName is not null && !userByUserName.IsDeleted)
             return new AuthModel() { Message = "User Name Is Already Registerd" };
 
-        if (await _userManager.FindByEmailAsync(registermodel.Email) is not null)
+        var userByEmail = await _userManager.FindByEmailAsync(registermodel.Email!);
+        if (userByEmail is not null && !userByEmail.IsDeleted)
             return new AuthModel() { Message = "Email Is Already Registerd" };
 
         await VerificationAccount(registermodel.Email);
@@ -147,11 +149,8 @@ public class AuthService(UserManager<ApplicationUser> _userManager,IServiceManag
     }
 
     private async Task HandleUserRoleAsync<TUserEntity>(
-    ApplicationUser user,
-    string roleName,
-    OwnerType ownerType,
-    string successLogMessage)
-    where TUserEntity : class
+    ApplicationUser user,string roleName,OwnerType ownerType,string successLogMessage)
+        where TUserEntity : class
     {
         await _userManager.AddToRoleAsync(user, roleName);
 
@@ -190,10 +189,10 @@ public class AuthService(UserManager<ApplicationUser> _userManager,IServiceManag
 
     private string HandleForgotEmailBody(string Email, string token)
     {
-        var imagePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Waselny.jpg");
-        var imageBytes = File.ReadAllBytes(imagePath);
-        var base64Image = Convert.ToBase64String(imageBytes);
-        var imageDataUrl = $"data:image/jpeg;base64,{base64Image}";
+        //var imagePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Waselny.jpg");
+        //var imageBytes = File.ReadAllBytes(imagePath);
+        //var base64Image = Convert.ToBase64String(imageBytes);
+        //var imageDataUrl = $"data:image/jpeg;base64,{base64Image}";
 
 
         var baseUrl = _configuration["AppSettings:BaseUrl"] ?? "https://localhost:44382";
@@ -201,7 +200,7 @@ public class AuthService(UserManager<ApplicationUser> _userManager,IServiceManag
 
         var htmlPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "FogotPasswordEmailTemplate.html");
         var htmlBody = File.ReadAllText(htmlPath);
-        htmlBody = htmlBody.Replace("{{LogoImage}}", imageDataUrl);
+        //htmlBody = htmlBody.Replace("{{LogoImage}}", imageDataUrl);
         htmlBody = htmlBody.Replace("{{ResetLink}}", resetLink);
         return htmlBody;
     }

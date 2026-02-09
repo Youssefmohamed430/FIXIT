@@ -112,3 +112,9 @@ code {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
     text-align: start;
 }
+
+/* Custom Syle */
+
+.bg-light {
+    background-color: rgb(245,249,251) !important;
+}

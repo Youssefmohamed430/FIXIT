@@ -78,6 +78,18 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader()
+              .WithOrigins("https://localhost:7083")
+              .AllowCredentials();
+    });
+});
+
 builder.Services.AddAuthentication()
                 .AddGoogle(options =>
                 {
@@ -135,6 +147,8 @@ var localizationOptions = new RequestLocalizationOptions()
     .AddSupportedUICultures(supportedCultures);
 
 app.UseRequestLocalization(localizationOptions);
+
+app.UseCors();
 
 app.UseAuthentication();
 

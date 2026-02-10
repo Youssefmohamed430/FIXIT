@@ -1,13 +1,13 @@
-﻿@page "/VerificationCode"
+﻿@page "/verification/{email}"
+
+@inject CustomAuthenticationStateProvider AuthProvider
+@inject IHttpClientFactory HttpFactory
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
 
 <div class="container min-vh-100 d-flex align-items-center justify-content-center">
     <div class="row w-100 justify-content-center">
         <div class="col-12 col-sm-10 col-md-8 col-lg-5 text-center">
-
-            <!-- Logo -->
-            <a href="/" class="d-inline-block mb-4">
-                <img src="assets/img/svg/logo.svg" alt="Logo" height="40">
-            </a>
 
             <!-- Card -->
             <div class="card shadow-sm border-0">
@@ -40,42 +40,29 @@
 
                     <!-- OTP Inputs -->
                     <div class="row g-2 justify-content-center mb-4">
-                        <div class="col-2">
-                            <input type="text"
-                                   class="form-control form-control-lg text-center fw-bold"
-                                   maxlength="1" autofocus>
-                        </div>
-                        <div class="col-2">
-                            <input type="text"
-                                   class="form-control form-control-lg text-center fw-bold"
-                                   maxlength="1">
-                        </div>
-                        <div class="col-2">
-                            <input type="text"
-                                   class="form-control form-control-lg text-center fw-bold"
-                                   maxlength="1">
-                        </div>
-                        <div class="col-2">
-                            <input type="text"
-                                   class="form-control form-control-lg text-center fw-bold"
-                                   maxlength="1">
-                        </div>
-                        <div class="col-2">
-                            <input type="text"
-                                   class="form-control form-control-lg text-center fw-bold"
-                                   maxlength="1">
-                        </div>
-                        <div class="col-2">
-                            <input type="text"
-                                   class="form-control form-control-lg text-center fw-bold"
-                                   maxlength="1">
-                        </div>
-                    </div>
+                        <EditForm Model="@verificationCode" OnValidSubmit="@HandleVerification">
+                            <DataAnnotationsValidator />
 
-                    <!-- Button -->
-                    <button class="btn btn-primary btn-lg w-100">
-                        Verify my account
-                    </button>
+                            <div class="row g-2 justify-content-center mb-4">
+                                @for (int i = 0; i < 6; i++)
+                                {
+                                    <div class="col-2">
+                                        <InputText class="form-control form-control-lg text-center fw-bold"
+                                                   maxlength="1"
+                                                   inputmode="numeric"
+                                                   pattern="[0-9]*"
+                                                   @bind-Value="digits[i]"
+                                                   @bind-Value:event="oninput" />
+
+                                    </div>
+                                }
+                            </div>
+
+                            <button type="submit" class="btn btn-primary btn-lg w-100">
+                                Verify my account
+                            </button>
+                        </EditForm>
+                        </div>
                 </div>
             </div>
 
@@ -93,4 +80,55 @@
 
 @code {
 
+    [Parameter]
+    public string Email { get; set; }
+    public VerificationCode verificationCode { get; set; } = new();
+    private string errorMessage = string.Empty;
+    private string[] digits = new string[] { "", "", "", "", "", "" };
+
+    public async Task HandleVerification()
+    {
+        try
+        {
+            verificationCode.Code = string.Concat(digits);
+
+            if (verificationCode.Code.Length != 6)
+                return;
+
+            var httpClient = HttpFactory.CreateClient("FIXIT.API");
+            var response = await httpClient
+                .PostAsync($"Auth/VerifyCode/{verificationCode.Code}?email={Email}", null);
+
+
+            if(response.IsSuccessStatusCode)
+            {
+                var result = await response.Content.ReadFromJsonAsync<AuthResult>();
+
+                await JS.InvokeVoidAsync("alert", "Verification successful!");
+
+                if (result?.IsAuthenticated == true &&
+                    !string.IsNullOrEmpty(result.Token))
+                {
+                    await AuthProvider.MarkUserAsAuthenticated(
+                        result.Token,
+                        result.RefreshToken ?? string.Empty);
+
+                    Navigation.NavigateTo("/");
+                }
+            }
+            else
+            {
+                errorMessage = "Invalid verification code. Please try again.";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+        }
+    }
+
+    public class VerificationCode
+    {
+        public string Code { get; set; }
+    }
 }

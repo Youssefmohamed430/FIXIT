@@ -174,11 +174,7 @@
 
                 if (result?.IsAuthenticated == true)
                 {
-                    // await AuthProvider.MarkUserAsAuthenticated(
-                    //     result.Token,
-                    //     result.RefreshToken ?? string.Empty);
-
-                    Navigation.NavigateTo("/VerificationCode");
+                    Navigation.NavigateTo($"/verification/{registerModel.Email}");
                 }
                 else
                 {

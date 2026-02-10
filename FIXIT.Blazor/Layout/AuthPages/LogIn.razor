@@ -93,7 +93,7 @@
                         result.Token,
                         result.RefreshToken ?? string.Empty);
 
-                    Navigation.NavigateTo("/", true);
+                    Navigation.NavigateTo("/");
                 }
                 else
                 {
@@ -118,24 +118,5 @@
         {
             isLoading = false;
         }
-    }
-
-    public class LoginModel
-    {
-        [Required(ErrorMessage = "UserName Is Required")]
-        public string UserName { get; set; } = string.Empty;
-
-        [Required(ErrorMessage = "Password Is Required")]
-        public string Password { get; set; } = string.Empty;
-    }
-
-    public class AuthResult
-    {
-        public bool IsAuthenticated { get; set; }
-        public string Token { get; set; }
-        public string RefreshToken { get; set; }
-        public string Message { get; set; }
-        public string Username { get; set; }
-        public string Email { get; set; }
     }
 }

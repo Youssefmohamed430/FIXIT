@@ -1,5 +1,9 @@
 ﻿@page "/register"
-@using FIXIT.Blazor.Pages
+@inject CustomAuthenticationStateProvider AuthProvider
+@inject IHttpClientFactory HttpFactory
+@inject NavigationManager Navigation
+@inject IJSRuntime JS
+
 
 <section class="vh-100" style="background-color: #eee;">
     <div class="container h-100">
@@ -96,7 +100,7 @@
                                             <InputSelect @bind-Value="registerModel.Role" class="form-select">
                                                 <option value="">Open this select menu</option>
                                                 <option value="Customer">Customer</option>
-                                                <option value="Service Provider">Service Provider</option>
+                                                <option value="Provider">Service Provider</option>
                                             </InputSelect>
                                             <ValidationMessage For="@(() => registerModel.Role)" />
                                         </div>
@@ -109,12 +113,24 @@
                                         </label>
                                     </div>
 
+                                    <div class="d-flex justify-content-center mb-3">
+                                        <button type="button"
+                                                class="btn btn-outline-secondary px-4"
+                                                @onclick="GetLocationAsync">
+                                            📍 Use Current Location
+                                        </button>
+                                    </div>
+
+
                                     <div class="d-flex justify-content-center mx-4 mb-3 mb-lg-4">
-                                        <button type="button" data-mdb-button-init data-mdb-ripple-init class="btn btn-primary btn-lg">Register</button>
+                                        <button type="submit" data-mdb-button-init data-mdb-ripple-init class="btn btn-primary btn-lg">Register</button>
                                     </div>
 
                                 </EditForm>
-
+                                
+                                <div class="text-center mt-3">
+                                    <a href="/login">You already have an account login</a>
+                                </div>
                             </div>
                             <div class="col-md-10 col-lg-6 col-xl-7 d-flex align-items-center order-1 order-lg-2">
 
@@ -129,13 +145,77 @@
         </div>
     </div>
 </section>
+<script src="js/location.js"></script>
 
 @code {
-    public RegisterModel registerModel { get; set; }
+    public RegisterModel registerModel { get; set; } = new();
     private string errorMessage = string.Empty;
+    private bool isLoading = false;
 
     private async Task  HandleRegister()
     {
-        
+        try
+        {
+            isLoading = true;
+            errorMessage = string.Empty;
+
+            if(registerModel.Latitude == 0 || registerModel.Longitude == 0)
+            {
+                errorMessage = "Please allow location access or use the 'Use Current Location' button.";
+                return;
+            }
+
+            var httpClient = HttpFactory.CreateClient("FIXIT.API");
+            var response = await httpClient.PostAsJsonAsync("Auth/Register", registerModel);
+
+            if(response.IsSuccessStatusCode)
+            {
+                var result = await response.Content.ReadFromJsonAsync<AuthResult>();
+
+                if (result?.IsAuthenticated == true)
+                {
+                    // await AuthProvider.MarkUserAsAuthenticated(
+                    //     result.Token,
+                    //     result.RefreshToken ?? string.Empty);
+
+                    Navigation.NavigateTo("/VerificationCode");
+                }
+                else
+                {
+                    errorMessage = result?.Message ?? "Failed to Register";
+                }
+            }
+            else
+            {
+                var errorContent = await response.Content.ReadAsStringAsync();
+                errorMessage = errorContent;
+            }
+        }
+        catch (HttpRequestException ex)
+        {
+            errorMessage = "Failed to conecnt to server.";
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    public class LocationDto
+    {
+        public double Latitude { get; set; } = 0;
+        public double Longitude { get; set; } = 0;
+    }
+
+    public async Task GetLocationAsync()
+    {
+        var location = await JS.InvokeAsync<LocationDto>("getUserLocation");
+
+        registerModel.Latitude = location.Latitude;
+        registerModel.Longitude = location.Longitude;
     }
 }

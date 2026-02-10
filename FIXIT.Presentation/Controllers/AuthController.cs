@@ -33,7 +33,7 @@ public class AuthController
 
         var result = await serviceManager.AuthService.Register(model);
 
-        return result.IsAuthenticated ? Ok(result.Message) : BadRequest(result.Message);
+        return result.IsAuthenticated ? Ok(result) : BadRequest(result.Message);
     }
     [HttpPost("ForgetPassword/{Email}")]
     public async Task<IActionResult> ForgetPassword(string Email)

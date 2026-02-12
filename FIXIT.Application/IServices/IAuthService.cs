@@ -15,4 +15,5 @@ public interface IAuthService
     Task<AuthModel> CreateUser(string email);
     Task<AuthModel> RefreshToken(string token);
     Task<bool> RevokeTokenAsync(string token);
+    Task<string> ResendCode(string email);
 }

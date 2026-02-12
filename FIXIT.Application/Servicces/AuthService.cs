@@ -261,6 +261,13 @@ public class AuthService(UserManager<ApplicationUser> _userManager,IServiceManag
         }
         return false;
     }
+
+    public Task<string> ResendCode(string email)
+    {
+        var newCode = VerificationAccount(email);
+
+        return newCode!;
+    }
     #endregion
 
     #region Handle Refresh Token

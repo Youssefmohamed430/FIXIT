@@ -104,6 +104,15 @@ public class AuthController
 
         return Ok();
     }
+
+    [HttpGet("ResendCode")]
+    public async Task<IActionResult> ResendCode([FromQuery] string email)
+    { 
+        var result = await serviceManager.AuthService.ResendCode(email);
+        return result != "" ? Ok(result) : BadRequest("Failed to resend code!");
+    }
+
+
     private void SetRefreshTokenInCookie(string refreshToken, DateTime expires)
     {
         var cookieOptions = new CookieOptions

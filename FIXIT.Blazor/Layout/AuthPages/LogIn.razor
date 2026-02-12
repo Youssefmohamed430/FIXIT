@@ -41,7 +41,10 @@
                                        placeholder="Password" />
                             <ValidationMessage For="@(() => loginModel.Password)" />
                         </div>
-
+                        <div class="text-start mt-3">
+                            <a href="/forget-password">Forget Password?</a>
+                        </div>
+                        <br />
                         <button type="submit"
                                 class="btn btn-primary w-100"
                                 disabled="@isLoading">

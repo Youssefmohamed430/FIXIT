@@ -38,38 +38,58 @@
                         Please enter the code below.
                     </p>
 
-                    <!-- OTP Inputs -->
-                    <div class="row g-2 justify-content-center mb-4">
-                        <EditForm Model="@verificationCode" OnValidSubmit="@HandleVerification">
-                            <DataAnnotationsValidator />
-
-                            <div class="row g-2 justify-content-center mb-4">
-                                @for (int i = 0; i < 6; i++)
-                                {
-                                    <div class="col-2">
-                                        <InputText class="form-control form-control-lg text-center fw-bold"
-                                                   maxlength="1"
-                                                   inputmode="numeric"
-                                                   pattern="[0-9]*"
-                                                   @bind-Value="digits[i]"
-                                                   @bind-Value:event="oninput" />
-
-                                    </div>
-                                }
-                            </div>
-
-                            <button type="submit" class="btn btn-primary btn-lg w-100">
-                                Verify my account
-                            </button>
-                        </EditForm>
+                    @if (!string.IsNullOrEmpty(errorMessage))
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show">
+                            @errorMessage
+                            <button type="button" class="btn-close"
+                                    @onclick="() => errorMessage = string.Empty"></button>
                         </div>
+                    }
+
+                    <!-- OTP Inputs -->
+                    <EditForm Model="@verificationModel" OnValidSubmit="@HandleVerification">
+                        <DataAnnotationsValidator />
+
+                        <div class="row g-2 justify-content-center mb-4">
+                            @for (int i = 0; i < 6; i++)
+                            {
+                                int index = i; 
+                                               <div class="col-2">
+                                                   <input type="text"
+                                                          class="form-control form-control-lg text-center fw-bold"
+                                                          maxlength="1"
+                                                          inputmode="numeric"
+                                                          pattern="[0-9]*"
+                                                          value="@verificationModel.Digits[index]"
+                                                          @oninput="@(e => OnDigitInput(index, e.Value?.ToString()))"
+                                                          @onkeydown="@(e => OnKeyDown(index, e))"
+                                                          id="@($"digit-{index}")" />
+                                               </div>
+                            }
+                        </div>
+
+                        <button type="submit"
+                                class="btn btn-primary btn-lg w-100"
+                                disabled="@isLoading">
+                            @if (isLoading)
+                            {
+                                <span class="spinner-border spinner-border-sm me-2"></span>
+                                <span>Verifying...</span>
+                            }
+                            else
+                            {
+                                <span>Verify my account</span>
+                            }
+                        </button>
+                    </EditForm>
                 </div>
             </div>
 
             <!-- Resend -->
             <p class="text-center text-muted mt-4">
-                Didn’t receive it?
-                <a href="#" class="fw-semibold text-decoration-none ms-1">
+                Didn't receive it?
+                <a href="#" class="fw-semibold text-decoration-none ms-1" @onclick="ResendCode" @onclick:preventDefault>
                     Resend code
                 </a>
             </p>
@@ -79,32 +99,83 @@
 </div>
 
 @code {
-
     [Parameter]
-    public string Email { get; set; }
-    public VerificationCode verificationCode { get; set; } = new();
-    private string errorMessage = string.Empty;
-    private string[] digits = new string[] { "", "", "", "", "", "" };
+    public string Email { get; set; } = string.Empty;
 
-    public async Task HandleVerification()
+    private VerificationModel verificationModel = new();
+    private string errorMessage = string.Empty;
+    private bool isLoading = false;
+
+    protected override void OnInitialized()
+    {
+        verificationModel = new VerificationModel();
+    }
+
+    private void OnDigitInput(int index, string? value)
+    {
+        if (string.IsNullOrEmpty(value))
+        {
+            verificationModel.Digits[index] = "";
+            return;
+        }
+
+        var digit = value.Length > 0 ? value[0].ToString() : "";
+
+        if (char.IsDigit(digit[0]))
+        {
+            verificationModel.Digits[index] = digit;
+
+            if (index < 5)
+            {
+                _ = JS.InvokeVoidAsync("eval", $"document.getElementById('digit-{index + 1}').focus()");
+            }
+        }
+    }
+
+    private async Task OnKeyDown(int index, KeyboardEventArgs e)
+    {
+        // عند الضغط على Backspace
+        if (e.Key == "Backspace")
+        {
+            if (string.IsNullOrEmpty(verificationModel.Digits[index]) && index > 0)
+            {
+                // إذا الخانة فاضية، ارجع للخانة السابقة
+                await JS.InvokeVoidAsync("eval", $"document.getElementById('digit-{index - 1}').focus()");
+            }
+        }
+    }
+
+    private async Task HandleVerification()
     {
         try
         {
-            verificationCode.Code = string.Concat(digits);
+            isLoading = true;
+            errorMessage = string.Empty;
 
-            if (verificationCode.Code.Length != 6)
+            // تجميع الكود
+            var code = string.Concat(verificationModel.Digits);
+
+            if (code.Length != 6)
+            {
+                errorMessage = "Please enter all 6 digits";
+                isLoading = false;
                 return;
+            }
+
+            if (!verificationModel.Digits.All(d => !string.IsNullOrEmpty(d)))
+            {
+                errorMessage = "Please enter all 6 digits";
+                isLoading = false;
+                return;
+            }
 
             var httpClient = HttpFactory.CreateClient("FIXIT.API");
             var response = await httpClient
-                .PostAsync($"Auth/VerifyCode/{verificationCode.Code}?email={Email}", null);
+                .PostAsync($"Auth/VerifyCode/{code}?email={Email}", null);
 
-
-            if(response.IsSuccessStatusCode)
+            if (response.IsSuccessStatusCode)
             {
                 var result = await response.Content.ReadFromJsonAsync<AuthResult>();
-
-                await JS.InvokeVoidAsync("alert", "Verification successful!");
 
                 if (result?.IsAuthenticated == true &&
                     !string.IsNullOrEmpty(result.Token))
@@ -113,22 +184,63 @@
                         result.Token,
                         result.RefreshToken ?? string.Empty);
 
+                    await JS.InvokeVoidAsync("alert", "Verification successful!");
                     Navigation.NavigateTo("/");
+                }
+                else
+                {
+                    errorMessage = result?.Message ?? "Verification failed";
                 }
             }
             else
             {
+                var errorContent = await response.Content.ReadAsStringAsync();
                 errorMessage = "Invalid verification code. Please try again.";
             }
         }
         catch (Exception ex)
         {
-            errorMessage = ex.Message;
+            errorMessage = $"Error: {ex.Message}";
+        }
+        finally
+        {
+            isLoading = false;
         }
     }
 
-    public class VerificationCode
+    private async Task ResendCode()
     {
-        public string Code { get; set; }
+        try
+        {
+            var httpClient = HttpFactory.CreateClient("FIXIT.API");
+            var response = await httpClient.PostAsync($"Auth/ResendCode?email={Email}", null);
+
+            if (response.IsSuccessStatusCode)
+            {
+                await JS.InvokeVoidAsync("alert", "Verification code resent!");
+                verificationModel = new VerificationModel();
+            }
+            else
+            {
+                await JS.InvokeVoidAsync("alert", "Failed to resend code");
+            }
+        }
+        catch (Exception ex)
+        {
+            await JS.InvokeVoidAsync("alert", $"Error: {ex.Message}");
+        }
+    }
+
+    public class VerificationModel
+    {
+        public string[] Digits { get; set; } = new string[6] { "", "", "", "", "", "" };
+    }
+
+    public class AuthResult
+    {
+        public bool IsAuthenticated { get; set; }
+        public string? Token { get; set; }
+        public string? RefreshToken { get; set; }
+        public string? Message { get; set; }
     }
 }

@@ -195,8 +195,8 @@ public class AuthService(UserManager<ApplicationUser> _userManager,IServiceManag
         //var imageDataUrl = $"data:image/jpeg;base64,{base64Image}";
 
 
-        var baseUrl = _configuration["AppSettings:BaseUrl"] ?? "https://localhost:44382";
-        var resetLink = $"{baseUrl}/Auth/ResetPassword?email={Uri.EscapeDataString(Email)}&token={Uri.EscapeDataString(token)}";
+        var baseUrl = _configuration["AppSettings:BaseUrl"] ?? "https://localhost:7083";
+        var resetLink = $"{baseUrl}/reset-password?email={Uri.EscapeDataString(Email)}&token={token}";
 
         var htmlPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "FogotPasswordEmailTemplate.html");
         var htmlBody = File.ReadAllText(htmlPath);

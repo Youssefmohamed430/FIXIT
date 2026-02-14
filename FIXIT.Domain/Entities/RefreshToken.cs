@@ -5,6 +5,7 @@ namespace FIXIT.Domain.Entities;
 [Owned]
 public class RefreshToken
 {
+    public string id { get; set; }
     public string Token { get; set; }
     public DateTime ExpiresOn { get; set; }
     public bool IsExpired => DateTime.UtcNow >= ExpiresOn;

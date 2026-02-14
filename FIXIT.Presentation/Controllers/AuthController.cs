@@ -1,7 +1,5 @@
 ﻿using FIXIT.Application.DTOs;
 using FIXIT.Application.IServices;
-using FIXIT.Application.Servicces;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 

@@ -27,6 +27,17 @@ namespace FIXIT.Infrastructure.Repositoriesك
             return entity.FirstOrDefault(criteria)!;
         }
 
+        public async Task<T> FindAsync(Expression<Func<T, bool>> criteria, string[] includes = null)
+        {
+            var entity = _context.Set<T>().AsNoTracking();
+
+            if (includes != null)
+                foreach (var include in includes ?? Array.Empty<string>())
+                    entity = entity.Include(include);
+
+            return await entity.FirstOrDefaultAsync(criteria);
+        }
+
         public TDto Find<TDto>(Expression<Func<T, bool>> criteria, string[] includes = null)
         {
             var entity = _context.Set<T>()

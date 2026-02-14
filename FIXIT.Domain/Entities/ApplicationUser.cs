@@ -7,7 +7,7 @@ namespace FIXIT.Domain.Entities
     {
         public required string Name { get; set; }
         public required Point Location { get; set; }
-        public ImgPath? Img { get; private set; }
+        public ImgPath? Img { get; set; }
         public bool IsDeleted { get; set; } = false;
         public Customer? Customer { get; set; }
         public ServiceProvider? ServiceProvider { get; set; }

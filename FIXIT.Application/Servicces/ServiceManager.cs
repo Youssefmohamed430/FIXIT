@@ -17,6 +17,7 @@ public class ServiceManager : IServiceManager
     private readonly Lazy<IAuthService> _authService;
     private readonly Lazy<IEmailService> _emailService;
     private readonly Lazy<IWallettService> _walletService;
+    private readonly Lazy<IAccountService> _accountService;
     #endregion
 
     #region Constructor
@@ -40,13 +41,17 @@ public class ServiceManager : IServiceManager
         _walletService = new Lazy<IWallettService>(
             () => _serviceProvider.GetRequiredService<IWallettService>()
         );
+
+        _accountService = new Lazy<IAccountService>(
+            () => _serviceProvider.GetRequiredService<IAccountService>()
+        );
     }
     #endregion
 
     #region Service Properties
     public IAuthService AuthService => _authService.Value;
     public IEmailService EmailService => _emailService.Value;
-
+    IAccountService IServiceManager._accountService => _accountService.Value;
     IWallettService IServiceManager._walletService => _walletService.Value;
     #endregion
 }

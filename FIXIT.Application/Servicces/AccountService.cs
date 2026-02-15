@@ -38,10 +38,14 @@ public class AccountService(IUnitOfWork unitOfWork) : IAccountService
         if (Olduser is null)
             return Result<UserDTO>.Failure(new Error("User.NotFound","User not found"));
 
-        Olduser.Name = user.Name!;
-        Olduser.Email = user.Email!;
-        Olduser.PhoneNumber = user.Phone!;
-        Olduser.Location = new NetTopologySuite.Geometries.Point(user.Longitude!.Value, user.Latitude!.Value) { SRID = 4326 };
+        Olduser.Name = user.Name! ?? Olduser.Name;
+        Olduser.UserName = user.UserName! ?? Olduser.UserName;
+        Olduser.Email = user.Email! ?? Olduser.Email;
+        Olduser.PhoneNumber = user.Phone! ?? Olduser.PhoneNumber;
+        Olduser.Location = user.Longitude.HasValue && user.Latitude.HasValue
+             ? new NetTopologySuite.Geometries.Point(user.Longitude!.Value, user.Latitude!.Value) { SRID = 4326 } 
+             : Olduser.Location;
+        Olduser.Img = user.ImgPath != null ? ImgPath.Create(user.ImgPath) : Olduser.Img;
 
         await unitOfWork.GetRepository<ApplicationUser>().UpdateAsync(Olduser);
         await unitOfWork.SaveAsync();
@@ -76,7 +80,11 @@ public class AccountService(IUnitOfWork unitOfWork) : IAccountService
         await unitOfWork.GetRepository<ApplicationUser>().UpdateAsync(user);
 
         await unitOfWork.SaveAsync();
+        var userDto = new UserDTO
+        {
+            ImgPath = $"/images/{fileName}"
+        };
 
-        return Result<UserDTO>.Success(null!);
+        return Result<UserDTO>.Success(userDto);
     }
 }

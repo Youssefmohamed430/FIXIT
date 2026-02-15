@@ -22,15 +22,15 @@ public class AccountController(IServiceManager serviceManager) : ControllerBase
     }
 
     [HttpPost("UploadImage/{id}")]
-    public async Task<IActionResult> UploadImage(string id,IFormFile Image)
+    public async Task<IActionResult> UploadImage(string id, [FromForm(Name = "image")] IFormFile image)
     {
-        var result = await serviceManager._accountService.UploadImg(id, Image);
+        var result = await serviceManager._accountService.UploadImg(id, image);
 
         return result.IsSuccess ? Ok(result.Value.ImgPath) : BadRequest(result.Error);
     }
 
-    [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateImage(string id,[FromBody] UserDTO user)
+    [HttpPut("UpdateUserInfo/{id}")]
+    public async Task<IActionResult> UpdateUserInfo(string id,[FromBody] UserDTO user)
     {
         var result = await serviceManager._accountService.UpdateUserInfo(id, user);
         return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);

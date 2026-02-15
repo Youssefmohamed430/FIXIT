@@ -29,7 +29,7 @@ namespace FIXIT.Infrastructure.Repositoriesك
 
         public async Task<T> FindAsync(Expression<Func<T, bool>> criteria, string[] includes = null)
         {
-            var entity = _context.Set<T>().AsNoTracking();
+            var entity = _context.Set<T>().AsTracking();
 
             if (includes != null)
                 foreach (var include in includes ?? Array.Empty<string>())

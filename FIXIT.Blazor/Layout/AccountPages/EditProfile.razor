@@ -1,0 +1,607 @@
+@page "/profile/edit"
+@attribute [Authorize]
+@inject HttpClient Http
+@inject NavigationManager Navigation
+@inject AuthenticationStateProvider AuthStateProvider
+
+<PageTitle>Edit Profile</PageTitle>
+
+<div class="edit-wrapper">
+    <div class="edit-card">
+
+        <!-- Top Bar -->
+        <div class="edit-topbar">
+            <button class="btn-back" @onclick="GoBack">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16">
+                    <path fill-rule="evenodd" d="M15 8a.5.5 0 0 0-.5-.5H2.707l3.147-3.146a.5.5 0 1 0-.708-.708l-4 4a.5.5 0 0 0 0 .708l4 4a.5.5 0 0 0 .708-.708L2.707 8.5H14.5A.5.5 0 0 0 15 8z"/>
+                </svg>
+                Back
+            </button>
+            <h1 class="edit-title">Edit Profile</h1>
+            <div style="width:72px"></div>
+        </div>
+
+        <!-- Avatar Upload Section -->
+        <div class="avatar-section">
+            <div class="avatar-preview-wrapper">
+                @if (!string.IsNullOrWhiteSpace(previewUrl))
+                {
+                    <img src="@previewUrl" alt="Profile Preview" class="avatar-preview" />
+                }
+                else
+                {
+                    <div class="avatar-preview-placeholder">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4z"/>
+                        </svg>
+                    </div>
+                }
+                <label class="avatar-overlay" for="imgUpload" title="Change photo">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M10.5 8.5a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0z"/>
+                        <path d="M2 4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-1.172a2 2 0 0 1-1.414-.586l-.828-.828A2 2 0 0 0 9.172 2H6.828a2 2 0 0 0-1.414.586l-.828.828A2 2 0 0 0 3.172 4H2zm.5 2a.5.5 0 1 1 0-1 .5.5 0 0 1 0 1zm9 2.5a3.5 3.5 0 1 1-7 0 3.5 3.5 0 0 1 7 0z"/>
+                    </svg>
+                </label>
+            </div>
+
+            <InputFile id="imgUpload" OnChange="HandleImageSelected" accept="image/*" class="d-none" />
+
+            @if (isUploadingImg)
+            {
+                <p class="upload-status uploading">
+                    <span class="spinner-border spinner-border-sm me-2"></span>
+                    Uploading image...
+                </p>
+            }
+            else if (imgUploadSuccess)
+            {
+                <p class="upload-status success">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16" class="me-1">
+                        <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
+                    </svg>
+                    Image uploaded successfully
+                </p>
+            }
+            else if (!string.IsNullOrWhiteSpace(imgErrorMessage))
+            {
+                <p class="upload-status error">@imgErrorMessage</p>
+            }
+            else
+            {
+                <p class="upload-hint">Click the camera icon to change your photo</p>
+            }
+        </div>
+
+        <!-- Info Form -->
+        <EditForm Model="model" OnValidSubmit="HandleSubmit" class="edit-form">
+            <DataAnnotationsValidator />
+
+            <div class="form-section">
+                <label class="form-label-custom">Full Name</label>
+                <div class="input-wrapper">
+                    <span class="input-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4z"/>
+                        </svg>
+                    </span>
+                    <InputText @bind-Value="model.Name" class="form-input" placeholder="Enter your full name" />
+                </div>
+                <ValidationMessage For="@(() => model.Name)" class="validation-msg" />
+            </div>
+            <div class="form-section">
+                <label class="form-label-custom">Username</label>
+                <div class="input-wrapper">
+                    <span class="input-icon"></span>
+                    <InputText @bind-Value="model.UserName" class="form-input" placeholder="Enter username" />
+                </div>
+                <ValidationMessage For="@(() => model.UserName)" class="validation-msg" />
+            </div>
+
+            <div class="form-section">
+                <label class="form-label-custom">Email Address</label>
+                <div class="input-wrapper">
+                    <span class="input-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                            <path d="M0 4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V4Zm2-1a1 1 0 0 0-1 1v.217l7 4.2 7-4.2V4a1 1 0 0 0-1-1H2Zm13 2.383-4.708 2.825L15 11.105V5.383Zm-.034 6.876-5.64-3.471L8 9.583l-1.326-.795-5.64 3.47A1 1 0 0 0 2 13h12a1 1 0 0 0 .966-.741ZM1 11.105l4.708-2.897L1 5.383v5.722Z"/>
+                        </svg>
+                    </span>
+                    <InputText @bind-Value="model.Email" class="form-input" placeholder="Enter email address" type="email" />
+                </div>
+                <ValidationMessage For="@(() => model.Email)" class="validation-msg" />
+            </div>
+
+            <div class="form-section">
+                <label class="form-label-custom">Phone Number</label>
+                <div class="input-wrapper">
+                    <span class="input-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                            <path fill-rule="evenodd" d="M1.885.511a1.745 1.745 0 0 1 2.61.163L6.29 2.98c.329.423.445.974.315 1.494l-.547 2.19a.678.678 0 0 0 .178.643l2.457 2.457a.678.678 0 0 0 .644.178l2.189-.547a1.745 1.745 0 0 1 1.494.315l2.306 1.794c.829.645.905 1.87.163 2.611l-1.034 1.034c-.74.74-1.846 1.065-2.877.702a18.634 18.634 0 0 1-7.01-4.42 18.634 18.634 0 0 1-4.42-7.009c-.362-1.03-.037-2.137.703-2.877L1.885.511z"/>
+                        </svg>
+                    </span>
+                    <InputText @bind-Value="model.Phone" class="form-input" placeholder="Enter phone number" type="tel" />
+                </div>
+                <ValidationMessage For="@(() => model.Phone)" class="validation-msg" />
+            </div>
+
+            <!-- Success / Error feedback -->
+            @if (saveSuccess)
+            {
+                <div class="alert-success">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
+                    </svg>
+                    Profile updated successfully!
+                </div>
+            }
+
+            @if (!string.IsNullOrWhiteSpace(saveError))
+            {
+                <div class="alert-error">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+                        <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
+                    </svg>
+                    @saveError
+                </div>
+            }
+
+            <!-- Submit Button -->
+            <button type="submit" class="btn-save" disabled="@isSaving">
+                @if (isSaving)
+                {
+                    <span class="spinner-border spinner-border-sm me-2" role="status"></span>
+                    <span>Saving...</span>
+                }
+                else
+                {
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" class="me-2">
+                        <path d="M2 1a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H9.5a1 1 0 0 0-1 1v7.293l2.646-2.647a.5.5 0 0 1 .708.708l-3.5 3.5a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L7.5 9.293V2a2 2 0 0 1 2-2H14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h2.5a.5.5 0 0 1 0 1H2z"/>
+                    </svg>
+                    <span>Save Changes</span>
+                }
+            </button>
+
+        </EditForm>
+    </div>
+</div>
+
+<style>
+    .edit-wrapper {
+        min-height: 100vh;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        align-items: flex-start;
+        justify-content: center;
+        padding: 40px 16px;
+    }
+
+    .edit-card {
+        background: #fff;
+        border-radius: 24px;
+        width: 100%;
+        max-width: 500px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+        overflow: hidden;
+    }
+
+    /* Top Bar */
+    .edit-topbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 20px 24px 16px;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .edit-title {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin: 0;
+    }
+
+    .btn-back {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: none;
+        border: 1px solid #e2e8f0;
+        border-radius: 50px;
+        padding: 7px 14px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        color: #64748b;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .btn-back:hover {
+        background: #f8f9ff;
+        border-color: #667eea;
+        color: #667eea;
+    }
+
+    /* Avatar */
+    .avatar-section {
+        padding: 28px 24px 8px;
+        text-align: center;
+    }
+
+    .avatar-preview-wrapper {
+        position: relative;
+        display: inline-block;
+        margin-bottom: 12px;
+    }
+
+    .avatar-preview {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 3px solid #e8ecff;
+        box-shadow: 0 6px 20px rgba(102,126,234,0.2);
+    }
+
+    .avatar-preview-placeholder {
+        width: 100px;
+        height: 100px;
+        border-radius: 50%;
+        background: #f0f2ff;
+        border: 3px dashed #c7d2fe;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #a5b4fc;
+    }
+
+    .avatar-overlay {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        cursor: pointer;
+        border: 2px solid #fff;
+        transition: transform 0.2s ease;
+        box-shadow: 0 3px 10px rgba(102,126,234,0.4);
+    }
+
+    .avatar-overlay:hover { transform: scale(1.1); }
+
+    .upload-hint {
+        font-size: 0.82rem;
+        color: #94a3b8;
+        margin: 0;
+    }
+
+    .upload-status {
+        font-size: 0.82rem;
+        margin: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .upload-status.uploading { color: #667eea; }
+    .upload-status.success   { color: #16a34a; }
+    .upload-status.error     { color: #dc2626; }
+
+    /* Form */
+    .edit-form {
+        padding: 16px 24px 28px;
+    }
+
+    .form-section {
+        margin-bottom: 18px;
+    }
+
+    .form-label-custom {
+        display: block;
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: #64748b;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 8px;
+    }
+
+    .input-wrapper {
+        position: relative;
+        display: flex;
+        align-items: center;
+    }
+
+    .input-icon {
+        position: absolute;
+        left: 14px;
+        color: #94a3b8;
+        font-size: 0.85rem;
+        display: flex;
+        align-items: center;
+        pointer-events: none;
+        z-index: 1;
+    }
+
+    .form-input {
+        width: 100%;
+        padding: 11px 14px 11px 42px;
+        border: 1.5px solid #e2e8f0;
+        border-radius: 12px;
+        font-size: 0.9rem;
+        color: #1e293b;
+        background: #f8faff;
+        transition: all 0.2s ease;
+        outline: none;
+    }
+
+    .form-input:focus {
+        border-color: #667eea;
+        background: #fff;
+        box-shadow: 0 0 0 3px rgba(102,126,234,0.12);
+    }
+
+    .validation-msg {
+        display: block;
+        font-size: 0.78rem;
+        color: #dc2626;
+        margin-top: 5px;
+        padding-left: 4px;
+    }
+
+    /* Alerts */
+    .alert-success {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 16px;
+        background: #f0fdf4;
+        border: 1px solid #bbf7d0;
+        border-radius: 10px;
+        color: #16a34a;
+        font-size: 0.88rem;
+        margin-bottom: 18px;
+    }
+
+    .alert-error {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 16px;
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+        border-radius: 10px;
+        color: #dc2626;
+        font-size: 0.88rem;
+        margin-bottom: 18px;
+    }
+
+    /* Save Button */
+    .btn-save {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: #fff;
+        border: none;
+        border-radius: 14px;
+        padding: 14px;
+        font-size: 0.95rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        box-shadow: 0 6px 20px rgba(102,126,234,0.4);
+        margin-top: 4px;
+    }
+
+    .btn-save:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 28px rgba(102,126,234,0.5);
+    }
+
+    .btn-save:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
+        transform: none;
+    }
+</style>
+
+@code {
+    private string? userId;
+
+    private UserEditModel model = new();
+
+    private string? previewUrl;
+    private IBrowserFile? selectedFile;
+
+    private bool isUploadingImg = false;
+    private bool imgUploadSuccess = false;
+    private string? imgErrorMessage;
+
+    private bool isSaving = false;
+    private bool saveSuccess = false;
+    private string? saveError;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (!user.Identity?.IsAuthenticated ?? true)
+        {
+            Navigation.NavigateTo("/login");
+            return;
+        }
+
+        userId = user.FindFirst("uid")?.Value
+              ?? user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+        // Pre-fill form with existing claims
+        model.Name     = user.FindFirst("name")?.Value
+                      ?? user.FindFirst(System.Security.Claims.ClaimTypes.GivenName)?.Value;
+        model.UserName = user.FindFirst("sub")?.Value
+                      ?? user.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value;
+        model.Email    = user.FindFirst("email")?.Value
+                      ?? user.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value;
+        model.Phone    = user.FindFirst(System.Security.Claims.ClaimTypes.MobilePhone)?.Value
+                      ?? user.FindFirst("phone_number")?.Value;
+
+        // Load current image for preview
+        if (!string.IsNullOrWhiteSpace(userId))
+        {
+            try
+            {
+                var imgResponse = await Http.GetAsync($"Account/{userId}");
+                if (imgResponse.IsSuccessStatusCode)
+                {
+                    var path = await imgResponse.Content.ReadAsStringAsync();
+                    previewUrl = path.Trim('"');
+                }
+            }
+            catch { /* non-fatal */ }
+        }
+    }
+
+    // ── Image Selection ─────────────────────────────────────────────────────────
+    private async Task HandleImageSelected(InputFileChangeEventArgs e)
+    {
+        imgErrorMessage  = null;
+        imgUploadSuccess = false;
+
+        selectedFile = e.File;
+
+        // Show local preview immediately
+        try
+        {
+            var imageStream = selectedFile.OpenReadStream(maxAllowedSize: 5 * 1024 * 1024);
+            var buffer = new byte[selectedFile.Size];
+            await imageStream.ReadExactlyAsync(buffer);
+            var base64 = Convert.ToBase64String(buffer);
+            previewUrl = $"data:{selectedFile.ContentType};base64,{base64}";
+        }
+        catch
+        {
+            imgErrorMessage = "Could not preview the selected image.";
+            return;
+        }
+
+        // Auto-upload to API
+        await UploadImage();
+    }
+
+    private async Task UploadImage()
+    {
+        if (selectedFile is null || string.IsNullOrWhiteSpace(userId)) return;
+
+        isUploadingImg = true;
+        imgErrorMessage = null;
+        StateHasChanged();
+
+        try
+        {
+            using var content = new MultipartFormDataContent();
+            var stream = selectedFile.OpenReadStream(maxAllowedSize: 5 * 1024 * 1024);
+            using var streamContent = new StreamContent(stream);
+            streamContent.Headers.ContentType =
+                new System.Net.Http.Headers.MediaTypeHeaderValue(selectedFile.ContentType);
+            content.Add(streamContent, "image", selectedFile.Name);
+
+            var response = await Http.PostAsync($"Account/UploadImage/{userId}", content);
+
+            if (response.IsSuccessStatusCode)
+            {
+                var path = await response.Content.ReadAsStringAsync();
+                previewUrl = path.Trim('"');
+                imgUploadSuccess = true;
+            }
+            else
+            {
+                imgErrorMessage = "Image upload failed. Please try again.";
+            }
+        }
+        catch (Exception ex)
+        {
+            imgErrorMessage = $"Upload error: {ex.Message}";
+        }
+        finally
+        {
+            isUploadingImg = false;
+            StateHasChanged();
+        }
+    }
+
+    // ── Save Changes ─────────────────────────────────────────────────────────────
+    private async Task HandleSubmit()
+    {
+        if (string.IsNullOrWhiteSpace(userId)) return;
+
+        isSaving   = true;
+        saveSuccess = false;
+        saveError   = null;
+
+        try
+        {
+            // Map to UserDTO structure expected by AccountController
+            var dto = new
+            {
+                Name     = model.Name,
+                UserName = model.UserName,
+                Email    = model.Email,
+                Phone    = model.Phone,
+                ImgPath  = (string?)null,     // image already uploaded separately
+                Latitude  = (double?)null,
+                Longitude = (double?)null
+            };
+
+            var response = await Http.PutAsJsonAsync($"Account/UpdateUserInfo/{userId}", dto);
+
+            if (response.IsSuccessStatusCode)
+            {
+                saveSuccess = true;
+                // Navigate back to profile after short delay
+                await Task.Delay(1200);
+                Navigation.NavigateTo("/profile");
+            }
+            else
+            {
+                var err = await response.Content.ReadAsStringAsync();
+                saveError = string.IsNullOrWhiteSpace(err)
+                    ? "Failed to save changes. Please try again."
+                    : err;
+            }
+        }
+        catch (Exception ex)
+        {
+            saveError = $"An error occurred: {ex.Message}";
+        }
+        finally
+        {
+            isSaving = false;
+        }
+    }
+
+    private void GoBack() => Navigation.NavigateTo("/profile");
+
+    // ── Local Form Model ──────────────────────────────────────────────────────────
+    private class UserEditModel
+    {
+        [MinLength(3, ErrorMessage = "Name must be at least 3 characters")]
+        [RegularExpression(@"^[a-zA-Z\s]+$", ErrorMessage = "Name must contain only letters")]
+        public string? Name { get; set; }
+
+        [MinLength(10, ErrorMessage = "Username must be at least 10 characters")]
+        [RegularExpression(@"^[a-zA-Z0-9]+$", ErrorMessage = "Username must contain only letters and numbers")]
+        public string? UserName { get; set; }
+
+        [EmailAddress(ErrorMessage = "Invalid email address")]
+        public string? Email { get; set; }
+
+        [RegularExpression(@"^\d+$", ErrorMessage = "Phone must contain numbers only")]
+        public string? Phone { get; set; }
+    }
+}

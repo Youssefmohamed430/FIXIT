@@ -1,18 +1,18 @@
 ﻿<CascadingAuthenticationState> @* Tag Work to Determine Auth state at any route *@
     <Router AppAssembly="@typeof(App).Assembly">
         <Found Context="routeData">
-            <AuthorizeView Context="AppAuthSate">
-                <Authorized>
-                    <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
-                </Authorized>
+            <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)">
                 <NotAuthorized>
-                    <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(Auth)">
-                        <NotAuthorized>
-                            <RedirectToLogin /> @* Custom Component to Redirect to Login Page if not Authorized *@
-                        </NotAuthorized>
-                    </AuthorizeRouteView>
+                    <RedirectToLogin />
                 </NotAuthorized>
-            </AuthorizeView>
+                <Authorizing>
+                    <div class="d-flex justify-content-center align-items-center vh-100">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                </Authorizing>
+            </AuthorizeRouteView>
             <FocusOnNavigate RouteData="@routeData" Selector="h1" />
         </Found>
         <NotFound>

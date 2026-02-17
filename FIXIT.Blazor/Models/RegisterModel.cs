@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace FIXIT.Blazor.Pages;
+namespace FIXIT.Blazor.Models;
 
 public class RegisterModel
 {

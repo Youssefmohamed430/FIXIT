@@ -1,4 +1,6 @@
 ﻿@page "/login"
+@attribute [AllowAnonymous]
+@layout Auth
 @inject CustomAuthenticationStateProvider AuthProvider
 @inject IHttpClientFactory HttpFactory
 @inject NavigationManager Navigation

@@ -11,6 +11,7 @@ public class CustomAuthenticationStateProvider : AuthenticationStateProvider
     private readonly ILocalStorageService _localStorage;
     private readonly HttpClient _httpClient;
     private readonly NavigationManager _navigationManager;
+    public ILogger<CustomAuthenticationStateProvider> Logger { get; set; }
 
     private DateTime _lastRefreshCheck = DateTime.MinValue;
     private readonly TimeSpan _refreshCheckInterval = TimeSpan.FromMinutes(1);
@@ -18,11 +19,13 @@ public class CustomAuthenticationStateProvider : AuthenticationStateProvider
     public CustomAuthenticationStateProvider(
         ILocalStorageService localStorage,
         HttpClient httpClient,
-        NavigationManager navigationManager)
+        NavigationManager navigationManager,
+        ILogger<CustomAuthenticationStateProvider> logger)
     {
         _localStorage = localStorage;
         _httpClient = httpClient;
         _navigationManager = navigationManager;
+        Logger = logger;
     }
 
     public override async Task<AuthenticationState> GetAuthenticationStateAsync()
@@ -65,8 +68,9 @@ public class CustomAuthenticationStateProvider : AuthenticationStateProvider
 
             return new AuthenticationState(user);
         }
-        catch
+        catch(Exception ex)
         {
+            Logger.LogError(ex, "Error while getting authentication state");
             return CreateAnonymousState();
         }
     }

@@ -10,10 +10,10 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 
 var apiBaseAddress = "https://localhost:7195";
 
-builder.Services.AddScoped(sp => new HttpClient
-{
-    BaseAddress = new Uri(apiBaseAddress)
-});
+//builder.Services.AddScoped(sp => new HttpClient
+//{
+//    BaseAddress = new Uri(apiBaseAddress)
+//});
 
 builder.Services.AddScoped<ILocalStorageService, LocalStorageService>();
 

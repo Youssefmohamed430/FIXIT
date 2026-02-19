@@ -1,4 +1,5 @@
 using DotNetEnv;
+using FIXIT.Application.Handlers;
 using FIXIT.Application.IServices;
 using FIXIT.Application.Servicces;
 using FIXIT.Domain.Abstractions;
@@ -13,10 +14,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Localization;
-using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.Globalization;
 using System.Text;
@@ -57,6 +55,9 @@ builder.Services.AddScoped<IWallettService, WalletService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<IServiceManager, ServiceManager>();
+builder.Services.AddScoped<IUserRoleHandler, CustomerRoleHandler>();
+builder.Services.AddScoped<RegisterUserService>();
+builder.Services.AddScoped<IUserRoleHandler, ProviderRoleHandler>();
 builder.Services.AddScoped<JWTService>();
 builder.Services.AddAuthentication(options =>
 {

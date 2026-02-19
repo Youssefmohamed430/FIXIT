@@ -1,4 +1,5 @@
 ﻿using FIXIT.Application.DTOs;
+using FIXIT.Application.Handlers;
 using FIXIT.Application.IServices;
 using FIXIT.Domain;
 using FIXIT.Domain.Abstractions;
@@ -26,7 +27,7 @@ public enum UserRole
 
 public class AuthService(UserManager<ApplicationUser> _userManager,IServiceManager serviceManager,
         JWTService _jwtservice, SignInManager<ApplicationUser> _signInManager,IConfiguration _configuration,
-        IMemoryCache _cache, ILogger<AuthService> logger, IUnitOfWork unitOfWork)
+        IMemoryCache _cache, ILogger<AuthService> logger, IUnitOfWork unitOfWork,IEnumerable<IUserRoleHandler> _roleHandlers)
         : IAuthService
 {
     #region Login
@@ -39,11 +40,8 @@ public class AuthService(UserManager<ApplicationUser> _userManager,IServiceManag
 
         if (result.Succeeded)
         {
-            var user = await _userManager.FindByNameAsync(loginDTO.UserName);
-
-            var token = await _jwtservice.CreateJwtToken(user);
-
-            var refreshtoken = await HandleRefreshToken(user, token);
+            (ApplicationUser? user, JwtSecurityToken token, RefreshToken refreshtoken)
+                = await HandleUserLogIn(loginDTO);
 
             return new AuthModelFactory()
                 .CreateAuthModel(user.Id, user.UserName, user.Email, token.ValidTo,
@@ -63,77 +61,81 @@ public class AuthService(UserManager<ApplicationUser> _userManager,IServiceManag
             return new AuthModel { Message = "Invalid username or password", IsAuthenticated = false };
         }
     }
+
+    private async Task<(ApplicationUser? user, JwtSecurityToken token, RefreshToken refreshtoken)> HandleUserLogIn(LoginDTO loginDTO)
+    {
+        var user = await _userManager.FindByNameAsync(loginDTO.UserName);
+
+        var token = await _jwtservice.CreateJwtToken(user);
+
+        var refreshtoken = await HandleRefreshToken(user, token);
+        return (user, token, refreshtoken);
+    }
     #endregion
 
     #region Register
     public async Task<AuthModel> Register(RegisterDTO registermodel)
     {
-        var userByUserName = await _userManager.FindByNameAsync(registermodel.UserName!);
-        if (userByUserName is not null && !userByUserName.IsDeleted)
-            return new AuthModel() { Message = "User Name Is Already Registerd" };
+        (bool flowControl, AuthModel value) = await IsUserNameFound(registermodel);
+        if (!flowControl) return value;
 
-        var userByEmail = await _userManager.FindByEmailAsync(registermodel.Email!);
-        if (userByEmail is not null && !userByEmail.IsDeleted)
-            return new AuthModel() { Message = "Email Is Already Registerd" };
+        (flowControl, value) = await IsEmailFound(registermodel);
+        if (!flowControl) return value;
 
-        await VerificationAccount(registermodel.Email);
-
-        var cacheKey = $"User:{registermodel.Email}";
-        _cache.Set(cacheKey, registermodel, TimeSpan.FromMinutes(10));
+        await HandleVerification(registermodel);
 
         return new AuthModel { Message = "Verification code sent to email.", IsAuthenticated = true };
     }
+    
+    private async Task HandleVerification(RegisterDTO registermodel)
+    {
+        await VerificationAccount(registermodel.Email!);
+
+        var cacheKey = $"User:{registermodel.Email}";
+        _cache.Set(cacheKey, registermodel, TimeSpan.FromMinutes(10));
+    }
+
+    private async Task<(bool flowControl, AuthModel value)> IsEmailFound(RegisterDTO registermodel)
+    {
+        var userByEmail = await _userManager.FindByEmailAsync(registermodel.Email!);
+        
+        if (userByEmail is not null && !userByEmail.IsDeleted)
+            return (flowControl: false, value: new AuthModel() { Message = "Email Is Already Registerd" });
+       
+        return (flowControl: true, value: null)!;
+    }
+
+    private async Task<(bool flowControl, AuthModel value)> IsUserNameFound(RegisterDTO registermodel)
+    {
+        var userByUserName = await _userManager.FindByNameAsync(registermodel.UserName!);
+
+        if (userByUserName is not null && !userByUserName.IsDeleted)
+            return (flowControl: false, value: new AuthModel() { Message = "User Name Is Already Registerd" });
+
+        return (flowControl: true, value: null)!;
+    }
+
     public async Task<AuthModel> CreateUser(string email)
     {
         try
         {
             unitOfWork.BeginTransaction();
 
-            if (!_cache.TryGetValue($"User:{email}", out RegisterDTO? model))
-                return new AuthModel() { Message = "Verification code expired or invalid." };
+            var (flowControl, value, model, user, result) = await HandleUser(email);
 
-            var user = model.Adapt<ApplicationUser>();
-
-            var result = await _userManager.CreateAsync(user, model.Password);
+            if (!flowControl) return value!;
 
             if (!result.Succeeded)
             {
-                var errors = "";
-
-                foreach (var error in result.Errors)
-                    errors += $"{error.Description}, ";
-
-                logger.LogError("Failed to create user {Email}. Errors: {Errors}", email, errors);
+                string errors = HandleErrors(email, result);
 
                 return new AuthModel() { Message = errors };
             }
 
-            switch (model.Role)
-            {
-                case UserRole.Customer:
-                    await HandleUserRoleAsync<Customer>(
-                        user,
-                        "Customer",
-                        OwnerType.Customer,
-                        "Customer account created successfully for {Email}"
-                    );
-                    break;
+            var handler = _roleHandlers.First(x => x.Role == model.Role);
+            await handler.HandleAsync(user);
 
-                case UserRole.Provider:
-                    await HandleUserRoleAsync<ServiceProvider>(
-                        user,
-                        "Provider",
-                        OwnerType.Provider,
-                        "Service Provider account created successfully for {Email}"
-                    );
-                    break;
-            }
-
-            var JWTSecurityToken = await _jwtservice.CreateJwtToken(user);
-
-            user.EmailConfirmed = true;
-
-            var refreshToken = await HandleRefreshToken(user, JWTSecurityToken);
+            (JwtSecurityToken JWTSecurityToken, RefreshToken refreshToken) = await HandleTokens(user);
 
             unitOfWork.Commit();
 
@@ -148,24 +150,38 @@ public class AuthService(UserManager<ApplicationUser> _userManager,IServiceManag
         }
     }
 
-    private async Task HandleUserRoleAsync<TUserEntity>(
-    ApplicationUser user,string roleName,OwnerType ownerType,string successLogMessage)
-        where TUserEntity : class
+    private async Task<(JwtSecurityToken JWTSecurityToken, RefreshToken refreshToken)> HandleTokens(ApplicationUser user)
     {
-        await _userManager.AddToRoleAsync(user, roleName);
+        var JWTSecurityToken = await _jwtservice.CreateJwtToken(user);
 
-        var entity = user.Adapt<TUserEntity>();
-        await unitOfWork.GetRepository<TUserEntity>().AddAsync(entity);
-        await unitOfWork.SaveAsync();
+        user.EmailConfirmed = true;
 
-        await serviceManager._walletService.CreateWalletForUser(
-            new WalletDTO
-            {
-                UserId = user.Id,
-                ownerType = ownerType
-            });
+        var refreshToken = await HandleRefreshToken(user, JWTSecurityToken);
+        return (JWTSecurityToken, refreshToken);
+    }
 
-        logger.LogInformation(successLogMessage, user.Email);
+    private async Task<(bool flowControl, AuthModel? value, RegisterDTO? model, ApplicationUser? user, IdentityResult? result)>
+    HandleUser(string email)
+    {
+        if (!_cache.TryGetValue($"User:{email}", out RegisterDTO? model))
+            return (false, new AuthModel() { Message = "Verification code expired or invalid." }, null, null, null);
+
+        var user = model.Adapt<ApplicationUser>();
+        var result = await _userManager.CreateAsync(user, model.Password!);
+
+        return (true, null, model, user, result);
+    }
+
+
+    private string HandleErrors(string email, IdentityResult result)
+    {
+        var errors = "";
+
+        foreach (var error in result.Errors)
+            errors += $"{error.Description}, ";
+
+        logger.LogError("Failed to create user {Email}. Errors: {Errors}", email, errors);
+        return errors;
     }
     #endregion
 

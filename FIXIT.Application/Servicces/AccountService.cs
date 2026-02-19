@@ -23,10 +23,7 @@ public class AccountService(IUnitOfWork unitOfWork) : IAccountService
         if (imgPath == null)
             return Result<UserDTO>.Failure(new Error("User.NoImage", "User has no image"));
 
-        var userdto = new UserDTO
-        {
-            ImgPath = imgPath
-        };
+        var userdto = new UserDTO { ImgPath = imgPath };
 
         return Result<UserDTO>.Success(userdto);
     }
@@ -36,21 +33,26 @@ public class AccountService(IUnitOfWork unitOfWork) : IAccountService
         var Olduser = await unitOfWork.GetRepository<ApplicationUser>().FindAsync(u => u.Id == Id);
 
         if (Olduser is null)
-            return Result<UserDTO>.Failure(new Error("User.NotFound","User not found"));
+            return Result<UserDTO>.Failure(new Error("User.NotFound", "User not found"));
 
-        Olduser.Name = user.Name! ?? Olduser.Name;
-        Olduser.UserName = user.UserName! ?? Olduser.UserName;
-        Olduser.Email = user.Email! ?? Olduser.Email;
-        Olduser.PhoneNumber = user.Phone! ?? Olduser.PhoneNumber;
-        Olduser.Location = user.Longitude.HasValue && user.Latitude.HasValue
-             ? new NetTopologySuite.Geometries.Point(user.Longitude!.Value, user.Latitude!.Value) { SRID = 4326 } 
-             : Olduser.Location;
-        Olduser.Img = user.ImgPath != null ? ImgPath.Create(user.ImgPath) : Olduser.Img;
+        HandleUpdatingUser(user, Olduser);
 
         await unitOfWork.GetRepository<ApplicationUser>().UpdateAsync(Olduser);
         await unitOfWork.SaveAsync();
 
         return Result<UserDTO>.Success(user);
+    }
+
+    private static void HandleUpdatingUser(UserDTO user, ApplicationUser Olduser)
+    {
+        Olduser.Name = user.Name! ?? Olduser.Name;
+        Olduser.UserName = user.UserName! ?? Olduser.UserName;
+        Olduser.Email = user.Email! ?? Olduser.Email;
+        Olduser.PhoneNumber = user.Phone! ?? Olduser.PhoneNumber;
+        Olduser.Location = user.Longitude.HasValue && user.Latitude.HasValue
+             ? new NetTopologySuite.Geometries.Point(user.Longitude!.Value, user.Latitude!.Value) { SRID = 4326 }
+             : Olduser.Location;
+        Olduser.Img = user.ImgPath != null ? ImgPath.Create(user.ImgPath) : Olduser.Img;
     }
 
     public async Task<Result<UserDTO>> UploadImg(string Id,IFormFile imgFile)
@@ -60,6 +62,19 @@ public class AccountService(IUnitOfWork unitOfWork) : IAccountService
         if (user is null)
             return Result<UserDTO>.Failure(new Error("User.NotFound", "User not found"));
 
+        string fileName = await HandleFoldersandFile(imgFile);
+
+        user.Img = ImgPath.Create($"/images/{fileName}");
+
+        await unitOfWork.GetRepository<ApplicationUser>().UpdateAsync(user);
+
+        await unitOfWork.SaveAsync();
+
+        return Result<UserDTO>.Success(new UserDTO { ImgPath = $"/images/{fileName}" });
+    }
+
+    private static async Task<string> HandleFoldersandFile(IFormFile imgFile)
+    {
         var folderPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/images");
 
         if (!Directory.Exists(folderPath))
@@ -69,22 +84,8 @@ public class AccountService(IUnitOfWork unitOfWork) : IAccountService
         var filePath = Path.Combine(folderPath, fileName);
 
         using (var stream = new FileStream(filePath, FileMode.Create))
-        {
-            await imgFile.CopyToAsync(stream);
-        }
+        { await imgFile.CopyToAsync(stream); }
 
-        var imgPath = ImgPath.Create($"/images/{fileName}");
-
-        user.Img = imgPath;
-
-        await unitOfWork.GetRepository<ApplicationUser>().UpdateAsync(user);
-
-        await unitOfWork.SaveAsync();
-        var userDto = new UserDTO
-        {
-            ImgPath = $"/images/{fileName}"
-        };
-
-        return Result<UserDTO>.Success(userDto);
+        return fileName;
     }
 }

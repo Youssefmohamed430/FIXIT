@@ -1,4 +1,6 @@
 ﻿using FIXIT.Application.DTOs;
+using FIXIT.Application.DTOsك;
+using FIXIT.Domain.ValueObjects;
 using Mapster;
 using Microsoft.Extensions.DependencyInjection;
 using NetTopologySuite.Geometries;
@@ -11,6 +13,23 @@ public static class MapsterConfiguration
 {
     public static void RegisterMapsterConfiguration(this IServiceCollection services)
     {
+        TypeAdapterConfig<JobPost, JobPostDTO>
+            .NewConfig()
+            .Map(dest => dest.JobPostImgPaths,
+                 src => src.JobPostImgs
+                           .Select(img => img.ImgPath.Value)
+                           .ToList())
+            .Map(dest => dest.CustomerName,
+                 src => src.Customer.User.Name);
+
+        TypeAdapterConfig<CreateJobPostDTO, JobPost>
+            .NewConfig()
+            .Ignore(dest => dest.JobPostImgs);
+
+        TypeAdapterConfig<ImgPath, string>
+            .NewConfig()
+            .MapWith(src => src.Value);
+
         // FROM ApplicationUser TO RegisterDTO
         TypeAdapterConfig<ApplicationUser, RegisterDTO>
             .NewConfig()

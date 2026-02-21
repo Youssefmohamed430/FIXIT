@@ -74,6 +74,18 @@ namespace FIXIT.Infrastructure.Repositoriesك
             return entity.Where(criteria).ProjectToType<TDto>()!;
         }
 
+        public Task<IQueryable<TDto>> FindAllAsync<TDto>(Expression<Func<T, bool>> criteria, string[] includes = null)
+        {
+            var entity = _context.Set<T>()
+                    .AsNoTracking();
+
+            if (includes != null)
+                foreach (var include in includes)
+                    entity = entity.Include(include);
+
+            return Task.FromResult(entity.Where(criteria).ProjectToType<TDto>()!);
+        }
+
         public T FindWithTracking(Expression<Func<T, bool>> criteria, string[] includes = null)
         {
             var entity = _context.Set<T>().AsTracking();

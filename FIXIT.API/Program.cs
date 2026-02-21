@@ -56,8 +56,8 @@ builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<IServiceManager, ServiceManager>();
 builder.Services.AddScoped<IUserRoleHandler, CustomerRoleHandler>();
-builder.Services.AddScoped<RegisterUserService>();
 builder.Services.AddScoped<IUserRoleHandler, ProviderRoleHandler>();
+builder.Services.AddScoped<RegisterUserService>();
 builder.Services.AddScoped<JWTService>();
 builder.Services.AddAuthentication(options =>
 {

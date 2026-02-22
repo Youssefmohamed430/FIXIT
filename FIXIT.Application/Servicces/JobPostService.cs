@@ -5,7 +5,6 @@ using FIXIT.Domain.Entities;
 using FIXIT.Domain.ValueObjects;
 using Mapster;
 using Microsoft.AspNetCore.Http;
-using System.Xml.Linq;
 
 namespace FIXIT.Application.Servicces;
 
@@ -15,7 +14,7 @@ public class JobPostService(IUnitOfWork unitOfWork) : IJobPostService
     public async Task<Result<List<JobPostDTO>>> GetPostsByCustomerId(string Id)
     {
         var Posts = await unitOfWork.GetRepository<JobPost>()
-            .FindAllAsync<JobPostDTO>(j => j.CustomerId == Id
+            .FindAllAsync<JobPostDTO>(j => j.CustomerId == Id && !j.IsDeleted
             , new string[] { "Customer.User", "JobPostImgs" });
 
         if (Posts is null || !Posts.Any())
@@ -23,11 +22,10 @@ public class JobPostService(IUnitOfWork unitOfWork) : IJobPostService
 
         return Result<List<JobPostDTO>>.Success(Posts.ToList());
     }
-
     public async Task<Result<List<JobPostDTO>>> GetPostsByCustomerName(string Name)
     {
         var Posts = await unitOfWork.GetRepository<JobPost>()
-            .FindAllAsync<JobPostDTO>(j => j.Customer.User.Name == Name
+            .FindAllAsync<JobPostDTO>(j => j.Customer.User.Name == Name && !j.IsDeleted
             , new string[] { "Customer.User", "JobPostImgs" });
 
         if (Posts is null || !Posts.Any())
@@ -38,7 +36,7 @@ public class JobPostService(IUnitOfWork unitOfWork) : IJobPostService
     public async Task<Result<List<JobPostDTO>>> GetPostByDateRange(DateTime startDate, DateTime endDate)
     {
         var Posts = await unitOfWork.GetRepository<JobPost>()
-            .FindAllAsync<JobPostDTO>(j => j.CreatedAt >= startDate && j.CreatedAt <= endDate
+            .FindAllAsync<JobPostDTO>(j => j.CreatedAt >= startDate && j.CreatedAt <= endDate && !j.IsDeleted
             , new string[] { "Customer.User", "JobPostImgs" });
 
         if (Posts is null || !Posts.Any())
@@ -46,11 +44,10 @@ public class JobPostService(IUnitOfWork unitOfWork) : IJobPostService
 
         return Result<List<JobPostDTO>>.Success(Posts.ToList());
     }
-
     public async Task<Result<List<JobPostDTO>>> GetPostByServiceType(string type)
     {
         var Posts = await unitOfWork.GetRepository<JobPost>()
-            .FindAllAsync<JobPostDTO>(j => j.ServiceType == type
+            .FindAllAsync<JobPostDTO>(j => j.ServiceType == type && !j.IsDeleted
             , new string[] { "Customer.User", "JobPostImgs" });
 
         if (Posts is null || !Posts.Any())
@@ -62,7 +59,7 @@ public class JobPostService(IUnitOfWork unitOfWork) : IJobPostService
     public async Task<Result<List<JobPostDTO>>> GetPostByStatus(JobPostStatus status)
     {
         var Posts = await unitOfWork.GetRepository<JobPost>()
-            .FindAllAsync<JobPostDTO>(j => j.Status == status
+            .FindAllAsync<JobPostDTO>(j => j.Status == status && !j.IsDeleted
             , new string[] { "Customer.User", "JobPostImgs" });
 
         if (Posts is null || !Posts.Any())
@@ -128,8 +125,8 @@ public class JobPostService(IUnitOfWork unitOfWork) : IJobPostService
         if (post is null)
              return Result<Object>.Failure(new Error("Posts.NotFound.Id", "No post found for the given ID."));
 
-        post.Description = jobPostDTO.Description;
-        post.ServiceType = jobPostDTO.ServiceType;
+        post.Description = jobPostDTO.Description ?? post.Description;
+        post.ServiceType = jobPostDTO.ServiceType ?? post.ServiceType;
 
         await unitOfWork.GetRepository<JobPost>().UpdateAsync(post);
         await unitOfWork.SaveAsync();

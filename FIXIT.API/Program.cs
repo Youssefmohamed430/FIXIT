@@ -52,6 +52,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 builder.Services.AddTransient<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IWallettService, WalletService>();
+builder.Services.AddScoped<IJobPostService, JobPostService>();
 builder.Services.AddScoped<IEmailService, EmailService>();
 builder.Services.AddScoped<IAccountService, AccountService>();
 builder.Services.AddScoped<IServiceManager, ServiceManager>();

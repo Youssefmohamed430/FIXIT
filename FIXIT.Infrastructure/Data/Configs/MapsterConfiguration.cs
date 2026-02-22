@@ -1,5 +1,4 @@
 ﻿using FIXIT.Application.DTOs;
-using FIXIT.Application.DTOsك;
 using FIXIT.Domain.ValueObjects;
 using Mapster;
 using Microsoft.Extensions.DependencyInjection;
@@ -21,10 +20,14 @@ public static class MapsterConfiguration
                            .ToList())
             .Map(dest => dest.CustomerName,
                  src => src.Customer.User.Name);
+            //.Map(dest => dest.Location,
+            //     src => src.Customer.User.Location);
 
         TypeAdapterConfig<CreateJobPostDTO, JobPost>
             .NewConfig()
-            .Ignore(dest => dest.JobPostImgs);
+            .Ignore(dest => dest.JobPostImgs)
+            .Ignore(dest => dest.CreatedAt)
+            .Ignore(dest => dest.Status);
 
         TypeAdapterConfig<ImgPath, string>
             .NewConfig()

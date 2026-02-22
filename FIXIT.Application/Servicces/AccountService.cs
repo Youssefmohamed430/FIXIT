@@ -64,13 +64,13 @@ public class AccountService(IUnitOfWork unitOfWork) : IAccountService
 
         string fileName = await HandleFoldersandFile(imgFile);
 
-        user.Img = ImgPath.Create($"/images/{fileName}");
+        user.Img = ImgPath.Create(fileName);
 
         await unitOfWork.GetRepository<ApplicationUser>().UpdateAsync(user);
 
         await unitOfWork.SaveAsync();
 
-        return Result<UserDTO>.Success(new UserDTO { ImgPath = $"/images/{fileName}" });
+        return Result<UserDTO>.Success(new UserDTO { ImgPath = fileName });
     }
 
     private static async Task<string> HandleFoldersandFile(IFormFile imgFile)

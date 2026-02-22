@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http;
 using FIXIT.Application.DTOs;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.EntityFrameworkCore.Migrations.Internal;
 
 namespace FIXIT.Presentation.Controllers;
 
@@ -21,12 +22,12 @@ public class AccountController(IServiceManager serviceManager) : ControllerBase
         return result.IsSuccess ? Ok(result.Value.ImgPath) : NotFound(result.Error);
     }
 
-    [HttpPost("UploadImage/{id}")]
-    public async Task<IActionResult> UploadImage(string id, [FromForm(Name = "image")] IFormFile image)
+    [HttpPost("UploadImage")]
+    public async Task<IActionResult> UploadImage([FromForm] ImageUploadModel model)
     {
-        var result = await serviceManager._accountService.UploadImg(id, image);
+        var result = await serviceManager._accountService.UploadImg(model.UserId, model.Image);
 
-        return result.IsSuccess ? Ok(result.Value.ImgPath) : BadRequest(result.Error);
+        return result.IsSuccess ? Ok("Uploading Success!") : BadRequest(result.Error);
     }
 
     [HttpPut("UpdateUserInfo/{id}")]
@@ -35,4 +36,9 @@ public class AccountController(IServiceManager serviceManager) : ControllerBase
         var result = await serviceManager._accountService.UpdateUserInfo(id, user);
         return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
     }
+}
+public class ImageUploadModel
+{
+    public string UserId { get; set; }
+    public IFormFile Image { get; set; }
 }

@@ -110,6 +110,7 @@ public class CustomAuthenticationStateProvider : AuthenticationStateProvider
             if (!response.IsSuccessStatusCode)
             {
                 await ClearAuthenticationAsync();
+                NotifyAuthenticationStateChanged(Task.FromResult(CreateAnonymousState())); 
                 return false;
             }
 

@@ -1,0 +1,683 @@
+@page "/job-posts"
+@attribute [Authorize]
+@inject IHttpClientFactory HttpFactory
+@inject AuthenticationStateProvider AuthStateProvider
+@inject NavigationManager Navigation
+
+<PageTitle>Job Posts</PageTitle>
+
+<!-- ===== Header ===== -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="fw-bold mb-0">
+            <i class="bi bi-briefcase-fill text-primary me-2"></i>Job Posts
+        </h2>
+        <p class="text-muted small mb-0">Manage and browse all job posts</p>
+    </div>
+    <button class="btn btn-primary" @onclick="OpenCreateModal">
+        <i class="bi bi-plus-circle me-1"></i> New Post
+    </button>
+</div>
+
+<!-- ===== Alert ===== -->
+@if (!string.IsNullOrEmpty(alertMessage))
+{
+    <div class="alert @alertClass alert-dismissible fade show" role="alert">
+        @alertMessage
+        <button type="button" class="btn-close" @onclick="ClearAlert"></button>
+    </div>
+}
+
+<!-- ===== Search / Filter Card ===== -->
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-white fw-semibold">
+        <i class="bi bi-funnel me-1 text-primary"></i> Search &amp; Filter
+    </div>
+    <div class="card-body">
+        <div class="row g-3 align-items-end">
+
+            <!-- Filter type selector -->
+            <div class="col-md-3">
+                <label class="form-label">Search By</label>
+                <select class="form-select" @bind="searchType">
+                    <option value="CustomerId">Customer ID</option>
+                    <option value="CustomerName">Customer Name</option>
+                    <option value="ServiceType">Service Type</option>
+                    <option value="DateRange">Date Range</option>
+                </select>
+            </div>
+
+            <!-- Dynamic search inputs -->
+            @if (searchType == "DateRange")
+            {
+                <div class="col-md-3">
+                    <label class="form-label">Start Date</label>
+                    <input type="date" class="form-control" @bind="startDate" />
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label">End Date</label>
+                    <input type="date" class="form-control" @bind="endDate" />
+                </div>
+            }
+            else
+            {
+                <div class="col-md-5">
+                    <label class="form-label">
+                        @(searchType == "CustomerId" ? "Customer ID" :
+                                            searchType == "CustomerName" ? "Customer Name" : "Service Type")
+                </label>
+                <input type="text" class="form-control"
+                       placeholder="Enter value..."
+                       @bind="searchValue" @bind:event="oninput"
+                       @onkeyup="HandleEnterKey" />
+            </div>
+                        }
+
+            <div class="col-md-2">
+                <button class="btn btn-primary w-100" @onclick="Search" disabled="@isLoading">
+                    @if (isLoading)
+                    {
+                        <span class="spinner-border spinner-border-sm me-1"></span>
+                    }
+                    else
+                    {
+                        <i class="bi bi-search me-1"></i>
+                    }
+                    Search
+                </button>
+            </div>
+            <div class="col-md-1">
+                <button class="btn btn-outline-secondary w-100" title="Clear" @onclick="ClearSearch">
+                    <i class="bi bi-x-lg"></i>
+                </button>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- ===== Results Table ===== -->
+<div class="card shadow-sm">
+    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+        <span class="fw-semibold">
+            <i class="bi bi-list-ul me-1 text-primary"></i> Results
+        </span>
+        <span class="badge bg-secondary">@posts.Count post(s)</span>
+    </div>
+    <div class="card-body p-0">
+
+        @if (isLoading)
+        {
+            <div class="text-center py-5">
+                <div class="spinner-border text-primary" role="status"></div>
+                <p class="mt-2 text-muted">Loading...</p>
+            </div>
+        }
+        else if (!posts.Any())
+        {
+            <div class="text-center py-5 text-muted">
+                <i class="bi bi-inbox display-4"></i>
+                <p class="mt-2">No posts found. Use the search above or create a new one.</p>
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>#</th>
+                            <th>Description</th>
+                            <th>Service Type</th>
+                            <th>Customer</th>
+                            <th>Status</th>
+                            <th>Created At</th>
+                            <th>Images</th>
+                            <th class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var post in posts)
+                        {
+                            <tr>
+                                <td><span class="badge bg-light text-dark border">@post.Id</span></td>
+                                <td>
+                                    <span class="d-inline-block text-truncate" style="max-width:200px;" title="@post.Description">
+                                        @post.Description
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge bg-info text-dark">@post.ServiceType</span>
+                                </td>
+                                <td>
+                                    <div class="fw-semibold">@post.CustomerName</div>
+                                    <div class="text-muted small">@TruncateId(post.CustomerId)</div>
+                                </td>
+                                <td>
+                                    <span class="badge @GetStatusBadge(post.Status?.ToString())">
+                                        @post.Status
+                                    </span>
+                                </td>
+                                <td class="text-muted small">
+                                    @post.CreatedAt?.ToString("dd MMM yyyy")
+                                </td>
+                                <td>
+                                    @if (post.JobPostImgPaths != null && post.JobPostImgPaths.Any())
+                                    {
+                                        <span class="badge bg-secondary">
+                                            <i class="bi bi-images me-1"></i>@post.JobPostImgPaths.Count
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="text-muted small">None</span>
+                                    }
+                                </td>
+                                <td class="text-center">
+                                    <button class="btn btn-sm btn-outline-warning me-1"
+                                            title="Edit"
+                                            @onclick="() => OpenEditModal(post)">
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger"
+                                            title="Delete"
+                                            @onclick="() => OpenDeleteModal(post)">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+
+    </div>
+</div>
+
+<!-- ============================= CREATE MODAL ============================= -->
+@if (showCreateModal)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background:rgba(0,0,0,.45)">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content shadow">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">
+                        <i class="bi bi-plus-circle me-1"></i> Create New Job Post
+                    </h5>
+                    <button class="btn-close btn-close-white" @onclick="CloseModals"></button>
+                </div>
+                <div class="modal-body">
+                    <EditForm Model="createModel" OnValidSubmit="CreatePost">
+                        <DataAnnotationsValidator />
+                        <ValidationSummary class="text-danger" />
+
+                        <!-- Customer ID is auto-filled from the logged-in user's token -->
+                        <div class="alert alert-light border d-flex align-items-center gap-2 py-2 mb-3">
+                            <i class="bi bi-person-badge text-primary"></i>
+                            <span class="small">
+                                Posting as: <strong class="text-primary">@currentUserId</strong>
+                            </span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Service Type <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control"
+                                   @bind="createModel.ServiceType"
+                                   placeholder="e.g. Plumbing, Electrical, Painting..." />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Description <span class="text-danger">*</span></label>
+                            <textarea class="form-control" rows="4"
+                                      @bind="createModel.Description"
+                                      placeholder="Describe the job in detail..."></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Images (optional)</label>
+                            <InputFile class="form-control" multiple OnChange="OnImagesSelected" accept="image/*" />
+                            @if (selectedFiles.Any())
+                            {
+                                <div class="mt-2">
+                                    @foreach (var f in selectedFiles)
+                                    {
+                                        <span class="badge bg-light text-dark border me-1">
+                                            <i class="bi bi-image me-1"></i>@f.Name
+                                        </span>
+                                    }
+                                </div>
+                            }
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2 mt-3">
+                            <button type="button" class="btn btn-outline-secondary" @onclick="CloseModals">Cancel</button>
+                            <button type="submit" class="btn btn-primary" disabled="@isSubmitting">
+                                @if (isSubmitting)
+                                {
+                                    <span class="spinner-border spinner-border-sm me-1"></span>
+                                }
+                                <i class="bi bi-send me-1"></i> Create Post
+                            </button>
+                        </div>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- ============================= EDIT MODAL ============================= -->
+@if (showEditModal && editModel != null)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background:rgba(0,0,0,.45)">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content shadow">
+                <div class="modal-header bg-warning">
+                    <h5 class="modal-title">
+                        <i class="bi bi-pencil-square me-1"></i> Edit Post #@editModel.Id
+                    </h5>
+                    <button class="btn-close" @onclick="CloseModals"></button>
+                </div>
+                <div class="modal-body">
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Service Type</label>
+                        <input type="text" class="form-control"
+                               @bind="editModel.ServiceType"
+                               placeholder="e.g. Plumbing, Electrical..." />
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Description</label>
+                        <textarea class="form-control" rows="4"
+                                  @bind="editModel.Description"
+                                  placeholder="Update description..."></textarea>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2 mt-3">
+                        <button type="button" class="btn btn-outline-secondary" @onclick="CloseModals">Cancel</button>
+                        <button class="btn btn-warning" @onclick="UpdatePost" disabled="@isSubmitting">
+                            @if (isSubmitting)
+                            {
+                                <span class="spinner-border spinner-border-sm me-1"></span>
+                            }
+                            <i class="bi bi-save me-1"></i> Save Changes
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<!-- ============================= DELETE MODAL ============================= -->
+@if (showDeleteModal && postToDelete != null)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background:rgba(0,0,0,.45)">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content shadow">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">
+                        <i class="bi bi-exclamation-triangle me-1"></i> Confirm Delete
+                    </h5>
+                    <button class="btn-close btn-close-white" @onclick="CloseModals"></button>
+                </div>
+                <div class="modal-body text-center py-4">
+                    <i class="bi bi-trash-fill text-danger display-4"></i>
+                    <p class="mt-3">Are you sure you want to delete <strong>Post #@postToDelete.Id</strong>?</p>
+                    <p class="text-muted small">This action cannot be undone.</p>
+                </div>
+                <div class="modal-footer justify-content-center gap-2">
+                    <button class="btn btn-outline-secondary px-4" @onclick="CloseModals">Cancel</button>
+                    <button class="btn btn-danger px-4" @onclick="DeletePost" disabled="@isSubmitting">
+                        @if (isSubmitting)
+                        {
+                            <span class="spinner-border spinner-border-sm me-1"></span>
+                        }
+                        <i class="bi bi-trash me-1"></i> Delete
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+
+    // ─── State ────────────────────────────────────────────────────────────────
+    private List<JobPostDTO> posts = new();
+    private bool isLoading = false;
+    private bool isSubmitting = false;
+
+    // Search
+    private string searchType = "CustomerId";
+    private string searchValue = "";
+    private DateTime startDate = DateTime.Today.AddMonths(-1);
+    private DateTime endDate = DateTime.Today;
+
+    // Alert
+    private string alertMessage = "";
+    private string alertClass = "alert-info";
+
+    // Modals
+    private bool showCreateModal = false;
+    private bool showEditModal = false;
+    private bool showDeleteModal = false;
+
+    private CreateJobPostModel createModel = new();
+    private JobPostDTO? editModel;
+    private JobPostDTO? postToDelete;
+
+    // File upload
+    private List<IBrowserFile> selectedFiles = new();
+
+    // Logged-in user
+    private string currentUserId = "";
+
+    // ─── Init ─────────────────────────────────────────────────────────────────
+    protected override async Task OnInitializedAsync()
+    {
+        // Extract the user ID from the JWT "uid" claim
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        currentUserId = user.FindFirst("uid")?.Value
+                     ?? user.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
+                     ?? "";
+    }
+
+    // ─── Search ───────────────────────────────────────────────────────────────
+    private async Task Search()
+    {
+        isLoading = true;
+        ClearAlert();
+        posts.Clear();
+
+        try
+        {
+            var http = HttpFactory.CreateClient("FIXIT.API");
+            HttpResponseMessage response;
+
+            switch (searchType)
+            {
+                case "CustomerId":
+                    if (string.IsNullOrWhiteSpace(searchValue)) { ShowAlert("Please enter a Customer ID.", "alert-warning"); return; }
+                    response = await http.GetAsync($"JobPost/ById/{Uri.EscapeDataString(searchValue)}");
+                    break;
+
+                case "CustomerName":
+                    if (string.IsNullOrWhiteSpace(searchValue)) { ShowAlert("Please enter a Customer Name.", "alert-warning"); return; }
+                    response = await http.GetAsync($"JobPost/ByName/{Uri.EscapeDataString(searchValue)}");
+                    break;
+
+                case "ServiceType":
+                    if (string.IsNullOrWhiteSpace(searchValue)) { ShowAlert("Please enter a Service Type.", "alert-warning"); return; }
+                    response = await http.GetAsync($"JobPost/ByServiceType/{Uri.EscapeDataString(searchValue)}");
+                    break;
+
+                case "DateRange":
+                    var start = startDate.ToString("yyyy-MM-ddTHH:mm:ss");
+                    var end = endDate.ToString("yyyy-MM-ddT23:59:59");
+                    response = await http.GetAsync($"JobPost/ByDateRange?start={start}&end={end}");
+                    break;
+
+                default:
+                    return;
+            }
+
+            if (response.IsSuccessStatusCode)
+            {
+                posts = await response.Content.ReadFromJsonAsync<List<JobPostDTO>>() ?? new();
+                if (!posts.Any()) ShowAlert("No posts found for the given criteria.", "alert-info");
+            }
+            else
+            {
+                var err = await response.Content.ReadAsStringAsync();
+                ShowAlert($"Error: {err}", "alert-danger");
+            }
+        }
+        catch (Exception ex)
+        {
+            ShowAlert($"Request failed: {ex.Message}", "alert-danger");
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private async Task HandleEnterKey(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter") await Search();
+    }
+
+    private void ClearSearch()
+    {
+        searchValue = "";
+        startDate = DateTime.Today.AddMonths(-1);
+        endDate = DateTime.Today;
+        posts.Clear();
+        ClearAlert();
+    }
+
+    // ─── Create ───────────────────────────────────────────────────────────────
+    private async Task CreatePost()
+    {
+        if (string.IsNullOrWhiteSpace(createModel.Description) ||
+            string.IsNullOrWhiteSpace(createModel.ServiceType))
+        {
+            ShowAlert("All fields are required.", "alert-warning");
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(currentUserId))
+        {
+            ShowAlert("Could not identify the logged-in user. Please log in again.", "alert-danger");
+            return;
+        }
+
+        isSubmitting = true;
+        try
+        {
+            var http = HttpFactory.CreateClient("FIXIT.API");
+            using var formData = new MultipartFormDataContent();
+
+            formData.Add(new StringContent(createModel.Description), "Description");
+            formData.Add(new StringContent(createModel.ServiceType), "ServiceType");
+            formData.Add(new StringContent(currentUserId), "CustomerId"); // auto from JWT claim "uid"
+
+            foreach (var file in selectedFiles)
+            {
+                var stream = file.OpenReadStream(maxAllowedSize: 10 * 1024 * 1024);
+                formData.Add(new StreamContent(stream), "Images", file.Name);
+            }
+
+            var response = await http.PostAsync("JobPost", formData);
+
+            if (response.IsSuccessStatusCode)
+            {
+                ShowAlert("Post created successfully!", "alert-success");
+                CloseModals();
+                await Search(); // Refresh results
+            }
+            else
+            {
+                var err = await response.Content.ReadAsStringAsync();
+                ShowAlert($"Failed to create post: {err}", "alert-danger");
+            }
+        }
+        catch (Exception ex)
+        {
+            ShowAlert($"Error: {ex.Message}", "alert-danger");
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+
+    // ─── Update ───────────────────────────────────────────────────────────────
+    private async Task UpdatePost()
+    {
+        if (editModel == null) return;
+        isSubmitting = true;
+        try
+        {
+            var http = HttpFactory.CreateClient("FIXIT.API");
+            var response = await http.PutAsJsonAsync($"JobPost/{editModel.Id}", editModel);
+
+            if (response.IsSuccessStatusCode)
+            {
+                ShowAlert("Post updated successfully!", "alert-success");
+                CloseModals();
+                // Update list locally
+                var idx = posts.FindIndex(p => p.Id == editModel.Id);
+                if (idx >= 0)
+                {
+                    posts[idx].Description = editModel.Description;
+                    posts[idx].ServiceType = editModel.ServiceType;
+                }
+            }
+            else
+            {
+                var err = await response.Content.ReadAsStringAsync();
+                ShowAlert($"Failed to update: {err}", "alert-danger");
+            }
+        }
+        catch (Exception ex)
+        {
+            ShowAlert($"Error: {ex.Message}", "alert-danger");
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+
+    // ─── Delete ───────────────────────────────────────────────────────────────
+    private async Task DeletePost()
+    {
+        if (postToDelete == null) return;
+        isSubmitting = true;
+        try
+        {
+            var http = HttpFactory.CreateClient("FIXIT.API");
+            var response = await http.DeleteAsync($"JobPost/{postToDelete.Id}");
+
+            if (response.IsSuccessStatusCode)
+            {
+                ShowAlert("Post deleted successfully!", "alert-success");
+                posts.Remove(postToDelete);
+                CloseModals();
+            }
+            else
+            {
+                var err = await response.Content.ReadAsStringAsync();
+                ShowAlert($"Failed to delete: {err}", "alert-danger");
+            }
+        }
+        catch (Exception ex)
+        {
+            ShowAlert($"Error: {ex.Message}", "alert-danger");
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+
+    // ─── Modal helpers ────────────────────────────────────────────────────────
+    private void OpenCreateModal()
+    {
+        createModel = new();
+        selectedFiles.Clear();
+        showCreateModal = true;
+    }
+
+    private void OpenEditModal(JobPostDTO post)
+    {
+        // Deep copy to avoid mutating original before save
+        editModel = new JobPostDTO
+        {
+            Id = post.Id,
+            Description = post.Description,
+            ServiceType = post.ServiceType,
+            CustomerId = post.CustomerId,
+            CustomerName = post.CustomerName,
+            Status = post.Status,
+            CreatedAt = post.CreatedAt,
+            JobPostImgPaths = post.JobPostImgPaths
+        };
+        showEditModal = true;
+    }
+
+    private void OpenDeleteModal(JobPostDTO post)
+    {
+        postToDelete = post;
+        showDeleteModal = true;
+    }
+
+    private void CloseModals()
+    {
+        showCreateModal = false;
+        showEditModal = false;
+        showDeleteModal = false;
+        editModel = null;
+        postToDelete = null;
+    }
+
+    // ─── File upload ──────────────────────────────────────────────────────────
+    private void OnImagesSelected(InputFileChangeEventArgs e)
+    {
+        selectedFiles = e.GetMultipleFiles(10).ToList();
+    }
+
+    // ─── Alert ────────────────────────────────────────────────────────────────
+    private void ShowAlert(string msg, string cssClass)
+    {
+        alertMessage = msg;
+        alertClass = cssClass;
+    }
+    private void ClearAlert()
+    {
+        alertMessage = "";
+    }
+
+    // ─── Utilities ────────────────────────────────────────────────────────────
+    private string TruncateId(string? id)
+    {
+        if (string.IsNullOrWhiteSpace(id)) return "N/A";
+        return id.Length > 10 ? $"{id[..8]}…" : id;
+    }
+
+    private string GetStatusBadge(string? status) => status switch
+    {
+        "Open" => "bg-success",
+        "InProgress" => "bg-warning text-dark",
+        "Closed" or "Completed" => "bg-secondary",
+        "Cancelled" => "bg-danger",
+        _ => "bg-light text-dark border"
+    };
+
+    // ─── Local models ─────────────────────────────────────────────────────────
+    public class CreateJobPostModel
+    {
+        public string ServiceType { get; set; } = "";
+        public string Description { get; set; } = "";
+    }
+
+    // Mirror of API DTO for use in this page
+    public class JobPostDTO
+    {
+        public int Id { get; set; }
+        public string? Description { get; set; }
+        public string? ServiceType { get; set; }
+        public string? CustomerId { get; set; }
+        public string? CustomerName { get; set; }
+        public object? Status { get; set; }
+        public DateTime? CreatedAt { get; set; }
+        public List<string>? JobPostImgPaths { get; set; } = new();
+    }
+}

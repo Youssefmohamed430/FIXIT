@@ -1,9 +1,4 @@
-﻿using FIXIT.Domain.Abstractions;
-using FIXIT.Domain.Entities;
-using Microsoft.AspNetCore.Http;
-using NetTopologySuite.Geometries;
-
-namespace FIXIT.Application.DTOs;
+﻿namespace FIXIT.Application.DTOs;
 
 public class JobPostDTO
 {

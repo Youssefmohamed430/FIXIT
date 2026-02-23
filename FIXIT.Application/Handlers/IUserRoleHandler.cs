@@ -1,6 +1,4 @@
-﻿using FIXIT.Application.Servicces;
-using FIXIT.Domain.Entities;
-
+﻿
 namespace FIXIT.Application.Handlers;
 
 public interface IUserRoleHandler

@@ -1,7 +1,4 @@
-﻿using FIXIT.Application.DTOs;
-using FIXIT.Domain.Abstractions;
-using FIXIT.Domain.Entities;
-
+﻿
 namespace FIXIT.Application.IServices;
 
 public interface IJobPostService

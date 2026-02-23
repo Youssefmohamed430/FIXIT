@@ -1,7 +1,4 @@
-﻿using FIXIT.Application.Handlers;
-using FIXIT.Application.Servicces;
-using FIXIT.Domain.Entities;
-
+﻿
 namespace FIXIT.Application.Handlers;
 
 public class RegisterUserService

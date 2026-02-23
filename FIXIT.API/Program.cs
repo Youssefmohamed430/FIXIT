@@ -1,24 +1,3 @@
-using DotNetEnv;
-using FIXIT.Application.Handlers;
-using FIXIT.Application.IServices;
-using FIXIT.Application.Servicces;
-using FIXIT.Domain.Abstractions;
-using FIXIT.Domain.Entities;
-using FIXIT.Domain.Helpers;
-using FIXIT.Domain.LocalizationsFiles;
-using FIXIT.Infrastructure;
-using FIXIT.Infrastructure.Data.Configs;
-using FIXIT.Infrastructure.Data.Context;
-using FIXIT.Presentation;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Localization;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Localization;
-using Microsoft.IdentityModel.Tokens;
-using System.Globalization;
-using System.Text;
-using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 

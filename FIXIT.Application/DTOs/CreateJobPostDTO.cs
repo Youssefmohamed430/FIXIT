@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
-
+﻿
 namespace FIXIT.Application.DTOs;
 
 public class CreateJobPostDTO

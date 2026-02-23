@@ -1,9 +1,4 @@
-﻿using FIXIT.Application.IServices;
-using FIXIT.Domain.Abstractions;
-using FIXIT.Domain.Entities;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.DependencyInjection;
-
+﻿
 namespace FIXIT.Application.Servicces;
 
 public class ServiceManager : IServiceManager

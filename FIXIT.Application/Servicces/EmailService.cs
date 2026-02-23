@@ -1,8 +1,4 @@
-﻿using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
-using System.Net;
-using System.Net.Mail;
-
+﻿
 namespace FIXIT.Application.Servicces;
 
 public class EmailService : IEmailService

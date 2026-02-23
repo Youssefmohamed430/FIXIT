@@ -1,22 +1,4 @@
-﻿using FIXIT.Application.DTOs;
-using FIXIT.Application.Handlers;
-using FIXIT.Application.IServices;
-using FIXIT.Domain;
-using FIXIT.Domain.Abstractions;
-using FIXIT.Domain.Entities;
-using FIXIT.Domain.Factories;
-using FIXIT.Domain.Helpers;
-using FIXIT.Presentation.Controllers;
-using Mapster;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.WebUtilities;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Cryptography;
-using System.Text;
+﻿
 
 namespace FIXIT.Application.Servicces;
 public enum UserRole

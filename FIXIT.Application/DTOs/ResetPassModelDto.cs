@@ -1,5 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
+﻿
 namespace FIXIT.Application.DTOs;
 
 public class ResetPassModelDto

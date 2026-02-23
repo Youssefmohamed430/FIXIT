@@ -1,7 +1,4 @@
-﻿using FIXIT.Application.Servicces;
-using System.ComponentModel.DataAnnotations;
-using System.Drawing;
-
+﻿
 namespace FIXIT.Application.DTOs;
 
 public class RegisterDTO

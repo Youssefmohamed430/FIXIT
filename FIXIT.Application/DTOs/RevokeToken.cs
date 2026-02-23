@@ -1,7 +1,6 @@
-﻿namespace FIXIT.Presentation.Controllers
+﻿namespace FIXIT.Presentation.Controllers;
+
+public class RevokeToken
 {
-    public class RevokeToken
-    {
-        public string? Token { get; set; }
-    }
+    public string? Token { get; set; }
 }

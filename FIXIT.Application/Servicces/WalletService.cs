@@ -1,11 +1,4 @@
 ﻿
-using FIXIT.Application.DTOs;
-using FIXIT.Application.IServices;
-using FIXIT.Domain.Abstractions;
-using FIXIT.Domain.Entities;
-using FIXIT.Domain.ValueObjects;
-using Mapster;
-
 namespace FIXIT.Application.Servicces;
 
 public class WalletService(IUnitOfWork unitOfWork) : IWallettService

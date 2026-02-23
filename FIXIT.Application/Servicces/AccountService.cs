@@ -1,12 +1,4 @@
-﻿using FIXIT.Application.DTOs;
-using FIXIT.Application.IServices;
-using FIXIT.Domain.Abstractions;
-using FIXIT.Domain.Entities;
-using FIXIT.Domain.ValueObjects;
-using MediatR;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-
+﻿
 namespace FIXIT.Application.Servicces;
 
 public class AccountService(IUnitOfWork unitOfWork) : IAccountService

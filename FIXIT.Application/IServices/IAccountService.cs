@@ -1,8 +1,4 @@
-﻿using FIXIT.Application.DTOs;
-using FIXIT.Domain.Abstractions;
-using FIXIT.Domain.ValueObjects;
-using Microsoft.AspNetCore.Http;
-
+﻿
 namespace FIXIT.Application.IServices;
 
 public interface IAccountService

@@ -1,7 +1,4 @@
 ﻿
-using FIXIT.Application.Servicces;
-using System.ComponentModel.DataAnnotations;
-
 namespace FIXIT.Application.DTOs;
 
 public class UserDTO

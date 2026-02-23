@@ -1,6 +1,4 @@
-﻿using FIXIT.Domain.Entities;
-using FIXIT.Domain.ValueObjects;
-
+﻿
 namespace FIXIT.Application.DTOs;
 
 public class WalletDTO

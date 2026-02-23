@@ -1,8 +1,4 @@
 ﻿
-
-using FIXIT.Application.DTOs;
-using FIXIT.Domain.Abstractions;
-
 namespace FIXIT.Application.IServices;
 
 public interface IWallettService

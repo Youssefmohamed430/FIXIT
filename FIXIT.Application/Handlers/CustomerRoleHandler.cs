@@ -1,13 +1,4 @@
-﻿using FIXIT.Application.DTOs;
-using FIXIT.Application.IServices;
-using FIXIT.Application.Servicces;
-using FIXIT.Domain.Abstractions;
-using FIXIT.Domain.Entities;
-using Mapster;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Logging;
-
-
+﻿
 namespace FIXIT.Application.Handlers;
 
 public class CustomerRoleHandler

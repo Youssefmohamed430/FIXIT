@@ -1,11 +1,4 @@
-﻿using FIXIT.Application.DTOs;
-using FIXIT.Application.IServices;
-using FIXIT.Domain.Abstractions;
-using FIXIT.Domain.Entities;
-using FIXIT.Domain.ValueObjects;
-using Mapster;
-using Microsoft.AspNetCore.Http;
-
+﻿
 namespace FIXIT.Application.Servicces;
 
 public class JobPostService(IUnitOfWork unitOfWork) : IJobPostService

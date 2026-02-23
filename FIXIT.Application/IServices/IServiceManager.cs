@@ -1,5 +1,4 @@
-﻿using FIXIT.Application.Servicces;
-
+﻿
 namespace FIXIT.Application.IServices;
 
 public interface IServiceManager

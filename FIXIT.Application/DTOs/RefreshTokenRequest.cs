@@ -1,13 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace FIXIT.Application.DTOs;
 
-namespace FIXIT.Application.DTOs
+public class RefreshTokenRequest
 {
-    public class RefreshTokenRequest
-    {
-        public string Token { get; set; }
-    }
+    public string Token { get; set; }
 }

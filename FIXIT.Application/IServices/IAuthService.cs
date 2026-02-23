@@ -1,8 +1,4 @@
 ﻿
-using FIXIT.Application.DTOs;
-using FIXIT.Domain;
-using FIXIT.Presentation.Controllers;
-
 namespace FIXIT.Application.IServices;
 
 public interface IAuthService

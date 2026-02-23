@@ -1,9 +1,4 @@
-﻿using FIXIT.Application.DTOs;
-using FIXIT.Application.IServices;
-using FIXIT.Presentation.Attributes;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
-
+﻿
 namespace FIXIT.Presentation.Controllers;
 [ApiController]
 [Route("[controller]")]

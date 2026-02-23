@@ -1,12 +1,4 @@
 ﻿
-using FIXIT.Application.IServices;
-using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Http;
-using FIXIT.Application.DTOs;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.EntityFrameworkCore.Migrations.Internal;
-
 namespace FIXIT.Presentation.Controllers;
 
 [ApiController]

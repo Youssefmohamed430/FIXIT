@@ -1,5 +1,4 @@
-﻿using FIXIT.Domain.IRepositries;
-
+﻿
 namespace FIXIT.Domain.Abstractions;
 
     public interface IUnitOfWork

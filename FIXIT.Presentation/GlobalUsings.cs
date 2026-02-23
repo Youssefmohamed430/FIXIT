@@ -1,4 +1,12 @@
 ﻿global using FIXIT.Infrastructure.Data.Context;
-global using Microsoft.EntityFrameworkCore;
 global using Microsoft.Extensions.Configuration;
 global using Microsoft.Extensions.DependencyInjection;
+global using FIXIT.Application.IServices;
+global using Microsoft.AspNetCore.Mvc;
+global using Microsoft.AspNetCore.Http;
+global using FIXIT.Application.DTOs;
+global using Microsoft.AspNetCore.Authorization;
+global using FIXIT.Presentation.Attributes;
+global using Microsoft.AspNetCore.Mvc.Filters;
+global using Microsoft.Extensions.Caching.Memory;
+global using Microsoft.Extensions.Logging;

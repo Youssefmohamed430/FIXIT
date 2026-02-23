@@ -1,4 +1,13 @@
-﻿global using FIXIT.Domain;
-global using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿global using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 global using FIXIT.Domain.Entities;
 global using Microsoft.EntityFrameworkCore;
+global using DotNetEnv;
+global using Microsoft.EntityFrameworkCore.Design;
+global using FIXIT.Domain.IRepositries;
+global using FIXIT.Infrastructure.Data.Context;
+global using Mapster;
+global using System.Linq.Expressions;
+global using FIXIT.Domain.Abstractions;
+global using FIXIT.Infrastructure.Repositories;
+global using Microsoft.EntityFrameworkCore.Storage;
+global using System.Collections.Concurrent;

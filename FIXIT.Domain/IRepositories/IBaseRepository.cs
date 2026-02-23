@@ -1,5 +1,4 @@
-﻿using System.Linq.Expressions;
-
+﻿
 namespace FIXIT.Domain.IRepositries;
 
     public interface IBaseRepository<T> where T : class

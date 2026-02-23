@@ -1,5 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
-
+﻿
 namespace FIXIT.Domain.Entities;
 
 [Owned]

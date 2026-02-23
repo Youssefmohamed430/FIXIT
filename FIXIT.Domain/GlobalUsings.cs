@@ -1,5 +1,16 @@
-﻿global using FIXIT.Domain.Helpers;
-global using FIXIT.Domain.ValueObjects;
+﻿global using FIXIT.Domain.ValueObjects;
 global using Microsoft.Extensions.Localization;
 global using Newtonsoft.Json;
-
+global using FIXIT.Domain.IRepositries;
+global using Microsoft.AspNetCore.Identity;
+global using NetTopologySuite.Geometries;
+global using FIXIT.Domain.Abstractions;
+global using System.ComponentModel.DataAnnotations;
+global using Microsoft.EntityFrameworkCore;
+global using FIXIT.Domain.Entities;
+global using Microsoft.Extensions.Options;
+global using System.Security.Claims;
+global using System.Text;
+global using Microsoft.IdentityModel.Tokens;
+global using System.IdentityModel.Tokens.Jwt;
+global using System.Linq.Expressions;

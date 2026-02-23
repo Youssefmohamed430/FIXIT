@@ -1,5 +1,4 @@
-﻿using FIXIT.Domain.Abstractions;
-
+﻿
 namespace FIXIT.Domain.Entities;
 
 public enum WorkStatus { InProgress = 1, Completed = 2}

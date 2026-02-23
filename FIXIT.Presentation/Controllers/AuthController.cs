@@ -1,8 +1,4 @@
-﻿using FIXIT.Application.DTOs;
-using FIXIT.Application.IServices;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-
+﻿
 namespace FIXIT.Presentation.Controllers;
 
 [Route("[controller]")]

@@ -1,6 +1,4 @@
-﻿using FIXIT.Domain.Abstractions;
-using System.ComponentModel.DataAnnotations;
-
+﻿
 namespace FIXIT.Domain.Entities;
 
 public class Notification

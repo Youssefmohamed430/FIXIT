@@ -1,5 +1,4 @@
-﻿using System.Text.Json.Serialization;
-using JsonIgnoreAttribute = System.Text.Json.Serialization.JsonIgnoreAttribute;
+﻿using JsonIgnoreAttribute = System.Text.Json.Serialization.JsonIgnoreAttribute;
 
 namespace FIXIT.Domain
 {

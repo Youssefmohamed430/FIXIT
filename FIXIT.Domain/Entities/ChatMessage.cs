@@ -1,5 +1,4 @@
-﻿using FIXIT.Domain.Abstractions;
-
+﻿
 namespace FIXIT.Domain.Entities;
 
 public class ChatMessage

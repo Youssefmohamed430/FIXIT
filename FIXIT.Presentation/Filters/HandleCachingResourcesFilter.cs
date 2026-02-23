@@ -1,10 +1,4 @@
-﻿using FIXIT.Presentation.Attributes;
-using Microsoft.AspNetCore.Mvc.Filters;
-using Microsoft.Extensions.Caching.Memory;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Logging;
-using Microsoft.AspNetCore.Mvc;
-
+﻿
 namespace FIXIT.Presentation;
 
 public class HandleCachingResourcesFilter(IMemoryCache cache,ILogger<HandleCachingResourcesFilter> logger) : IResourceFilter

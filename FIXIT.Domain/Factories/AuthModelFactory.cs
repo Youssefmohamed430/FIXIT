@@ -1,23 +1,21 @@
-﻿using FIXIT.Domain.Abstractions;
+﻿
+namespace FIXIT.Domain.Factories;
 
-namespace FIXIT.Domain.Factories
+public class AuthModelFactory
 {
-    public class AuthModelFactory
+    public AuthModel CreateAuthModel(string id, string username, string email, DateTime expiresOn,List<string> roles, string JWTSecurityToken,string refreshToken,DateTime refreshTokenExpiration, string Message = "")
     {
-        public AuthModel CreateAuthModel(string id, string username, string email, DateTime expiresOn,List<string> roles, string JWTSecurityToken,string refreshToken,DateTime refreshTokenExpiration, string Message = "")
+        return new AuthModel()
         {
-            return new AuthModel()
-            {
-                Id = id,
-                Username = username,
-                Email = email,
-                IsAuthenticated = true,
-                //ExpiresOn = expiresOn,
-                Roles = roles,
-                Token = JWTSecurityToken,
-                RefreshToken = refreshToken,
-                RefreshTokenExpiration = EgyptTimeHelper.ConvertFromUtc(refreshTokenExpiration),
-            };
-        }
+            Id = id,
+            Username = username,
+            Email = email,
+            IsAuthenticated = true,
+            //ExpiresOn = expiresOn,
+            Roles = roles,
+            Token = JWTSecurityToken,
+            RefreshToken = refreshToken,
+            RefreshTokenExpiration = EgyptTimeHelper.ConvertFromUtc(refreshTokenExpiration),
+        };
     }
 }

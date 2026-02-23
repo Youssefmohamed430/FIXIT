@@ -1,10 +1,4 @@
-﻿using FIXIT.Domain.Abstractions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
 namespace FIXIT.Domain.Entities;
 
 public enum JobPostStatus { Open = 1, Closed = 2 }

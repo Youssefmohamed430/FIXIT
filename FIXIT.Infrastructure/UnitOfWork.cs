@@ -1,12 +1,4 @@
 ﻿
-using FIXIT.Domain.Abstractions;
-using FIXIT.Domain.IRepositries;
-using FIXIT.Infrastructure.Data.Context;
-using FIXIT.Infrastructure.Repositoriesك;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage;
-using System.Collections.Concurrent;
-
 namespace FIXIT.Infrastructure;
 
 public class UnitOfWork(AppDbContext _context) : IUnitOfWork

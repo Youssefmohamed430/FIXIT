@@ -27,7 +27,9 @@ global using Microsoft.Extensions.DependencyInjection;
 global using System.ComponentModel.DataAnnotations;
 global using System.IdentityModel.Tokens.Jwt;
 global using System.Security.Cryptography;
+global using System.Linq.Expressions;
 global using System.Text;
 global using System.Net;
 global using System.Net.Mail;
 global using Mapster;
+

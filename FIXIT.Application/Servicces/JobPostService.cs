@@ -4,63 +4,54 @@ namespace FIXIT.Application.Servicces;
 public class JobPostService(IUnitOfWork unitOfWork) : IJobPostService
 {
     #region Get Posts
-    public async Task<Result<List<JobPostDTO>>> GetPostsByCustomerId(string Id)
+
+    private async Task<Result<List<JobPostDTO>>> GetPostsAsync(
+    Expression<Func<JobPost, bool>> filter,
+    string errorCode,
+    string errorMessage)
     {
+        Expression<Func<JobPost, bool>> baseFilter = o => !o.IsDeleted;
+
+        var combinedFilter = baseFilter.And(filter);
+
         var Posts = await unitOfWork.GetRepository<JobPost>()
-            .FindAllAsync<JobPostDTO>(j => j.CustomerId == Id && !j.IsDeleted
-            , new string[] { "Customer.User", "JobPostImgs" });
+            .FindAllAsync<JobPostDTO>(
+                combinedFilter,
+                new string[] { "Customer.User", "JobPostImgs" });
 
         if (Posts is null || !Posts.Any())
-            return Result<List<JobPostDTO>>.Failure(new Error("Posts.NotFound.Id","No posts found for the given customer ID."));
+            return Result<List<JobPostDTO>>.Failure(
+                new Error(errorCode, errorMessage));
 
         return Result<List<JobPostDTO>>.Success(Posts.ToList());
     }
+
+    public async Task<Result<List<JobPostDTO>>> GetPostsByCustomerId(string Id) 
+        => await GetPostsAsync(
+            j => j.CustomerId == Id,
+            "Posts.NotFound.Id",
+            "No posts found for the given customer ID.");
     public async Task<Result<List<JobPostDTO>>> GetPostsByCustomerName(string Name)
-    {
-        var Posts = await unitOfWork.GetRepository<JobPost>()
-            .FindAllAsync<JobPostDTO>(j => j.Customer.User.Name == Name && !j.IsDeleted
-            , new string[] { "Customer.User", "JobPostImgs" });
-
-        if (Posts is null || !Posts.Any())
-            return Result<List<JobPostDTO>>.Failure(new Error("Posts.NotFound.Name", "No posts found for the given customer Name."));
-
-        return Result<List<JobPostDTO>>.Success(Posts.ToList());
-    }
+        => await GetPostsAsync(
+            j => j.Customer.User.Name == Name,
+            "Posts.NotFound.Name",
+            "No posts found for the given customer Name.");
     public async Task<Result<List<JobPostDTO>>> GetPostByDateRange(DateTime startDate, DateTime endDate)
-    {
-        var Posts = await unitOfWork.GetRepository<JobPost>()
-            .FindAllAsync<JobPostDTO>(j => j.CreatedAt >= startDate && j.CreatedAt <= endDate && !j.IsDeleted
-            , new string[] { "Customer.User", "JobPostImgs" });
+        => await GetPostsAsync(
+            j => j.CreatedAt >= startDate && j.CreatedAt <= endDate,
+            "Posts.NotFound.DateRange",
+            "No posts found for the given Date Range.");
+    public async Task<Result<List<JobPostDTO>>> GetPostByServiceType(string type) 
+        => await GetPostsAsync(
+            j => j.ServiceType == type,
+            "Posts.NotFound.ServiceType",
+            "No posts found for the given Servcie Type.");
 
-        if (Posts is null || !Posts.Any())
-            return Result<List<JobPostDTO>>.Failure(new Error("Posts.NotFound.DateRange", "No posts found for the given Date Range."));
-
-        return Result<List<JobPostDTO>>.Success(Posts.ToList());
-    }
-    public async Task<Result<List<JobPostDTO>>> GetPostByServiceType(string type)
-    {
-        var Posts = await unitOfWork.GetRepository<JobPost>()
-            .FindAllAsync<JobPostDTO>(j => j.ServiceType == type && !j.IsDeleted
-            , new string[] { "Customer.User", "JobPostImgs" });
-
-        if (Posts is null || !Posts.Any())
-            return Result<List<JobPostDTO>>.Failure(new Error("Posts.NotFound.ServiceType", "No posts found for the given Servcie Type."));
-
-        return Result<List<JobPostDTO>>.Success(Posts.ToList());
-    }
-
-    public async Task<Result<List<JobPostDTO>>> GetPostByStatus(JobPostStatus status)
-    {
-        var Posts = await unitOfWork.GetRepository<JobPost>()
-            .FindAllAsync<JobPostDTO>(j => j.Status == status && !j.IsDeleted
-            , new string[] { "Customer.User", "JobPostImgs" });
-
-        if (Posts is null || !Posts.Any())
-            return Result<List<JobPostDTO>>.Failure(new Error("Posts.NotFound.Status", "No posts found for the given Status."));
-
-        return Result<List<JobPostDTO>>.Success(Posts.ToList());
-    }
-
+    public async Task<Result<List<JobPostDTO>>> GetPostByStatus(JobPostStatus status) 
+        => await GetPostsAsync(
+            j => j.Status == status,
+            "Posts.NotFound.Status",
+            "No posts found for the given Status.");
     #endregion
 
     #region Create - Update - Delete

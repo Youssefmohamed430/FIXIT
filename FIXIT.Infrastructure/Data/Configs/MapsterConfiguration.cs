@@ -29,9 +29,22 @@ public static class MapsterConfiguration
             .Ignore(dest => dest.CreatedAt)
             .Ignore(dest => dest.Status);
 
+        TypeAdapterConfig<Offer, OfferDTO>
+            .NewConfig()
+            .Map(dest => dest.ProviderName,
+                 src => src.ServiceProvider.User.Name);
+
         TypeAdapterConfig<ImgPath, string>
             .NewConfig()
             .MapWith(src => src.Value);
+
+        TypeAdapterConfig<Price, decimal>
+            .NewConfig()
+            .MapWith(src => src.Amount);
+
+        TypeAdapterConfig<Price, string>
+            .NewConfig()
+            .MapWith(src => src.Currency);
 
         // FROM ApplicationUser TO RegisterDTO
         TypeAdapterConfig<ApplicationUser, RegisterDTO>

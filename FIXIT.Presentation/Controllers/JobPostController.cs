@@ -6,7 +6,7 @@ public class JobPostController(IServiceManager serviceManger) : ControllerBase
 {
     #region Get All Posts
     [HttpGet("ById/{Id}")]
-    [Cacheable("posts")]
+    [Cacheable("posts.CustomerId")]
     [Authorize]
 
     public IActionResult GetPostsByCustomerId(string Id)
@@ -16,6 +16,7 @@ public class JobPostController(IServiceManager serviceManger) : ControllerBase
         return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
     }
     [HttpGet("ByName/{Name}")]
+    [Cacheable("posts.CustomerName")]
     [Authorize]
     public IActionResult GetPostsByCustomerName(string Name)
     {
@@ -24,6 +25,7 @@ public class JobPostController(IServiceManager serviceManger) : ControllerBase
         return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
     }
     [HttpGet("ByDateRange")]
+    [Cacheable("posts.DateRange")]
     [Authorize]
     public IActionResult GetPostsByDateRange(DateTime start, DateTime end)
     {
@@ -31,6 +33,7 @@ public class JobPostController(IServiceManager serviceManger) : ControllerBase
         return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
     }
     [HttpGet("ByServiceType/{type}")]
+    [Cacheable("posts.ServiceType")]
     [Authorize]
     public IActionResult GetPostsByServiceType(string type)
     {

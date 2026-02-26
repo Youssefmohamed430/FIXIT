@@ -1,4 +1,5 @@
 ﻿
+using FIXIT.Domain.Entities;
 using System.Xml.Linq;
 
 namespace FIXIT.Application.Servicces;
@@ -56,22 +57,73 @@ public class OfferService(IUnitOfWork unitOfWork) : IOfferService
 
     #region Create, Update, Delete Offers
 
-    public Task<Result<OfferDTO>> CreateOffer(CreateOfferDTO offer)
+    public async Task<Result<OfferDTO>> CreateOffer(CreateOfferDTO offer)
     {
-        throw new NotImplementedException();
+        try
+        {
+            var Newoffer = await unitOfWork.GetRepository<Offer>().AddAsync(offer.Adapt<Offer>());
+
+            await unitOfWork.SaveAsync();
+
+            return Result<OfferDTO>.Success(Newoffer.Adapt<OfferDTO>());
+        }
+        catch (Exception ex)
+        {
+            return Result<OfferDTO>.Failure(
+                new Error("Offers.CreateFailed", $"Failed to create offer: {ex.Message}"));
+        }
+    }
+    public async Task<Result<OfferDTO>> UpdateOffer(OfferDTO offer,int offerId)
+    {
+        var offerToUpdate = unitOfWork.GetRepository<Offer>().Find(o => o.Id == offerId);
+
+        if (offerToUpdate is null)
+            return Result<OfferDTO>.Failure(
+                new Error("Offers.NotFound.Id", "No offer found with the given ID."));
+
+        UpdateHandling(offer, offerToUpdate);
+
+        try
+        {
+            await unitOfWork.GetRepository<Offer>().UpdateAsync(offerToUpdate);
+            await unitOfWork.SaveAsync();
+            return Result<OfferDTO>.Success(offerToUpdate.Adapt<OfferDTO>());
+        }
+        catch (Exception ex)
+        {
+            return Result<OfferDTO>.Failure(
+                new Error("Offers.UpdateFailed", $"Failed to update offer: {ex.Message}"));
+        }
     }
 
-    public Task<Result<object>> DeleteOffer(int id)
+    private static void UpdateHandling(OfferDTO offer, Offer offerToUpdate)
     {
-        throw new NotImplementedException();
+        offerToUpdate.Description = offer.Description ?? offerToUpdate.Description;
+        offerToUpdate.status = offer.status;
+        offerToUpdate.Price = offer.Price ?? offerToUpdate.Price;
     }
 
-    
-
-    public Task<Result<OfferDTO>> UpdateOffer(OfferDTO offer)
+    public async Task<Result<object>> DeleteOffer(int id)
     {
-        throw new NotImplementedException();
-    }
+        var offerToDelete = unitOfWork.GetRepository<Offer>().Find(o => o.Id == id);
 
+        if (offerToDelete is null)
+            return Result<object>.Failure(
+                new Error("Offers.NotFound.Id", "No offer found with the given ID."));
+
+        offerToDelete.IsDeleted = true;
+
+        try
+        {
+            await unitOfWork.GetRepository<Offer>().UpdateAsync(offerToDelete);
+            await unitOfWork.SaveAsync();
+            return Result<object>.Success(null);
+        }
+        catch (Exception ex)
+        {
+            return Result<object>.Failure(
+                new Error("Offers.UpdateFailed", $"Failed to delete offer: {ex.Message}"));
+        }
+    }
     #endregion
 }

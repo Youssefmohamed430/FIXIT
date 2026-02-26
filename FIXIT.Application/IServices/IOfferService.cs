@@ -8,6 +8,6 @@ public interface IOfferService
     Task<Result<List<OfferDTO>>> GetOffersByPriceRange(Price start,Price end);
 
     Task<Result<OfferDTO>> CreateOffer(CreateOfferDTO offer);
-    Task<Result<OfferDTO>> UpdateOffer(OfferDTO offer);
+    Task<Result<OfferDTO>> UpdateOffer(OfferDTO offer,int offerId);
     Task<Result<Object>> DeleteOffer(int id);
 }

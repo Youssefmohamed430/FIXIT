@@ -14,6 +14,8 @@ public class ServiceManager : IServiceManager
     private readonly Lazy<IWallettService> _walletService;
     private readonly Lazy<IAccountService> _accountService;
     private readonly Lazy<IJobPostService> _jobPostService;
+    private readonly Lazy<IOfferService> _offerService;
+
 
     #endregion
 
@@ -46,6 +48,10 @@ public class ServiceManager : IServiceManager
         _jobPostService = new Lazy<IJobPostService>(
             () => _serviceProvider.GetRequiredService<IJobPostService>()
         );
+
+        _offerService = new Lazy<IOfferService>(
+            () => _serviceProvider.GetRequiredService<IOfferService>()
+        );
     }
     #endregion
 
@@ -56,5 +62,6 @@ public class ServiceManager : IServiceManager
     IWallettService IServiceManager._walletService => _walletService.Value;
 
     public IJobPostService jobPostService => _jobPostService.Value;
+    public IOfferService offerService => _offerService.Value;
     #endregion
 }

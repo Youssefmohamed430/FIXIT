@@ -3,7 +3,7 @@
 public class OfferDTO
 {
     public int Id { get; set; }
-    public Price? Price { get; private set; }
+    public Price? Price { get; set; }
     public string? Description { get; set; }
     public DateTime CreatedAt { get; set; } = EgyptTimeHelper.Now;
     public OfferStatus status { get; set; } = OfferStatus.Pending;

@@ -8,4 +8,5 @@ public interface IServiceManager
     public IWallettService _walletService { get; }
     public IAccountService _accountService { get; }
     public IJobPostService jobPostService { get; }
+    public IOfferService offerService { get; }
 }

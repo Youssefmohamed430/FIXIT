@@ -97,7 +97,7 @@ public class OfferService(IUnitOfWork unitOfWork) : IOfferService
     {
         offerToUpdate.Description = offer.Description ?? offerToUpdate.Description;
         offerToUpdate.status = offer.status;
-        offerToUpdate.Price = offer.Price ?? offerToUpdate.Price;
+        offerToUpdate.Price = Price.Create(Convert.ToDecimal(offer.Price)) ?? offerToUpdate.Price;
     }
 
     public async Task<Result<object>> DeleteOffer(int id)

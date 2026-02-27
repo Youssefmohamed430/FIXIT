@@ -1,4 +1,6 @@
 ﻿
+using ServiceProvider = FIXIT.Domain.Entities.ServiceProvider;
+
 namespace FIXIT.Application.Handlers;
 
 public class ProviderRoleHandler(UserManager<ApplicationUser> userManager, IUnitOfWork unitOfWork, IWallettService walletService, ILogger<CustomerRoleHandler> logger) : IUserRoleHandler

@@ -30,9 +30,25 @@ public static class MapsterConfiguration
             .Ignore(dest => dest.Status);
 
         TypeAdapterConfig<Offer, OfferDTO>
-            .NewConfig()
-            .Map(dest => dest.ProviderName,
-                 src => src.ServiceProvider.User.Name);
+        .NewConfig()
+        .Map(dest => dest.Price,
+             src => src.Price.Amount)
+        .Map(dest => dest.ProviderName,
+             src => src.ServiceProvider.User.Name);
+
+        TypeAdapterConfig<CreateOfferDTO, Offer>
+        .NewConfig()
+        .Map(dest => dest.Price,
+             src => src.Price != null ? Price.Create(src.Price.Value,"EGP") : null)
+        .Ignore(dest => dest.CreatedAt)
+        .Ignore(dest => dest.status)
+        .Ignore(dest => dest.ServiceProvider)
+        .Ignore(dest => dest.JobPost)
+        .Ignore(dest => dest.orders);
+
+        TypeAdapterConfig<decimal, Price>
+        .NewConfig()
+        .MapWith(src => Price.Create(src, "EGP"));
 
         TypeAdapterConfig<ImgPath, string>
             .NewConfig()

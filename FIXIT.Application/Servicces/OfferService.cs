@@ -1,7 +1,4 @@
 ﻿
-using FIXIT.Domain.Entities;
-using System.Xml.Linq;
-
 namespace FIXIT.Application.Servicces;
 
 public class OfferService(IUnitOfWork unitOfWork) : IOfferService
@@ -35,10 +32,10 @@ public class OfferService(IUnitOfWork unitOfWork) : IOfferService
         "Offers.NotFound.Id",
         "No offers found for the given Job Post.");
 
-    public Task<Result<List<OfferDTO>>> GetOffersByPriceRange(Price start, Price end) =>
+    public Task<Result<List<OfferDTO>>> GetOffersByPriceRange(decimal start, decimal end) =>
         GetOffersAsync(
-            o => o.Price.Amount >= start.Amount &&
-                 o.Price.Amount <= end.Amount,
+            o => o.Price.Amount >= start &&
+                 o.Price.Amount <= end,
             "Offers.NotFound.Price",
             "No offers found for the given Price Range.");
 

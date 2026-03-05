@@ -37,14 +37,17 @@ public class AccountService(IUnitOfWork unitOfWork) : IAccountService
 
     private static void HandleUpdatingUser(UserDTO user, ApplicationUser Olduser)
     {
-        Olduser.Name = user.Name! ?? Olduser.Name;
-        Olduser.UserName = user.UserName! ?? Olduser.UserName;
-        Olduser.Email = user.Email! ?? Olduser.Email;
-        Olduser.PhoneNumber = user.Phone! ?? Olduser.PhoneNumber;
-        Olduser.Location = user.Longitude.HasValue && user.Latitude.HasValue
-             ? new NetTopologySuite.Geometries.Point(user.Longitude!.Value, user.Latitude!.Value) { SRID = 4326 }
-             : Olduser.Location;
-        Olduser.Img = user.ImgPath != null ? ImgPath.Create(user.ImgPath) : Olduser.Img;
+        double? longitude = user.Longitude.HasValue ? user.Longitude.Value : Olduser.Location?.X;
+        double? latitude = user.Latitude.HasValue ? user.Latitude.Value : Olduser.Location?.Y;
+       
+        Olduser = new UserBuilder(Olduser)
+            .SetName(user.Name! ?? Olduser.Name)
+            .SetUserName(user.UserName! ?? Olduser.UserName)
+            .SetPhone(user.Phone! ?? Olduser.PhoneNumber)
+            .SetEmail(user.Email! ?? Olduser.Email)
+            .SetLocation(Convert.ToDouble(longitude), Convert.ToDouble(latitude))
+            .SetImg(user.ImgPath != null ? user.ImgPath : Olduser.Img?.Value)
+            .Build();
     }
 
     public async Task<Result<UserDTO>> UploadImg(string Id,IFormFile imgFile)

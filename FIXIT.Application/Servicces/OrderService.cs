@@ -1,6 +1,4 @@
-﻿using FIXIT.Domain.Entities;
-using System.Collections.Generic;
-
+﻿
 namespace FIXIT.Application.Servicces;
 
 public class OrderService(IUnitOfWork unitOfWork) : IOrderService

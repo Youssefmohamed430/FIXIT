@@ -1,8 +1,9 @@
 ﻿
 namespace FIXIT.Domain.Entities;
 
-public enum WorkStatus { InProgress = 1, Completed = 2}
-public enum PaymentStatus {Pending = 1, Paid = 2, Failed = 3, Refunded = 4}
+public enum WorkStatus
+{ Pending = 1,Accepted = 2,InProgress = 3,CompletedByProvider = 4,Completed = 5,RevisionRequested = 6,Cancelled = 7}
+public enum PaymentStatus {Pending = 1,Held = 2, Paid = 3, Failed = 4, Refunded = 5}
 public class Order
 {
     public int Id { get; set; }
@@ -14,7 +15,7 @@ public class Order
     public Price ProviderAmount { get; set; } = Price.Create(0);
     public Price PlatformCommission { get; set; } = Price.Create(0);
     public DateTime CreatedAt { get; set; } = EgyptTimeHelper.Now;
-    public WorkStatus WorkStatus { get; set; } = WorkStatus.InProgress;
+    public WorkStatus WorkStatus { get; set; } = WorkStatus.Pending;
     public PaymentStatus PaymentStatus { get; set; } = PaymentStatus.Pending;
     public bool IsDeleted { get; set; } = false;
     public List<WalletTransaction>? walletTransactions { get; set; }

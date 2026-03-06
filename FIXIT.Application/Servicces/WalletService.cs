@@ -61,9 +61,9 @@ public class WalletService(IUnitOfWork unitOfWork) : IWallettService
 
     private async Task HandleBalanceWallets(decimal Transferedamount, Wallet senderWallet, Wallet recieverWallet)
     {
-        var balance = senderWallet.Balance.Amount;
-        balance -= Transferedamount;
-        senderWallet.Balance = Price.Create(balance);
+        var Senderbalance = senderWallet.Balance.Amount;
+        Senderbalance -= Transferedamount;
+        senderWallet.Balance = Price.Create(Senderbalance);
 
         var recieverBalance = recieverWallet.Balance.Amount;
         recieverBalance += Transferedamount;

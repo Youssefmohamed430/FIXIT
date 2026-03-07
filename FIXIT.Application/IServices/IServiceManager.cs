@@ -9,4 +9,6 @@ public interface IServiceManager
     public IAccountService _accountService { get; }
     public IJobPostService jobPostService { get; }
     public IOfferService offerService { get; }
+    public IOrderService orderService { get; }
+    public IEscrowPaymentService escrowPaymentService { get; }
 }

@@ -1,7 +1,4 @@
-﻿
-using FIXIT.Domain.Abstractions;
-
-namespace FIXIT.Application.Servicces;
+﻿namespace FIXIT.Application.Servicces;
 
 public class EscrowPaymentService(IUnitOfWork unitOfWork,IServiceManager serviceManager) : IEscrowPaymentService
 {
@@ -134,7 +131,6 @@ public class EscrowPaymentService(IUnitOfWork unitOfWork,IServiceManager service
 
         return result;
     }
-
     private static void HandleMoney(Order order)
     {
         var PlatformPercentAmount = order.TotalAmount.Amount * 10 / 100;

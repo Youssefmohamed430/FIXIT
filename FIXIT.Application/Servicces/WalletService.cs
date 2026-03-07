@@ -61,6 +61,9 @@ public class WalletService(IUnitOfWork unitOfWork) : IWallettService
 
     private async Task HandleBalanceWallets(decimal Transferedamount, Wallet senderWallet, Wallet recieverWallet)
     {
+        if(senderWallet.Balance.Amount < Transferedamount)
+            throw new Exception("You does not have enough balance to transfer the specified amount.");
+
         var Senderbalance = senderWallet.Balance.Amount;
         Senderbalance -= Transferedamount;
         senderWallet.Balance = Price.Create(Senderbalance);

@@ -1,32 +1,26 @@
-﻿using Microsoft.Extensions.Configuration;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using FIXIT.Presentation.ServiceRegistration;
 
-namespace FIXIT.Presentation.ServiceRegistration
+namespace Service_Layer.ServiceRegistration;
+
+public static class ServiceExtensions
 {
-    public static class ServiceExtensions
+    public static IServiceCollection AddCoreApplicationServices(this IServiceCollection services, IConfiguration config)
     {
-        public static IServiceCollection AddApplicationServices(this IServiceCollection services, IConfiguration config)
-        {
-            var appsettingsconfig = new ConfigurationBuilder()
-                .AddJsonFile("appsettings.json")
-                .Build();
+        var appsettingsconfig = new ConfigurationBuilder()
+            .AddJsonFile("appsettings.json")
+            .Build();
+        
+        var connectionString = Environment.GetEnvironmentVariable("constr");
 
-            services.AddDataBaseConfiguration(appsettingsconfig);
-            //services.AddAppConfigurations(config);
-            //services.AddSerilogConfigs(appsettingsconfig);
-            //services.AddIdentityService();
-            //services.AddJwtAuthentication(config);
-            //services.AddService();
-            //services.AddCorsPolicy();
-            //services.AddRateLimiter();
-            //services.AddRemainingAppConfigs();
+        services.AddControllerServices();
+        services.AddDatabaseServices(connectionString);
+        services.AddApplicationServices();
+        services.AddJwtAuthentication(config);
+        services.AddCorsServices();
+        services.AddIdentityServices();
+        services.AddLocalizationServices();
 
-
-            return services;
-        }
+        return services;
     }
+
 }

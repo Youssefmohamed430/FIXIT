@@ -1,4 +1,6 @@
 
+using Service_Layer.ServiceRegistration;
+
 var builder = WebApplication.CreateBuilder(args);
 
 Env.Load();
@@ -12,106 +14,12 @@ var connectionString =
 
 builder.Services.AddScoped<HandleCachingResourcesFilter>();
 
-builder.Services.AddControllers(options =>
-{
-    options.Filters.Add<HandleCachingResourcesFilter>();
-})
-    .AddJsonOptions(options =>
-    {
-        options.JsonSerializerOptions.Converters
-            .Add(new JsonStringEnumConverter());
-    });
 
+builder.Services.AddCoreApplicationServices(config);
 
-builder.Services.AddDbContext<AppDbContext>(options =>
-{
-    options.UseSqlServer(connectionString,
-        x => x.UseNetTopologySuite());
-});
-builder.Services.AddTransient<IUnitOfWork, UnitOfWork>();
-builder.Services.AddScoped<IAuthService, AuthService>();
-builder.Services.AddScoped<IWallettService, WalletService>();
-builder.Services.AddScoped<IJobPostService, JobPostService>();
-builder.Services.AddScoped<IOfferService, OfferService>();
-builder.Services.AddScoped<IEmailService, EmailService>();
-builder.Services.AddScoped<IAccountService, AccountService>();
-builder.Services.AddScoped<IServiceManager, ServiceManager>();
-builder.Services.AddScoped<IUserRoleHandler, CustomerRoleHandler>();
-builder.Services.AddScoped<IUserRoleHandler, ProviderRoleHandler>();
-builder.Services.AddScoped<RegisterUserService>();
-builder.Services.AddScoped<JWTService>();
-builder.Services.AddAuthentication(options =>
-{
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-}).AddJwtBearer(o =>
-{
-    o.Authority = "https://accounts.google.com";
-    o.RequireHttpsMetadata = false;
-    o.SaveToken = false;
-    o.TokenValidationParameters = new TokenValidationParameters
-    {
-        ValidateIssuerSigningKey = true,
-        ValidateIssuer = true,
-        ValidateAudience = true,
-        ValidateLifetime = true,
-        ValidIssuer = config["JWT:Issuer"],
-        ValidAudience = config["JWT:Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8
-        .GetBytes(Environment.GetEnvironmentVariable("JWTKey")!)),
-        ClockSkew = TimeSpan.Zero
-    };
-});
-
-builder.Services.AddCors(options =>
-{
-    options.AddDefaultPolicy(policy =>
-    {
-        policy.AllowAnyOrigin()
-              .AllowAnyMethod()
-              .AllowAnyHeader()
-              .WithOrigins("https://localhost:7083")
-              .AllowCredentials();
-    });
-});
-
-builder.Services.AddAuthentication()
-                .AddGoogle(options =>
-                {
-                    options.ClientId = Environment.GetEnvironmentVariable("ClientGoogleId")!;
-                    options.ClientSecret = Environment.GetEnvironmentVariable("ClientGoogleSecret")!;
-                });
 
 builder.Services.AddOpenApi();
 builder.Services.AddMemoryCache();
-
-builder.Services.AddLocalization();
-builder.Services.AddSingleton<IStringLocalizerFactory, JsonStringLocalizerFactory>();
-
-
-builder.Services.Configure<RequestLocalizationOptions>(options =>
-{
-    var supportedCultures = new[]
-    {
-        new CultureInfo("en-US"),
-        new CultureInfo("ar-EG"),
-    };
-
-    options.DefaultRequestCulture = new RequestCulture(culture: supportedCultures[0]);
-    options.SupportedCultures = supportedCultures;
-});
-
-builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
-{
-    options.SignIn.RequireConfirmedAccount = true; 
-    options.Password.RequireDigit = true;
-    options.Password.RequiredLength = 8;
-    options.Password.RequireNonAlphanumeric = false;
-    options.Password.RequireUppercase = true;
-    options.Password.RequireLowercase = true;
-}).AddEntityFrameworkStores<AppDbContext>()
-         .AddDefaultTokenProviders();
-
 builder.Services.RegisterMapsterConfiguration();
 
 

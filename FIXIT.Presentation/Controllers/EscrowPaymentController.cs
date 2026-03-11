@@ -1,5 +1,4 @@
-﻿using FIXIT.Domain.Entities;
-
+﻿
 namespace FIXIT.Presentation.Controllers;
 
 [ApiController]
@@ -8,8 +7,8 @@ public class EscrowPaymentController(IServiceManager serviceManager) : Controlle
 {
     [Authorize(Roles = "Customer")]
     [HttpPost("AcceptOrder/{orderId}")]
-
-    public async Task<IActionResult> AcceptOrder(int orderId)
+    [ServiceFilter(typeof(IdempotencyKeyFilter))]
+    public async Task<IActionResult> AcceptOrder(int orderId, [FromHeader(Name = "Idempotency-Key")] string Key)
     {
         var result = await serviceManager.escrowPaymentService.AcceptOrder(orderId);
         return result.IsSuccess ? Ok(result) : BadRequest(result);

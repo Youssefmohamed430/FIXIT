@@ -1,5 +1,5 @@
 
-using Service_Layer.ServiceRegistration;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,6 +13,7 @@ var connectionString =
     Environment.GetEnvironmentVariable("constr");
 
 builder.Services.AddScoped<HandleCachingResourcesFilter>();
+builder.Services.AddScoped<IdempotencyKeyFilter>();
 
 
 builder.Services.AddCoreApplicationServices(config);

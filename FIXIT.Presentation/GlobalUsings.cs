@@ -18,3 +18,4 @@ global using FIXIT.Domain.Helpers;
 global using FIXIT.Infrastructure;
 global using FIXIT.Domain.Entities;
 global using Microsoft.AspNetCore.Identity;
+global using FIXIT.Presentation.Filters;

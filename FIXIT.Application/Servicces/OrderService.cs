@@ -6,7 +6,7 @@ public class OrderService(IUnitOfWork unitOfWork) : IOrderService
     public async Task<Result<List<OrderDTO>>> GetOrdersByProviderId(string Id)
     {
         var Orders = await unitOfWork.GetRepository<Order>()
-            .FindAllAsync<OrderDTO>(o => o.Offer.ProviderId == Id);
+            .FindAllAsync<OrderDTO>(o => o.Offer.ProviderId == Id,new string[] {"Offer"});
 
         if (Orders == null)
             return Result<List<OrderDTO>>.Failure(new Error("Orders.NotFound.ProviderId", "Orders for this provider not found"));
@@ -16,7 +16,7 @@ public class OrderService(IUnitOfWork unitOfWork) : IOrderService
     public async Task<Result<List<OrderDTO>>> GetOrdersByCustomerId(string Id)
     {
         var Orders = await unitOfWork.GetRepository<Order>()
-                    .FindAllAsync<OrderDTO>(o => o.JobPost.CustomerId == Id);
+                    .FindAllAsync<OrderDTO>(o => o.JobPost.CustomerId == Id,new string[] { "JobPost" });
 
         if (Orders == null)
             return Result<List<OrderDTO>>.Failure(new Error("Orders.NotFound.CustomerId", "Orders for this customer not found"));
@@ -29,7 +29,8 @@ public class OrderService(IUnitOfWork unitOfWork) : IOrderService
         {
             var newOrder = order.Adapt<Order>();
 
-            newOrder.TotalAmount = unitOfWork.GetRepository<Offer>().FindAsync(o => o.Id == order.OfferId).Result.Price;
+            newOrder.TotalAmount = unitOfWork.GetRepository<Offer>()
+                .FindAsync(o => o.Id == order.OfferId).Result.Price;
 
             await unitOfWork.GetRepository<Order>().AddAsync(newOrder);
             await unitOfWork.SaveAsync();

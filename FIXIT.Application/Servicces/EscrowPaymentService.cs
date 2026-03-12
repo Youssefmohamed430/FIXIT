@@ -80,7 +80,9 @@ public class EscrowPaymentService(IUnitOfWork unitOfWork,IServiceManager service
 
     public async Task<Result<OrderDTO>> ChangeWorkOrderStatus(int id, WorkStatus workStatus)
     {
-        var order = await unitOfWork.GetRepository<Order>().FindAsync(o => o.Id == id);
+        var order = await unitOfWork.GetRepository<Order>()
+            .FindAsync(o => o.Id == id,
+            new string[] { "Offer.ServiceProvider.User.Wallet" });
 
         Result<OrderDTO> result = Result<OrderDTO>.Success(order.Adapt<OrderDTO>());
 
@@ -98,6 +100,8 @@ public class EscrowPaymentService(IUnitOfWork unitOfWork,IServiceManager service
 
             await unitOfWork.GetRepository<Order>().UpdateAsync(order);
             await unitOfWork.SaveAsync();
+
+            result = Result<OrderDTO>.Success(order.Adapt<OrderDTO>());
 
             return result;
         }

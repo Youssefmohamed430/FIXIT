@@ -15,7 +15,7 @@ public class EscrowPaymentController(IServiceManager serviceManager) : Controlle
     }
 
     [Authorize(Roles = "Customer")]
-    [HttpPost("CancelOrder/{orderId}")]
+    [HttpPut("CancelOrder/{orderId}")]
     public async Task<IActionResult> CancelOrder(int orderId)
     {
         var result = await serviceManager.escrowPaymentService.CancelOrder(orderId);
@@ -23,7 +23,7 @@ public class EscrowPaymentController(IServiceManager serviceManager) : Controlle
     }
 
     [Authorize]
-    [HttpPost("ChangeWorkOrderStatus/{orderId}/{newStatus}")]
+    [HttpPut("ChangeWorkOrderStatus/{orderId}/{newStatus}")]
     public async Task<IActionResult> ChangeWorkOrderStatus(int orderId,WorkStatus newStatus)
     {
         var result = await serviceManager.escrowPaymentService.ChangeWorkOrderStatus(orderId, newStatus);

@@ -4,6 +4,6 @@ public interface IOrderService
 {
     Task<Result<List<OrderDTO>>> GetOrdersByProviderId(string Id);
     Task<Result<List<OrderDTO>>> GetOrdersByCustomerId(string Id);
-    Task<Result<OrderDTO>> CreateOrder(OrderDTO order);
+    Task<Result<CreateOrderDTO>> CreateOrder(CreateOrderDTO order);
     Task<Result<Object>> DeleteOrder(int id);
 }

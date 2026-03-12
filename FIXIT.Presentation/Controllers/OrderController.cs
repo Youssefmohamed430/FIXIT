@@ -24,7 +24,7 @@ public class OrderController(IServiceManager serviceManager) : ControllerBase
 
     [Authorize(Roles = "Customer")]
     [HttpPost]
-    public async Task<IActionResult> CreateOrder([FromBody] OrderDTO order)
+    public async Task<IActionResult> CreateOrder([FromBody] CreateOrderDTO order)
     {
         var result = await serviceManager.orderService.CreateOrder(order);
         return result.IsSuccess ? Ok(result) : BadRequest(result);
@@ -32,7 +32,7 @@ public class OrderController(IServiceManager serviceManager) : ControllerBase
 
     [Authorize(Roles = "Customer")]
     [HttpDelete("{id}")]
-    public async Task<IActionResult> CancelOrder(int id)
+    public async Task<IActionResult> DeleteOrder(int id)
     {
         var result = await serviceManager.orderService.DeleteOrder(id);
         return result.IsSuccess ? Ok(result) : BadRequest(result);

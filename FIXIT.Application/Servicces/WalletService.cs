@@ -33,7 +33,7 @@ public class WalletService(IUnitOfWork unitOfWork) : IWallettService
         return Result<WalletDTO>.Success(wallet.Adapt<WalletDTO>());
     }
 
-    public async Task<Result<WalletDTO>> TransferMoney(int WalletSenderId, int WalletRecieverId,decimal Transferedamount)
+    public async Task<Result<WalletDTO>> TransferMoney(int orderid,int WalletSenderId, int WalletRecieverId,decimal Transferedamount)
     {
         try
         {
@@ -42,7 +42,7 @@ public class WalletService(IUnitOfWork unitOfWork) : IWallettService
             var senderWallet = await unitOfWork.GetRepository<Wallet>().FindAsync(w => w.Id == WalletSenderId);
             var recieverWallet = await unitOfWork.GetRepository<Wallet>().FindAsync(w => w.Id == WalletRecieverId);
             
-            await HandleBalanceWallets(Transferedamount, senderWallet, recieverWallet);
+            await HandleBalanceWallets(Transferedamount,orderid, senderWallet, recieverWallet);
 
             await unitOfWork.GetRepository<Wallet>().UpdateAsync(senderWallet);
             await unitOfWork.GetRepository<Wallet>().UpdateAsync(recieverWallet);
@@ -59,7 +59,7 @@ public class WalletService(IUnitOfWork unitOfWork) : IWallettService
         }
     }
 
-    private async Task HandleBalanceWallets(decimal Transferedamount, Wallet senderWallet, Wallet recieverWallet)
+    private async Task HandleBalanceWallets(decimal Transferedamount,int orderid, Wallet senderWallet, Wallet recieverWallet)
     {
         if(senderWallet.Balance.Amount < Transferedamount)
             throw new Exception("You does not have enough balance to transfer the specified amount.");
@@ -72,16 +72,17 @@ public class WalletService(IUnitOfWork unitOfWork) : IWallettService
         recieverBalance += Transferedamount;
         recieverWallet.Balance = Price.Create(recieverBalance);
 
-        await CreateTransactions(Transferedamount, senderWallet, recieverWallet);
+        await CreateTransactions(Transferedamount,orderid, senderWallet, recieverWallet);
     }
 
-    private async Task CreateTransactions(decimal Transferedamount, Wallet senderWallet, Wallet recieverWallet)
+    private async Task CreateTransactions(decimal Transferedamount,int orderid, Wallet senderWallet, Wallet recieverWallet)
     {
         var Sendertransaction = new WalletTransaction
         {
             Amount = Price.Create(Transferedamount),
             Type = TransactionType.Depit,
             WalletId = senderWallet.Id,
+            OrderId = orderid
         };
 
         var Recievertransaction = new WalletTransaction
@@ -89,6 +90,7 @@ public class WalletService(IUnitOfWork unitOfWork) : IWallettService
             Amount = Price.Create(Transferedamount),
             Type = TransactionType.Credit,
             WalletId = recieverWallet.Id,
+            OrderId = orderid
         };
 
         await unitOfWork.GetRepository<WalletTransaction>().AddAsync(Sendertransaction);

@@ -23,25 +23,22 @@ public class OrderService(IUnitOfWork unitOfWork) : IOrderService
 
         return Result<List<OrderDTO>>.Success(Orders.ToList());
     }
-    public async Task<Result<OrderDTO>> CreateOrder(OrderDTO order)
+    public async Task<Result<CreateOrderDTO>> CreateOrder(CreateOrderDTO order)
     {
         try
         {
-            var newOrder = new Order
-            {
-                JobPostId = order.JobPostId,
-                OfferId = order.OfferId,
-                TotalAmount = order.TotalAmount
-            };
+            var newOrder = order.Adapt<Order>();
+
+            newOrder.TotalAmount = unitOfWork.GetRepository<Offer>().FindAsync(o => o.Id == order.OfferId).Result.Price;
 
             await unitOfWork.GetRepository<Order>().AddAsync(newOrder);
             await unitOfWork.SaveAsync();
 
-            return Result<OrderDTO>.Success(order);
+            return Result<CreateOrderDTO>.Success(order);
         }
         catch (Exception ex)
         {
-            return Result<OrderDTO>.Failure(new Error("Orders.CreateFailed", $"Failed to create order: {ex.Message}"));
+            return Result<CreateOrderDTO>.Failure(new Error("Orders.CreateFailed", $"Failed to create order: {ex.Message}"));
         }
     }
 

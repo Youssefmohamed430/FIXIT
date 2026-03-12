@@ -2,6 +2,7 @@
 
 public class EscrowPaymentService(IUnitOfWork unitOfWork,IServiceManager serviceManager) : IEscrowPaymentService
 {
+    private const int PlatformWalletId = 4;
     public async Task<Result<OrderDTO>> AcceptOrder(int orderId)
     {
         var order = await unitOfWork.GetRepository<Order>()
@@ -14,9 +15,8 @@ public class EscrowPaymentService(IUnitOfWork unitOfWork,IServiceManager service
                 return Result<OrderDTO>.Failure(new Error("Order.NotFound", "Order not found"));
 
             var customerWalletId = order!.JobPost!.Customer!.User!.Wallet!.Id;
-            var PlatformWalletId = 1;
             var TransferResult = await serviceManager._walletService
-                .TransferMoney(customerWalletId, PlatformWalletId, order.TotalAmount.Amount);
+                .TransferMoney(order.Id,customerWalletId, PlatformWalletId, order.TotalAmount.Amount);
 
             if (!TransferResult.IsSuccess)
             {
@@ -51,9 +51,8 @@ public class EscrowPaymentService(IUnitOfWork unitOfWork,IServiceManager service
                 return Result<OrderDTO>.Failure(new Error("Order.NotFound", "Order not found"));
 
             var customerWalletId = order!.JobPost!.Customer!.User!.Wallet!.Id;
-            var PlatformWalletId = 1;
             var TransferResult = await serviceManager._walletService
-                .TransferMoney(PlatformWalletId, customerWalletId, order.TotalAmount.Amount);
+                .TransferMoney(order.Id, customerWalletId, customerWalletId, order.TotalAmount.Amount);
 
             if (!TransferResult.IsSuccess)
             {
@@ -111,12 +110,11 @@ public class EscrowPaymentService(IUnitOfWork unitOfWork,IServiceManager service
     private async Task<Result<OrderDTO>> HandleCompletedOrder(Order order, Result<OrderDTO> result)
     {
         var providerWalletId = order.Offer!.ServiceProvider!.User!.Wallet!.Id;
-        var PlatformWalletId = 1;
 
         HandleMoney(order);
 
         var TransferResult = await serviceManager._walletService
-            .TransferMoney(PlatformWalletId, providerWalletId, order.ProviderAmount.Amount);
+            .TransferMoney(order.Id,PlatformWalletId, providerWalletId, order.ProviderAmount.Amount);
 
         if (!TransferResult.IsSuccess)
         {

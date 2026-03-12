@@ -29,6 +29,33 @@ public static class MapsterConfiguration
             .Ignore(dest => dest.CreatedAt)
             .Ignore(dest => dest.Status);
 
+        TypeAdapterConfig<CreateOrderDTO, Order>
+            .NewConfig()
+            .Ignore(dest => dest.CreatedAt)
+            .Ignore(dest => dest.PaymentStatus)
+            .Ignore(dest => dest.WorkStatus)
+            .Ignore(dest => dest.PlatformCommission)
+            .Ignore(dest => dest.ProviderAmount)
+            .Ignore(dest => dest.TotalAmount);
+
+        TypeAdapterConfig<Order, OrderDTO>
+        .NewConfig()
+        .Map(dest => dest.TotalAmount,
+             src => src.TotalAmount.Amount)
+        .Map(dest => dest.ProviderAmount,
+             src => src.ProviderAmount.Amount)
+        .Map(dest => dest.PlatformCommission,
+             src => src.PlatformCommission.Amount);
+
+        TypeAdapterConfig<OrderDTO, Order>
+        .NewConfig()
+        .Map(dest => dest.TotalAmount.Amount,
+             src => src.TotalAmount)
+        .Map(dest => dest.ProviderAmount.Amount,
+             src => src.ProviderAmount)
+        .Map(dest => dest.PlatformCommission.Amount,
+             src => src.PlatformCommission);
+
         TypeAdapterConfig<Offer, OfferDTO>
         .NewConfig()
         .Map(dest => dest.Price,

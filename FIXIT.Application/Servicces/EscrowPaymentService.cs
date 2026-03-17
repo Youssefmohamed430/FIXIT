@@ -22,12 +22,15 @@ public class EscrowPaymentService(IUnitOfWork unitOfWork,IServiceManager service
             {
                 order.PaymentStatus = PaymentStatus.Failed;
                 result = Result<OrderDTO>.Failure(new Error("Payment.Failed", "Failed to transfer money to escrow"));
+                await SendNotificcationToCustomer(order.JobPostId, "Your order payment failed. Please try again.");
             }
             else
             {
                 order.WorkStatus = WorkStatus.Accepted;
                 order.PaymentStatus = PaymentStatus.Held;
                 result = Result<OrderDTO>.Success(order.Adapt<OrderDTO>());
+                await SendNotificcationToCustomer(order.JobPostId, "Your order has been accepted and payment is held in escrow.");
+                await SendNotificationToProvider(order.OfferId, "You have accepted an order. Please start working on it.");
             }
             await unitOfWork.GetRepository<Order>().UpdateAsync(order);
             await unitOfWork.SaveAsync();
@@ -57,13 +60,16 @@ public class EscrowPaymentService(IUnitOfWork unitOfWork,IServiceManager service
             if (!TransferResult.IsSuccess)
             {
                 order.PaymentStatus = PaymentStatus.Failed;
-                result = Result<OrderDTO>.Failure(new Error("Payment.Failed", "Failed to transfer money to escrow"));
+                result = Result<OrderDTO>.Failure(new Error("Payment.Failed", "Failed to transfer money from escrow"));
+                await SendNotificcationToCustomer(order.JobPostId, "Your order cancellation failed. Please Try again.");  
             }
             else
             {
                 order.WorkStatus = WorkStatus.Cancelled;
                 order.PaymentStatus = PaymentStatus.Refunded;
                 result = Result<OrderDTO>.Success(order.Adapt<OrderDTO>());
+                await SendNotificcationToCustomer(order.JobPostId, "Your order has been cancelled and payment is refunded.");
+                await SendNotificationToProvider(order.OfferId, "An order has been cancelled. The payment is refunded to the customer.");
             }
 
             await unitOfWork.GetRepository<Order>().UpdateAsync(order);
@@ -90,7 +96,8 @@ public class EscrowPaymentService(IUnitOfWork unitOfWork,IServiceManager service
             return Result<OrderDTO>.Failure(new Error("Order.NotFound", "Order not found"));
 
         order!.WorkStatus = workStatus;
-
+        await SendNotificcationToCustomer(order.JobPostId, $"The work status of your order has been changed to {workStatus}.");
+        await SendNotificationToProvider(order.OfferId, $"The work status of the order you are working on has been changed to {workStatus}.");
         try
         {
             if(workStatus == WorkStatus.Completed)
@@ -100,6 +107,9 @@ public class EscrowPaymentService(IUnitOfWork unitOfWork,IServiceManager service
 
             await unitOfWork.GetRepository<Order>().UpdateAsync(order);
             await unitOfWork.SaveAsync();
+
+            await SendNotificcationToCustomer(order.JobPostId, $"The payment to provider is paid.");
+            await SendNotificationToProvider(order.OfferId, $"The payment for the order you completed has been paid to your wallet.");
 
             result = Result<OrderDTO>.Success(order.Adapt<OrderDTO>());
 
@@ -139,5 +149,30 @@ public class EscrowPaymentService(IUnitOfWork unitOfWork,IServiceManager service
         var ProviderAmount = order.TotalAmount.Amount - PlatformPercentAmount;
         order.ProviderAmount = Price.Create(ProviderAmount);
         order.PlatformCommission = Price.Create(PlatformPercentAmount);
+    }
+
+    private async Task SendNotificcationToCustomer(int jobpostid, string msg)
+    {
+        var customerId = unitOfWork.GetRepository<JobPost>()
+                        .FindAsync(j => j.Id == jobpostid).Result.CustomerId;
+
+
+        await serviceManager.notifService.CreateNotif(new NotifDTO
+        {
+            UserId = customerId,
+            Message = msg
+        });
+    }
+
+    private async Task SendNotificationToProvider(int offerid, string msg)
+    {
+        var providerId = unitOfWork.GetRepository<Offer>()
+            .FindAsync(o => o.Id == offerid).Result.ProviderId;
+
+        await serviceManager.notifService.CreateNotif(new NotifDTO
+        {
+            UserId = providerId,
+            Message = msg
+        });
     }
 }

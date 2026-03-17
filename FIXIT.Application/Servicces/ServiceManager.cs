@@ -17,6 +17,7 @@ public class ServiceManager : IServiceManager
     private readonly Lazy<IOfferService> _offerService;
     private readonly Lazy<IOrderService> _orderService;
     private readonly Lazy<IEscrowPaymentService> _escrowPaymentService;
+    private readonly Lazy<INotifService> _notifService;
 
 
     #endregion
@@ -61,6 +62,9 @@ public class ServiceManager : IServiceManager
         _escrowPaymentService = new Lazy<IEscrowPaymentService>(
             () => _serviceProvider.GetRequiredService<IEscrowPaymentService>()
         );
+        _notifService = new Lazy<INotifService>(
+            () => _serviceProvider.GetRequiredService<INotifService>()
+        );
     }
     #endregion
 
@@ -74,5 +78,6 @@ public class ServiceManager : IServiceManager
     public IOfferService offerService => _offerService.Value;
     public IOrderService orderService => _orderService.Value;
     public IEscrowPaymentService escrowPaymentService => _escrowPaymentService.Value;
+    public INotifService notifService => _notifService.Value;
     #endregion
 }

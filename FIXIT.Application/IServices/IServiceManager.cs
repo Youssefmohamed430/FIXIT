@@ -11,4 +11,5 @@ public interface IServiceManager
     public IOfferService offerService { get; }
     public IOrderService orderService { get; }
     public IEscrowPaymentService escrowPaymentService { get; }
+    public INotifService notifService { get; }
 }

@@ -1,7 +1,9 @@
 ﻿
+using FIXIT.Domain.Entities;
+
 namespace FIXIT.Application.Servicces;
 
-public class OfferService(IUnitOfWork unitOfWork) : IOfferService
+public class OfferService(IUnitOfWork unitOfWork,IServiceManager serviceManager) : IOfferService
 {
     #region Gets Offers
 
@@ -62,6 +64,8 @@ public class OfferService(IUnitOfWork unitOfWork) : IOfferService
 
             await unitOfWork.SaveAsync();
 
+            await SendNotification(offer.JobPostId,$"New Offer Has been added to your jobPost with price {offer.Price}.");
+
             return Result<OfferDTO>.Success(Newoffer.Adapt<OfferDTO>());
         }
         catch (Exception ex)
@@ -70,6 +74,18 @@ public class OfferService(IUnitOfWork unitOfWork) : IOfferService
                 new Error("Offers.CreateFailed", $"Failed to create offer: {ex.Message}"));
         }
     }
+
+    private async Task SendNotification(int jobpostid,string msg)
+    {
+        JobPost jobPost = unitOfWork.GetRepository<JobPost>().Find(j => j.Id == jobpostid);
+
+        await serviceManager.notifService.CreateNotif(new NotifDTO
+        {
+            UserId = jobPost.CustomerId,
+            Message = msg,
+        });
+    }
+
     public async Task<Result<OfferDTO>> UpdateOffer(OfferDTO offer,int offerId)
     {
         var offerToUpdate = unitOfWork.GetRepository<Offer>().Find(o => o.Id == offerId);
@@ -84,6 +100,9 @@ public class OfferService(IUnitOfWork unitOfWork) : IOfferService
         {
             await unitOfWork.GetRepository<Offer>().UpdateAsync(offerToUpdate);
             await unitOfWork.SaveAsync();
+
+            await SendNotification(offer.JobPostId, "An offer on your job post has been updated.");
+
             return Result<OfferDTO>.Success(offerToUpdate.Adapt<OfferDTO>());
         }
         catch (Exception ex)
@@ -114,6 +133,9 @@ public class OfferService(IUnitOfWork unitOfWork) : IOfferService
         {
             await unitOfWork.GetRepository<Offer>().UpdateAsync(offerToDelete);
             await unitOfWork.SaveAsync();
+
+            await SendNotification(offerToDelete.JobPostId, "An offer on your job post has been deleted.");
+
             return Result<object>.Success(null);
         }
         catch (Exception ex)

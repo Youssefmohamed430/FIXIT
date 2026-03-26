@@ -1,7 +1,7 @@
 ﻿
 namespace FIXIT.Application.Servicces;
 
-public class JobPostService(IUnitOfWork unitOfWork) : IJobPostService
+public class JobPostService(IUnitOfWork unitOfWork,ILogger<JobPostService> logger) : IJobPostService
 {
     #region Get Posts
 
@@ -65,6 +65,7 @@ public class JobPostService(IUnitOfWork unitOfWork) : IJobPostService
         await SaveImgs(jobPostDTO, jobPost);
 
         var resultDTO = jobPost.Adapt<JobPostDTO>();
+        logger.LogInformation("JobPost created successfully with ID: {JobPostId}", jobPost.Id);
 
         return Result<JobPostDTO>.Success(resultDTO);
     }
@@ -107,7 +108,10 @@ public class JobPostService(IUnitOfWork unitOfWork) : IJobPostService
         var post = await unitOfWork.GetRepository<JobPost>().FindAsync(p => p.Id == id);
 
         if (post is null)
-             return Result<Object>.Failure(new Error("Posts.NotFound.Id", "No post found for the given ID."));
+        {
+            logger.LogWarning("Attempted to update JobPost with ID: {JobPostId}, but it was not found", id);
+            return Result<Object>.Failure(new Error("Posts.NotFound.Id", "No post found for the given ID."));
+        }
 
         post.Description = jobPostDTO.Description ?? post.Description;
         post.ServiceType = jobPostDTO.ServiceType ?? post.ServiceType;
@@ -116,6 +120,7 @@ public class JobPostService(IUnitOfWork unitOfWork) : IJobPostService
         await unitOfWork.SaveAsync();
 
         var resultDTO = post.Adapt<JobPostDTO>();
+        logger.LogInformation("JobPost with ID: {JobPostId} updated successfully", post.Id);
 
         return Result<Object>.Success(null!);
     }
@@ -125,13 +130,16 @@ public class JobPostService(IUnitOfWork unitOfWork) : IJobPostService
         var post = await unitOfWork.GetRepository<JobPost>().FindAsync(p => p.Id == id);
 
         if (post is null)
+        {
+            logger.LogWarning("Attempted to delete JobPost with ID: {JobPostId}, but it was not found", id);
             return Result<Object>.Failure(new Error("Posts.NotFound.Id", "No post found for the given ID."));
+        }
         
         post.IsDeleted = true;
 
         await unitOfWork.GetRepository<JobPost>().UpdateAsync(post);
         await unitOfWork.SaveAsync();
-
+        logger.LogInformation("JobPost with ID: {JobPostId} deleted successfully", post.Id);
         return Result<Object>.Success(null!);
     }
     #endregion

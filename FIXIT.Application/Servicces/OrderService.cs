@@ -1,7 +1,7 @@
 ﻿
 namespace FIXIT.Application.Servicces;
 
-public class OrderService(IUnitOfWork unitOfWork,IServiceManager serviceManager) : IOrderService
+public class OrderService(IUnitOfWork unitOfWork,IServiceManager serviceManager,ILogger<OrderService> logger) : IOrderService
 {
     #region Get Orders
     public async Task<Result<List<OrderDTO>>> GetOrdersByProviderId(string Id)
@@ -36,10 +36,13 @@ public class OrderService(IUnitOfWork unitOfWork,IServiceManager serviceManager)
 
             newOrder.TotalAmount = unitOfWork.GetRepository<Offer>()
                 .FindAsync(o => o.Id == order.OfferId).Result.Price;
+            
 
             await SendNotificcationToCustomer(order.JobPostId, $"Your order has been created.");
 
             await SendNotificationToProvider(order.OfferId, $"A new order has been created for your offer with price.");
+
+            logger.LogInformation("Creating order for JobPostId: {JobPostId} and OfferId: {OfferId}", order.JobPostId, order.OfferId);
 
             await unitOfWork.GetRepository<Order>().AddAsync(newOrder);
             await unitOfWork.SaveAsync();
@@ -48,6 +51,7 @@ public class OrderService(IUnitOfWork unitOfWork,IServiceManager serviceManager)
         }
         catch (Exception ex)
         {
+            logger.LogError(ex, "Failed to create order for JobPostId: {JobPostId} and OfferId: {OfferId}", order.JobPostId, order.OfferId);
             return Result<CreateOrderDTO>.Failure(new Error("Orders.CreateFailed", $"Failed to create order: {ex.Message}"));
         }
     }
@@ -83,7 +87,10 @@ public class OrderService(IUnitOfWork unitOfWork,IServiceManager serviceManager)
             .FindAsync(o => o.Id == id,new string[] {"JobPost.Customer.User"});
 
         if (order == null)
+        {
+            logger.LogWarning("Attempted to delete order with Id: {OrderId}, but it was not found", id);
             return Result<object>.Failure(new Error("Order.NotFound","Order not found"));
+        }
 
         order.IsDeleted = true;
 
@@ -92,7 +99,7 @@ public class OrderService(IUnitOfWork unitOfWork,IServiceManager serviceManager)
 
         await SendNotificcationToCustomer(order.JobPostId, "The request was successfully deleted");
         await SendNotificationToProvider(order.OfferId, $"Your request to view your post on {order.JobPost.Customer.User.Name}'s page has been deleted.");
-
+        logger.LogInformation("Deleted order with Id: {OrderId}", id);
         return Result<object>.Success(order);
     }
     #endregion

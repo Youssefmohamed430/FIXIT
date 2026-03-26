@@ -1,7 +1,7 @@
 ﻿
 namespace FIXIT.Application.Servicces;
 
-public class AccountService(IUnitOfWork unitOfWork) : IAccountService
+public class AccountService(IUnitOfWork unitOfWork,ILogger<AccountService> logger) : IAccountService
 {
     public async Task<Result<UserDTO>> GetImg(string Id)
     {
@@ -35,22 +35,29 @@ public class AccountService(IUnitOfWork unitOfWork) : IAccountService
         return Result<UserDTO>.Success(user);
     }
 
-    private static void HandleUpdatingUser(UserDTO user, ApplicationUser Olduser)
+    private void HandleUpdatingUser(UserDTO user, ApplicationUser Olduser)
     {
-        double? longitude = user.Longitude.HasValue ? user.Longitude.Value : Olduser.Location?.X;
-        double? latitude = user.Latitude.HasValue ? user.Latitude.Value : Olduser.Location?.Y;
-       
-        Olduser = new UserBuilder(Olduser)
-            .SetName(user.Name! ?? Olduser.Name)
-            .SetUserName(user.UserName! ?? Olduser.UserName)
-            .SetPhone(user.Phone! ?? Olduser.PhoneNumber)
-            .SetEmail(user.Email! ?? Olduser.Email)
-            .SetLocation(Convert.ToDouble(longitude), Convert.ToDouble(latitude))
-            .SetImg(user.ImgPath != null ? user.ImgPath : Olduser.Img?.Value)
-            .Build();
+        try
+        {
+            double? longitude = user.Longitude.HasValue ? user.Longitude.Value : Olduser.Location?.X;
+            double? latitude = user.Latitude.HasValue ? user.Latitude.Value : Olduser.Location?.Y;
+
+            Olduser = new UserBuilder(Olduser)
+                .SetName(user.Name! ?? Olduser.Name)
+                .SetUserName(user.UserName! ?? Olduser.UserName)
+                .SetPhone(user.Phone! ?? Olduser.PhoneNumber)
+                .SetEmail(user.Email! ?? Olduser.Email)
+                .SetLocation(Convert.ToDouble(longitude), Convert.ToDouble(latitude))
+                .SetImg(user.ImgPath != null ? user.ImgPath : Olduser.Img?.Value)
+                .Build();
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error updating user information for user with ID {UserId}", Olduser.Id);
+        }
     }
 
-    public async Task<Result<UserDTO>> UploadImg(string Id,IFormFile imgFile)
+    public async Task<Result<UserDTO>> UploadImg(string Id, IFormFile imgFile)
     {
         var user = await unitOfWork.GetRepository<ApplicationUser>().FindAsync(u => u.Id == Id);
 

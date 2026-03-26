@@ -1,10 +1,7 @@
 ﻿
-using System.Security.AccessControl;
-using System.Threading.Tasks;
-
 namespace FIXIT.Application.Servicces;
 
-public class WalletService(IUnitOfWork unitOfWork) : IWallettService
+public class WalletService(IUnitOfWork unitOfWork,ILogger<WalletService> logger) : IWallettService
 {
     public async Task<Result<WalletDTO>> CreateWalletForUser(WalletDTO walletDTO)
     {
@@ -20,6 +17,7 @@ public class WalletService(IUnitOfWork unitOfWork) : IWallettService
         }
         catch (Exception ex)
         {
+            logger.LogError(ex, "Failed to create wallet for user {UserId}", walletDTO.UserId);
             return Result<WalletDTO>.Failure(new Error("Wallet.WalletCreationFailed", ex.Message) );
         }
     }
@@ -39,6 +37,7 @@ public class WalletService(IUnitOfWork unitOfWork) : IWallettService
         {
             unitOfWork.BeginTransaction();
 
+            logger.LogInformation("Initiating transfer of {Amount} from wallet {SenderWalletId} to wallet {RecieverWalletId} for order {OrderId}", Transferedamount, WalletSenderId, WalletRecieverId, orderid);
             var senderWallet = await unitOfWork.GetRepository<Wallet>().FindAsync(w => w.Id == WalletSenderId);
             var recieverWallet = await unitOfWork.GetRepository<Wallet>().FindAsync(w => w.Id == WalletRecieverId);
             
@@ -55,6 +54,7 @@ public class WalletService(IUnitOfWork unitOfWork) : IWallettService
         catch (Exception ex)
         {
             unitOfWork.Rollback();
+            logger.LogError(ex, "Failed to transfer money from wallet {SenderWalletId} to wallet {RecieverWalletId} for order {OrderId}", WalletSenderId, WalletRecieverId, orderid);
             return Result<WalletDTO>.Failure(new Error("Wallet.TransferFailed", ex.Message));
         }
     }
@@ -62,7 +62,10 @@ public class WalletService(IUnitOfWork unitOfWork) : IWallettService
     private async Task HandleBalanceWallets(decimal Transferedamount,int orderid, Wallet senderWallet, Wallet recieverWallet)
     {
         if(senderWallet.Balance.Amount < Transferedamount)
+        {
+            logger.LogWarning("Transfer failed due to insufficient balance. Sender Wallet ID: {SenderWalletId}, Available Balance: {AvailableBalance}, Attempted Transfer Amount: {TransferAmount}", senderWallet.Id, senderWallet.Balance.Amount, Transferedamount);
             throw new Exception("You does not have enough balance to transfer the specified amount.");
+        }
 
         var Senderbalance = senderWallet.Balance.Amount;
         Senderbalance -= Transferedamount;

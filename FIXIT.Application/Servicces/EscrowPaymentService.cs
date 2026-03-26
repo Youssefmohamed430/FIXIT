@@ -1,6 +1,6 @@
 ﻿namespace FIXIT.Application.Servicces;
 
-public class EscrowPaymentService(IUnitOfWork unitOfWork,IServiceManager serviceManager) : IEscrowPaymentService
+public class EscrowPaymentService(IUnitOfWork unitOfWork,IServiceManager serviceManager,ILogger<EscrowPaymentService> logger) : IEscrowPaymentService
 {
     private const int PlatformWalletId = 1;
     public async Task<Result<OrderDTO>> AcceptOrder(int orderId)
@@ -12,7 +12,10 @@ public class EscrowPaymentService(IUnitOfWork unitOfWork,IServiceManager service
         try
         {
             if (order is null)
+            {
+                logger.LogWarning("Attempt to accept order with id {OrderId} failed because the order was not found.", orderId);
                 return Result<OrderDTO>.Failure(new Error("Order.NotFound", "Order not found"));
+            }
 
             var customerWalletId = order!.JobPost!.Customer!.User!.Wallet!.Id;
             var TransferResult = await serviceManager._walletService
@@ -20,12 +23,14 @@ public class EscrowPaymentService(IUnitOfWork unitOfWork,IServiceManager service
 
             if (!TransferResult.IsSuccess)
             {
+                logger.LogError("Failed to transfer money to escrow for order id {OrderId}. Error: {ErrorMessage}", orderId, TransferResult.Error.Descriprion);
                 order.PaymentStatus = PaymentStatus.Failed;
                 result = Result<OrderDTO>.Failure(new Error("Payment.Failed", "Failed to transfer money to escrow"));
                 await SendNotificcationToCustomer(order.JobPostId, "Your order payment failed. Please try again.");
             }
             else
             {
+                logger.LogInformation("Order id {OrderId} accepted successfully. Money transferred to escrow.", orderId);
                 order.WorkStatus = WorkStatus.Accepted;
                 order.PaymentStatus = PaymentStatus.Held;
                 result = Result<OrderDTO>.Success(order.Adapt<OrderDTO>());
@@ -39,6 +44,7 @@ public class EscrowPaymentService(IUnitOfWork unitOfWork,IServiceManager service
         }
         catch (Exception ex)
         {
+            logger.LogError(ex, "An error occurred while accepting order with id {OrderId}.", orderId);
             return Result<OrderDTO>.Failure(new Error("Order.AcceptedFailed", ex.Message));
         }
     }
@@ -59,12 +65,14 @@ public class EscrowPaymentService(IUnitOfWork unitOfWork,IServiceManager service
 
             if (!TransferResult.IsSuccess)
             {
+                logger.LogError("Failed to transfer money back to customer for order id {OrderId}. Error: {ErrorMessage}", orderId, TransferResult.Error.Descriprion);
                 order.PaymentStatus = PaymentStatus.Failed;
                 result = Result<OrderDTO>.Failure(new Error("Payment.Failed", "Failed to transfer money from escrow"));
                 await SendNotificcationToCustomer(order.JobPostId, "Your order cancellation failed. Please Try again.");  
             }
             else
             {
+                logger.LogInformation("Order id {OrderId} cancelled successfully. Money transferred back to customer.", orderId);
                 order.WorkStatus = WorkStatus.Cancelled;
                 order.PaymentStatus = PaymentStatus.Refunded;
                 result = Result<OrderDTO>.Success(order.Adapt<OrderDTO>());
@@ -79,6 +87,7 @@ public class EscrowPaymentService(IUnitOfWork unitOfWork,IServiceManager service
         }
         catch (Exception ex)
         {
+            logger.LogError(ex, "An error occurred while cancelling order with id {OrderId}.", orderId);
             return Result<OrderDTO>.Failure(new Error("Order.CancelFailed", ex.Message));
         }
     }
@@ -102,6 +111,7 @@ public class EscrowPaymentService(IUnitOfWork unitOfWork,IServiceManager service
         {
             if(workStatus == WorkStatus.Completed)
             {
+                logger.LogInformation("Order id {OrderId} marked as completed. Processing payment to provider.", id);
                 result = await HandleCompletedOrder(order, result);
             }
 
@@ -117,6 +127,7 @@ public class EscrowPaymentService(IUnitOfWork unitOfWork,IServiceManager service
         }
         catch (Exception ex)
         {
+            logger.LogError(ex, "An error occurred while changing work status for order with id {OrderId}.", id);
             return Result<OrderDTO>.Failure(new Error("Order.UpdateFailed", ex.Message));
         }
     }
@@ -132,11 +143,13 @@ public class EscrowPaymentService(IUnitOfWork unitOfWork,IServiceManager service
 
         if (!TransferResult.IsSuccess)
         {
+            logger.LogError("Failed to transfer money to provider for order id {OrderId}. Error: {ErrorMessage}", order.Id, TransferResult.Error.Descriprion);
             order.PaymentStatus = PaymentStatus.Failed;
             result = Result<OrderDTO>.Failure(new Error("Payment.Failed", "Failed to transfer money to provider"));
         }
         else
         {
+            logger.LogInformation("Money transferred to provider for order id {OrderId}.", order.Id);
             order.PaymentStatus = PaymentStatus.Paid;
             result = Result<OrderDTO>.Success(order.Adapt<OrderDTO>());
         }

@@ -3,7 +3,7 @@ using FIXIT.Domain.Entities;
 
 namespace FIXIT.Application.Servicces;
 
-public class OfferService(IUnitOfWork unitOfWork,IServiceManager serviceManager) : IOfferService
+public class OfferService(IUnitOfWork unitOfWork,IServiceManager serviceManager,ILogger<OfferService> logger) : IOfferService
 {
     #region Gets Offers
 
@@ -66,10 +66,13 @@ public class OfferService(IUnitOfWork unitOfWork,IServiceManager serviceManager)
 
             await SendNotification(offer.JobPostId,$"New Offer Has been added to your jobPost with price {offer.Price}.");
 
+            logger.LogInformation("Offer created successfully with ID: {OfferId}", Newoffer.Id);
+
             return Result<OfferDTO>.Success(Newoffer.Adapt<OfferDTO>());
         }
         catch (Exception ex)
         {
+            logger.LogError(ex, "Failed to create offer for JobPostId: {JobPostId} by ProviderId: {ProviderId}", offer.JobPostId, offer.ProviderId);
             return Result<OfferDTO>.Failure(
                 new Error("Offers.CreateFailed", $"Failed to create offer: {ex.Message}"));
         }
@@ -102,11 +105,12 @@ public class OfferService(IUnitOfWork unitOfWork,IServiceManager serviceManager)
             await unitOfWork.SaveAsync();
 
             await SendNotification(offer.JobPostId, "An offer on your job post has been updated.");
-
+            logger.LogInformation("Offer with ID: {OfferId} updated successfully.", offerId);
             return Result<OfferDTO>.Success(offerToUpdate.Adapt<OfferDTO>());
         }
         catch (Exception ex)
         {
+            logger.LogError(ex, "Failed to update offer with ID: {OfferId}", offerId);
             return Result<OfferDTO>.Failure(
                 new Error("Offers.UpdateFailed", $"Failed to update offer: {ex.Message}"));
         }
@@ -135,11 +139,12 @@ public class OfferService(IUnitOfWork unitOfWork,IServiceManager serviceManager)
             await unitOfWork.SaveAsync();
 
             await SendNotification(offerToDelete.JobPostId, "An offer on your job post has been deleted.");
-
+            logger.LogInformation("Offer with ID: {OfferId} deleted successfully.", id);
             return Result<object>.Success(null);
         }
         catch (Exception ex)
         {
+            logger.LogError(ex, "Failed to delete offer with ID: {OfferId}", id);
             return Result<object>.Failure(
                 new Error("Offers.UpdateFailed", $"Failed to delete offer: {ex.Message}"));
         }

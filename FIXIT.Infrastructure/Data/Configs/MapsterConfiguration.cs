@@ -110,6 +110,10 @@ public static class MapsterConfiguration
             })
             .IgnoreNonMapped(true);
 
+        TypeAdapterConfig<UserNotification, NotifDTO>
+            .NewConfig()
+            .Map(dest => dest.Message, src => src.Notif.Message);
+
         TypeAdapterConfig.GlobalSettings.Scan(Assembly.GetExecutingAssembly());
     }
 }

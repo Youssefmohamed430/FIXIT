@@ -14,6 +14,7 @@ public static class ApplicationServiceRegistration
         services.AddScoped<IAccountService, AccountService>();
         services.AddScoped<IOrderService, OrderService>();
         services.AddScoped<IEscrowPaymentService, EscrowPaymentService>();
+        services.AddScoped<INotifService, NotifService>();
         services.AddScoped<IServiceManager, ServiceManager>();
 
         services.AddScoped<IUserRoleHandler, CustomerRoleHandler>();

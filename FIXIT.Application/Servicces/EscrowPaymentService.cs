@@ -2,7 +2,7 @@
 
 public class EscrowPaymentService(IUnitOfWork unitOfWork,IServiceManager serviceManager) : IEscrowPaymentService
 {
-    private const int PlatformWalletId = 4;
+    private const int PlatformWalletId = 1;
     public async Task<Result<OrderDTO>> AcceptOrder(int orderId)
     {
         var order = await unitOfWork.GetRepository<Order>()

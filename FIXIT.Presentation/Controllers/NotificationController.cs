@@ -1,12 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace FIXIT.Presentation.Controllers;
 
-namespace FIXIT.Presentation.Controllers
+[ApiController]
+[Route("[controller]")]
+[Authorize]
+public class NotificationController(IServiceManager serviceManager) : ControllerBase
 {
-    internal class NotificationController
+    [HttpGet("{Id}")]
+    public async Task<IActionResult> GetNotifs(string Id)
     {
+        var result = await serviceManager.notifService.GetNotifsByUserId(Id);
+        return result.IsSuccess ? Ok(result) : BadRequest(result);
+    }
+    [HttpPut]
+    public async Task<IActionResult> MarkNotifAsRead(int notifid)
+    {
+        var result = await serviceManager.notifService.MarkNotifAsRead(notifid);
+        return result.IsSuccess ? Ok(result) : BadRequest(result);
     }
 }

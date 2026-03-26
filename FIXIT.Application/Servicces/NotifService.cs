@@ -29,7 +29,7 @@ public class NotifService(IUnitOfWork unitOfWork) : INotifService
     public async Task<Result<List<NotifDTO>>> GetNotifsByUserId(string userId)
     {
         var notifs = await unitOfWork.GetRepository<UserNotification>()
-            .FindAllAsync<NotifDTO>(n => n.UserId == userId);
+            .FindAllAsync<NotifDTO>(n => n.UserId == userId,new string[] { "Notif" });
 
         if(notifs == null)
             return Result<List<NotifDTO>>.Failure(new Error("Notifs.NotFound.UserId", "Notifications for this user not found"));
@@ -59,15 +59,4 @@ public class NotifService(IUnitOfWork unitOfWork) : INotifService
 
         return Result<NotifDTO>.Success(notifDTO);
     }
-
-    //public async Task SendNotification<T>(CreateOfferDTO offer)
-    //{
-    //    JobPost jobPost = unitOfWork.GetRepository<JobPost>().Find(j => j.Id == offer.JobPostId);
-
-    //    await serviceManager.notifService.CreateNotif(new NotifDTO
-    //    {
-    //        UserId = jobPost.CustomerId,
-    //        Message = $"New offer created for your job post with price {offer.Price}.",
-    //    });
-    //}
 }

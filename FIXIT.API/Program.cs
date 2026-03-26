@@ -1,6 +1,3 @@
-
-
-
 var builder = WebApplication.CreateBuilder(args);
 
 Env.Load();
@@ -15,6 +12,24 @@ var connectionString =
 builder.Services.AddScoped<HandleCachingResourcesFilter>();
 builder.Services.AddScoped<IdempotencyKeyFilter>();
 
+builder.Host.UseSerilog((context, services, configuration) =>
+        configuration.ReadFrom.Configuration(context.Configuration)
+                     .Enrich.FromLogContext()
+                     .WriteTo.Console());
+
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Information()
+    .WriteTo.Console() 
+    .WriteTo.File(
+        path: "logs/log-.txt",
+        rollingInterval: RollingInterval.Day,
+        retainedFileCountLimit: 7, 
+        fileSizeLimitBytes: 10_000_000,
+        rollOnFileSizeLimit: true
+    )
+    .CreateLogger();
+
+builder.Host.UseSerilog();
 
 builder.Services.AddCoreApplicationServices(config);
 
@@ -49,5 +64,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.UseSerilogRequestLogging();
 
 app.Run();

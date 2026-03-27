@@ -114,6 +114,12 @@ public static class MapsterConfiguration
             .NewConfig()
             .Map(dest => dest.Message, src => src.Notif.Message);
 
+        TypeAdapterConfig<Wallet, WalletDTO>
+            .NewConfig()
+            .Map(dest => dest.Name, src => src.User.Name)
+            .Map(dest => dest.email, src => src.User.Email);
+
+
         TypeAdapterConfig.GlobalSettings.Scan(Assembly.GetExecutingAssembly());
     }
 }

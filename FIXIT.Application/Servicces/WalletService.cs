@@ -1,8 +1,15 @@
-﻿
+﻿using FIXIT.Domain.Abstractions;
+using FIXIT.Domain.Entities;
+using Microsoft.AspNetCore.Mvc;
+
 namespace FIXIT.Application.Servicces;
 
-public class WalletService(IUnitOfWork unitOfWork,ILogger<WalletService> logger) : IWallettService
+public class WalletService(IUnitOfWork unitOfWork,ILogger<WalletService> logger,IServiceManager servicemanager) : IWallettService
 {
+    public Task<string> ChargeWallet(double amount, string customerid)
+    {
+        return servicemanager.payMobService.PayWithCard((int)amount, customerid);
+    }
     public async Task<Result<WalletDTO>> CreateWalletForUser(WalletDTO walletDTO)
     {
         var wallet = walletDTO.Adapt<Wallet>();
@@ -23,7 +30,8 @@ public class WalletService(IUnitOfWork unitOfWork,ILogger<WalletService> logger)
     }
     public async Task<Result<WalletDTO>> GetWalletByUserId(string userId)
     {
-        var wallet = await unitOfWork.GetRepository<Wallet>().FindAsync(w => w.UserId == userId);
+        var wallet = await unitOfWork.GetRepository<Wallet>()
+            .FindAsync(w => w.UserId == userId,new string[] {"User"});
 
         if (wallet == null)
             return Result<WalletDTO>.Failure(new Error("Wallet.NotFound", "Wallet for this user not found"));
@@ -100,5 +108,65 @@ public class WalletService(IUnitOfWork unitOfWork,ILogger<WalletService> logger)
         await unitOfWork.GetRepository<WalletTransaction>().AddAsync(Recievertransaction);
 
         await unitOfWork.SaveAsync();
+    }
+    public async Task<Result<object>> PaymobCallback(PaymobCallback payload, string hmacHeader)
+    {
+        try
+        {
+            logger.LogInformation("Paymob callback received with payload: {payload}", System.Text.Json.JsonSerializer.Serialize(payload));
+            unitOfWork.BeginTransaction();
+
+            if (await servicemanager.payMobService.PaymobCallback(payload, hmacHeader))
+            {
+                var customerid = payload.obj.payment_key_claims.billing_data.apartment;
+
+                var notif = new NotifDTO
+                {
+                    UserId = customerid,
+                    Message = $"Your card has been successfully debited with {Convert.ToInt32(payload.obj.amount_cents) / 100} pounds."
+                };
+
+                await servicemanager.notifService.CreateNotif(notif);
+
+                await UpdateBalance(Convert.ToInt32(payload.obj.amount_cents) / 100, customerid);
+
+                unitOfWork.Commit();
+
+                return Result<object>.Success( null!);
+            }
+            else
+            {
+                unitOfWork.Commit();
+
+                return Result<object>.Failure(new Error("Payment.Fail", "Sorry, The payment process was failed."));
+            }
+        }
+        catch (Exception ex)
+        {
+            unitOfWork.Rollback();
+            return Result<object>.Failure(new Error("Payment.Error", $"Sorry, An error occurred during the payment process. {ex.Message}"));
+        }
+    }
+    public async Task<Result<WalletDTO>> UpdateBalance(decimal amount, string Customerid)
+    {
+        var wallet = await unitOfWork.GetRepository<Wallet>()
+            .FindAsync(w => w.UserId == Customerid);
+
+
+         var walletbalance = wallet.Balance.Amount;
+         walletbalance += amount;
+         wallet.Balance = Price.Create(walletbalance);
+         await unitOfWork.GetRepository<Wallet>().UpdateAsync(wallet);
+         await unitOfWork.SaveAsync();
+
+        var notif = new NotifDTO
+        {
+            UserId = Customerid,
+            Message = $"Wallet charged Successfully with {amount} pounds."
+        };
+
+        await servicemanager.notifService.CreateNotif(notif);
+
+        return Result<WalletDTO>.Success(wallet.Adapt<WalletDTO>());
     }
 }

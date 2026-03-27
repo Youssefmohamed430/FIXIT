@@ -1,4 +1,6 @@
-﻿namespace FIXIT.Presentation.ServiceRegistration;
+﻿using FIXIT.Application.Services;
+
+namespace FIXIT.Presentation.ServiceRegistration;
 
 public static class ApplicationServiceRegistration
 {
@@ -15,6 +17,7 @@ public static class ApplicationServiceRegistration
         services.AddScoped<IOrderService, OrderService>();
         services.AddScoped<IEscrowPaymentService, EscrowPaymentService>();
         services.AddScoped<INotifService, NotifService>();
+        services.AddScoped<IPayMobService, PayMobService>();
         services.AddScoped<IServiceManager, ServiceManager>();
 
         services.AddScoped<IUserRoleHandler, CustomerRoleHandler>();

@@ -16,6 +16,8 @@ try
     builder.Services.AddScoped<HandleCachingResourcesFilter>();
     builder.Services.AddScoped<IdempotencyKeyFilter>();
 
+    builder.Services.AddHttpClient();
+
     builder.Host.UseSerilog((context, services, configuration) =>
             configuration.ReadFrom.Configuration(context.Configuration)
                          .Enrich.FromLogContext()

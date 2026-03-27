@@ -45,6 +45,7 @@ public class WalletController(IServiceManager serviceManager,ILogger<WalletContr
         catch (Exception ex)
         {
             logger.LogError(ex, "Error logging Paymob callback");
+            result = Result<object>.Failure(new Error("PaymobCallbackError", "An error occurred while processing the Paymob callback."));
         }
         return result.IsSuccess ? Ok(result) : BadRequest(result);
     }

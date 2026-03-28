@@ -3,6 +3,7 @@ namespace FIXIT.Application.DTOs;
 
 public class OrderDTO
 {
+    public int Id { get; set; }
     public int JobPostId { get; set; }
     public int OfferId { get; set; }
     public decimal TotalAmount { get; set; }

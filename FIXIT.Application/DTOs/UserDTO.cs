@@ -3,6 +3,7 @@ namespace FIXIT.Application.DTOs;
 
 public class UserDTO
 {
+    public string? Id { get; set; }
     [MinLength(3, ErrorMessage = "At Least three Letters")]
     [RegularExpression(@"^[a-zA-Z]+$", ErrorMessage = "Name must contain only letters")]
     public string? Name { get; set; }

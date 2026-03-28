@@ -169,4 +169,45 @@ public class WalletService(IUnitOfWork unitOfWork,ILogger<WalletService> logger,
 
         return Result<WalletDTO>.Success(wallet.Adapt<WalletDTO>());
     }
+
+    public async Task<Result<WalletDTO>> Withdraw(WithdrawDTO withdrawDTO)
+    {
+        try
+        {
+            var wallet = await unitOfWork.GetRepository<Wallet>()
+            .FindAsync(w => w.Id == withdrawDTO.WalletId,new string[] {"User"});
+
+            if (wallet.Balance.Amount < withdrawDTO.Amount)
+            {
+                return Result<WalletDTO>.Failure(new Error("Wallet.InsufficientBalance", "You does not have enough balance to withdraw the specified amount."));
+            }
+
+            var walletbalance = wallet.Balance.Amount;
+            walletbalance -= withdrawDTO.Amount;
+            wallet.Balance = Price.Create(walletbalance);
+
+            await unitOfWork.GetRepository<Wallet>().UpdateAsync(wallet);
+            await unitOfWork.SaveAsync();
+
+            await SendNotif(withdrawDTO.MobileNumber, withdrawDTO.Amount, wallet);
+
+            return Result<WalletDTO>.Success(wallet.Adapt<WalletDTO>());
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to withdraw money from wallet {WalletId} to mobile number {MobileNumber}", withdrawDTO.WalletId, withdrawDTO.MobileNumber);
+            return Result<WalletDTO>.Failure(new Error("Wallet.WithdrawalFailed", $"An error occurred during the withdrawal process: {ex.Message}"));
+        }
+    }
+
+    private async Task SendNotif(string mobileNumber, decimal amount, Wallet wallet)
+    {
+        var notif = new NotifDTO
+        {
+            UserId = wallet.UserId,
+            Message = $"You have successfully withdrawn {amount} pounds to your mobile number {mobileNumber}."
+        };
+
+        await servicemanager.notifService.CreateNotif(notif);
+    }
 }

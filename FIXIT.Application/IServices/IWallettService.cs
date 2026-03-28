@@ -10,4 +10,5 @@ public interface IWallettService
     Task<string> ChargeWallet(double amount, string customerid);
     Task<Result<object>> PaymobCallback(PaymobCallback payload, string hmacHeader);
     Task<Result<WalletDTO>> TransferMoney(int orderid,int WalletSenderId,int WalletRecieverId, decimal Transferedamount);
+    Task<Result<WalletDTO>> Withdraw(WithdrawDTO withdrawDTO);
 }

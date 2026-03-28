@@ -5,7 +5,7 @@ namespace FIXIT.Presentation.Controllers;
 [Route("[controller]")]
 public class WalletController(IServiceManager serviceManager,ILogger<WalletController> logger) : ControllerBase
 {
-    [HttpGet("Id")]
+    [HttpGet("{Id}")]
     [Authorize]
     public async Task<IActionResult> GetWalletByUserId(string Id)
     {
@@ -22,6 +22,22 @@ public class WalletController(IServiceManager serviceManager,ILogger<WalletContr
                 .ChargeWallet(amount, Customerid);
 
             return Ok(new { iframeUrl = iframeUrl });
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { message = ex.Message });
+        }
+    }
+
+    [HttpPut("Withdraw")]
+    [Authorize]
+
+    public async Task<IActionResult> WithdrawFromWallet([FromBody] WithdrawDTO withdrawDTO)
+    {
+        try
+        {
+            var result = await serviceManager._walletService.Withdraw(withdrawDTO);
+            return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
         }
         catch (Exception ex)
         {

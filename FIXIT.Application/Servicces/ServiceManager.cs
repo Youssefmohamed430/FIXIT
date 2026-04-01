@@ -16,7 +16,8 @@ public class ServiceManager : IServiceManager
     private readonly Lazy<IJobPostService> _jobPostService;
     private readonly Lazy<IOfferService> _offerService;
     private readonly Lazy<IOrderService> _orderService;
-    private readonly Lazy<IEscrowPaymentService> _escrowPaymentService;
+    //private readonly Lazy<IEscrowPaymentService> _escrowPaymentService;
+    private readonly Lazy<IEscrowPaymentServiceV2> _escrowPaymentService;
     private readonly Lazy<INotifService> _notifService;
     private readonly Lazy<IPayMobService> _paymobservice;
     private readonly Lazy<IPaymentGateway> _paymentGateway;
@@ -61,8 +62,8 @@ public class ServiceManager : IServiceManager
         _orderService = new Lazy<IOrderService>(
             () => _serviceProvider.GetRequiredService<IOrderService>()
         );
-        _escrowPaymentService = new Lazy<IEscrowPaymentService>(
-            () => _serviceProvider.GetRequiredService<IEscrowPaymentService>()
+        _escrowPaymentService = new Lazy<IEscrowPaymentServiceV2>(
+            () => _serviceProvider.GetRequiredService<IEscrowPaymentServiceV2>()
         );
         _notifService = new Lazy<INotifService>(
             () => _serviceProvider.GetRequiredService<INotifService>()
@@ -85,7 +86,7 @@ public class ServiceManager : IServiceManager
     public IJobPostService jobPostService => _jobPostService.Value;
     public IOfferService offerService => _offerService.Value;
     public IOrderService orderService => _orderService.Value;
-    public IEscrowPaymentService escrowPaymentService => _escrowPaymentService.Value;
+    public IEscrowPaymentServiceV2 escrowPaymentService => _escrowPaymentService.Value;
     public INotifService notifService => _notifService.Value;
     public IPayMobService payMobService => _paymobservice.Value;
     public IPaymentGateway paymentGateway => _paymentGateway.Value;

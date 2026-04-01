@@ -10,7 +10,7 @@ public interface IServiceManager
     public IJobPostService jobPostService { get; }
     public IOfferService offerService { get; }
     public IOrderService orderService { get; }
-    public IEscrowPaymentService escrowPaymentService { get; }
+    public IEscrowPaymentServiceV2 escrowPaymentService { get; }
     public INotifService notifService { get; }
     public IPayMobService payMobService { get; }
     public IPaymentGateway paymentGateway { get; }

@@ -47,7 +47,7 @@ public class WalletController(IServiceManager serviceManager,ILogger<WalletContr
 
     [HttpPost("callback")]
     [AllowAnonymous]
-    public async Task<IActionResult> PaymobCallback([FromBody] PaymobCallback payload)
+    public async Task<IActionResult> RecieveCallback([FromBody] PaymobCallback payload)
     {
         Result<object> result = null!;
         try
@@ -56,7 +56,7 @@ public class WalletController(IServiceManager serviceManager,ILogger<WalletContr
 
             var hmacHeader = Request.Query["hmac"].FirstOrDefault();
 
-            result = await serviceManager._walletService.PaymobCallback(payload, hmacHeader);
+            result = await serviceManager._walletService.RecieveCallback(payload, hmacHeader);
         }
         catch (Exception ex)
         {

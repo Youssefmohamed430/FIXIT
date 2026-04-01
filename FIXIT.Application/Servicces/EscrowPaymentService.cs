@@ -61,7 +61,7 @@ public class EscrowPaymentService(IUnitOfWork unitOfWork,IServiceManager service
 
             var customerWalletId = order!.JobPost!.Customer!.User!.Wallet!.Id;
             var TransferResult = await serviceManager._walletService
-                .TransferMoney(order.Id, customerWalletId, customerWalletId, order.TotalAmount.Amount);
+                .TransferMoney(order.Id, PlatformWalletId, customerWalletId, order.TotalAmount.Amount);
 
             if (!TransferResult.IsSuccess)
             {

@@ -5,22 +5,22 @@ namespace FIXIT.Presentation.Controllers;
 [Route("[controller]")]
 public class EscrowPaymentController(IServiceManager serviceManager) : ControllerBase
 {
-    [Authorize(Roles = "Customer")]
-    [HttpPost("AcceptOrder/{orderId}")]
-    [ServiceFilter(typeof(IdempotencyKeyFilter))]
-    public async Task<IActionResult> AcceptOrder(int orderId, [FromHeader(Name = "Idempotency-Key")] string Key)
-    {
-        var result = await serviceManager.escrowPaymentService.AcceptOrder(orderId);
-        return result.IsSuccess ? Ok(result) : BadRequest(result);
-    }
+    //[Authorize(Roles = "Customer")]
+    //[HttpPost("AcceptOrder/{orderId}")]
+    //[ServiceFilter(typeof(IdempotencyKeyFilter))]
+    //public async Task<IActionResult> AcceptOrder(int orderId, [FromHeader(Name = "Idempotency-Key")] string Key)
+    //{
+    //    var result = await serviceManager.escrowPaymentService.ChangeWorkOrderStatus(orderId,WorkStatus.Accepted);
+    //    return result.IsSuccess ? Ok(result) : BadRequest(result);
+    //}
 
-    [Authorize(Roles = "Customer")]
-    [HttpPut("CancelOrder/{orderId}")]
-    public async Task<IActionResult> CancelOrder(int orderId)
-    {
-        var result = await serviceManager.escrowPaymentService.CancelOrder(orderId);
-        return result.IsSuccess ? Ok(result) : BadRequest(result);
-    }
+    //[Authorize(Roles = "Customer")]
+    //[HttpPut("CancelOrder/{orderId}")]
+    //public async Task<IActionResult> CancelOrder(int orderId)
+    //{
+    //    var result = await serviceManager.escrowPaymentService.CancelOrder(orderId);
+    //    return result.IsSuccess ? Ok(result) : BadRequest(result);
+    //}
 
     [Authorize]
     [HttpPut("ChangeWorkOrderStatus/{orderId}/{newStatus}")]

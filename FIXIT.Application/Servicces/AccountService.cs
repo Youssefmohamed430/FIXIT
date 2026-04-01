@@ -22,39 +22,25 @@ public class AccountService(IUnitOfWork unitOfWork,ILogger<AccountService> logge
 
     public async Task<Result<UserDTO>> UpdateUserInfo(string Id,UserDTO user)
     {
-        var Olduser = await unitOfWork.GetRepository<ApplicationUser>().FindAsync(u => u.Id == Id);
+        var existingUser = await unitOfWork.GetRepository<ApplicationUser>().FindAsync(u => u.Id == Id);
 
-        if (Olduser is null)
+        if (existingUser is null)
             return Result<UserDTO>.Failure(new Error("User.NotFound", "User not found"));
 
-        HandleUpdatingUser(user, Olduser);
+        existingUser.UpdateFrom(
+            user.Name,
+            user.UserName,
+            user.Phone,
+            user.Email,
+            user.Longitude,
+            user.Latitude,
+            user.ImgPath
+        );
 
-        await unitOfWork.GetRepository<ApplicationUser>().UpdateAsync(Olduser);
+        await unitOfWork.GetRepository<ApplicationUser>().UpdateAsync(existingUser);
         await unitOfWork.SaveAsync();
 
         return Result<UserDTO>.Success(user);
-    }
-
-    private void HandleUpdatingUser(UserDTO user, ApplicationUser Olduser)
-    {
-        try
-        {
-            double? longitude = user.Longitude.HasValue ? user.Longitude.Value : Olduser.Location?.X;
-            double? latitude = user.Latitude.HasValue ? user.Latitude.Value : Olduser.Location?.Y;
-
-            Olduser = new UserBuilder(Olduser)
-                .SetName(user.Name! ?? Olduser.Name)
-                .SetUserName(user.UserName! ?? Olduser.UserName)
-                .SetPhone(user.Phone! ?? Olduser.PhoneNumber)
-                .SetEmail(user.Email! ?? Olduser.Email)
-                .SetLocation(Convert.ToDouble(longitude), Convert.ToDouble(latitude))
-                .SetImg(user.ImgPath != null ? user.ImgPath : Olduser.Img?.Value)
-                .Build();
-        }
-        catch (Exception ex)
-        {
-            logger.LogError(ex, "Error updating user information for user with ID {UserId}", Olduser.Id);
-        }
     }
 
     public async Task<Result<UserDTO>> UploadImg(string Id, IFormFile imgFile)

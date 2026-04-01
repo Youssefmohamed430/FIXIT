@@ -15,4 +15,32 @@ public class ApplicationUser : IdentityUser
     public List<ChatParticipant>? ChatParticipants { get; set; }
     public List<ChatMessage>? ChatMessages { get; set; }
     public List<RefreshToken>? refreshTokens { get; set; }
+
+    public void UpdateFrom(
+        string? name,
+        string? userName,
+        string? phone,
+        string? email,
+        double? longitude,
+        double? latitude,
+        string? imgPath)
+    {
+        if (!string.IsNullOrEmpty(name))
+            Name = name;
+
+        if (!string.IsNullOrEmpty(userName))
+            UserName = userName;
+
+        if (!string.IsNullOrEmpty(phone))
+            PhoneNumber = phone;
+
+        if (!string.IsNullOrEmpty(email))
+            Email = email;
+
+        if (longitude.HasValue && latitude.HasValue)
+            Location = new Point(longitude.Value, latitude.Value) { SRID = 4326 };
+
+        if (!string.IsNullOrEmpty(imgPath))
+            Img = ImgPath.Create(imgPath);
+    }
 }

@@ -1,7 +1,6 @@
 ﻿namespace FIXIT.Application.IServices;
 
-public interface IPayMobService
+public interface IPayMobService : IPaymentGateway
 {
-    Task<string> PayWithCard(int amountCents,string passengerid);
-    Task<bool> PaymobCallback(PaymobCallback payload, string hmacHeader);
+    
 }

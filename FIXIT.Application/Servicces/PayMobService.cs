@@ -208,7 +208,7 @@ public class PayMobService : IPayMobService
     }
 
     // العملية الكاملة
-    public async Task<string> PayWithCard(int amountCents,string passengerid)
+    public async Task<string> Pay(int amountCents,string passengerid)
     {
         try
         {
@@ -237,38 +237,39 @@ public class PayMobService : IPayMobService
     }
 
     // التحقق من Callback
-    public async Task<bool> PaymobCallback([FromBody] PaymobCallback payload, string hmacHeader)
+    public async Task<bool> RecieveCallback(object payload, string hmacHeader)
     {
         try
         {
+            var paymobPayload = (PaymobCallback)payload;
 
-            if (payload.obj.data?.message != null)
+            if (paymobPayload.obj.data?.message != null)
             {
-                _logger.LogWarning("PayMob Error Message: {Message}", payload.obj.data.message);
-                _logger.LogWarning("TXN Response Code: {Code}", payload.obj.data.txn_response_code);
+                _logger.LogWarning("PayMob Error Message: {Message}", paymobPayload.obj.data.message);
+                _logger.LogWarning("TXN Response Code: {Code}", paymobPayload.obj.data.txn_response_code);
             }
 
             // بناء الـ data string للتحقق من HMAC
-            var dataString = $"{payload.obj.amount_cents}" +
-                             $"{payload.obj.created_at}" +
-                             $"{payload.obj.currency}" +
-                             $"{payload.obj.error_occured.ToString().ToLower()}" +
-                             $"{payload.obj.has_parent_transaction.ToString().ToLower()}" +
-                             $"{payload.obj.id}" +
-                             $"{payload.obj.integration_id}" +
-                             $"{payload.obj.is_3d_secure.ToString().ToLower()}" +
-                             $"{payload.obj.is_auth.ToString().ToLower()}" +
-                             $"{payload.obj.is_capture.ToString().ToLower()}" +
-                             $"{payload.obj.is_refunded.ToString().ToLower()}" +
-                             $"{payload.obj.is_standalone_payment.ToString().ToLower()}" +
-                             $"{payload.obj.is_voided.ToString().ToLower()}" +
-                             $"{payload.obj.order.id}" +
-                             $"{payload.obj.owner}" +
-                             $"{payload.obj.pending.ToString().ToLower()}" +
-                             $"{payload.obj.source_data.pan}" +
-                             $"{payload.obj.source_data.sub_type}" +
-                             $"{payload.obj.source_data.type}" +
-                             $"{payload.obj.success.ToString().ToLower()}";
+            var dataString = $"{paymobPayload.obj.amount_cents}" +
+                             $"{paymobPayload.obj.created_at}" +
+                             $"{paymobPayload.obj.currency}" +
+                             $"{paymobPayload.obj.error_occured.ToString().ToLower()}" +
+                             $"{paymobPayload.obj.has_parent_transaction.ToString().ToLower()}" +
+                             $"{paymobPayload.obj.id}" +
+                             $"{paymobPayload.obj.integration_id}" +
+                             $"{paymobPayload.obj.is_3d_secure.ToString().ToLower()}" +
+                             $"{paymobPayload.obj.is_auth.ToString().ToLower()}" +
+                             $"{paymobPayload.obj.is_capture.ToString().ToLower()}" +
+                             $"{paymobPayload.obj.is_refunded.ToString().ToLower()}" +
+                             $"{paymobPayload.obj.is_standalone_payment.ToString().ToLower()}" +
+                             $"{paymobPayload.obj.is_voided.ToString().ToLower()}" +
+                             $"{paymobPayload.obj.order.id}" +
+                             $"{paymobPayload.obj.owner}" +
+                             $"{paymobPayload.obj.pending.ToString().ToLower()}" +
+                             $"{paymobPayload.obj.source_data.pan}" +
+                             $"{paymobPayload.obj.source_data.sub_type}" +
+                             $"{paymobPayload.obj.source_data.type}" +
+                             $"{paymobPayload.obj.success.ToString().ToLower()}";
 
             // حساب HMAC
             using var hmac = new HMACSHA512(Encoding.UTF8.GetBytes(_hmacSecretKey));
@@ -284,15 +285,28 @@ public class PayMobService : IPayMobService
             }
 
             _logger.LogInformation("HMAC verified successfully. Payment success: {Success}",
-                payload.obj.success);
+                paymobPayload.obj.success);
 
-            return Convert.ToBoolean(payload.obj.success);
+            return Convert.ToBoolean(paymobPayload.obj.success);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error processing PayMob callback");
             return false;
         }
+    }
+    public Task<decimal> ExtractAmountAsync(object payload)
+    {
+        var paymobPayload = (PaymobCallback)payload;
+        return Task.FromResult(
+            Convert.ToDecimal(paymobPayload.obj.amount_cents) / 100);
+    }
+
+    public Task<string> ExtractCustomerIdAsync(object payload)
+    {
+        var paymobPayload = (PaymobCallback)payload;
+        return Task.FromResult(
+            paymobPayload.obj.payment_key_claims.billing_data.apartment);
     }
 }
 

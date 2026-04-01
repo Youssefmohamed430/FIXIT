@@ -1,14 +1,10 @@
-﻿using FIXIT.Domain.Abstractions;
-using FIXIT.Domain.Entities;
-using Microsoft.AspNetCore.Mvc;
-
-namespace FIXIT.Application.Servicces;
+﻿namespace FIXIT.Application.Servicces;
 
 public class WalletService(IUnitOfWork unitOfWork,ILogger<WalletService> logger,IServiceManager servicemanager) : IWallettService
 {
     public Task<string> ChargeWallet(double amount, string customerid)
     {
-        return servicemanager.payMobService.PayWithCard((int)amount, customerid);
+        return servicemanager.paymentGateway.Pay((int)amount, customerid);
     }
     public async Task<Result<WalletDTO>> CreateWalletForUser(WalletDTO walletDTO)
     {
@@ -49,7 +45,7 @@ public class WalletService(IUnitOfWork unitOfWork,ILogger<WalletService> logger,
             var senderWallet = await unitOfWork.GetRepository<Wallet>().FindAsync(w => w.Id == WalletSenderId);
             var recieverWallet = await unitOfWork.GetRepository<Wallet>().FindAsync(w => w.Id == WalletRecieverId);
             
-            await HandleBalanceWallets(Transferedamount,orderid, senderWallet, recieverWallet);
+            await UpdateBalance(Transferedamount,orderid, senderWallet, recieverWallet);
 
             await unitOfWork.GetRepository<Wallet>().UpdateAsync(senderWallet);
             await unitOfWork.GetRepository<Wallet>().UpdateAsync(recieverWallet);
@@ -67,7 +63,7 @@ public class WalletService(IUnitOfWork unitOfWork,ILogger<WalletService> logger,
         }
     }
 
-    private async Task HandleBalanceWallets(decimal Transferedamount,int orderid, Wallet senderWallet, Wallet recieverWallet)
+    private async Task UpdateBalance(decimal Transferedamount,int orderid, Wallet senderWallet, Wallet recieverWallet)
     {
         if(senderWallet.Balance.Amount < Transferedamount)
         {
@@ -109,26 +105,28 @@ public class WalletService(IUnitOfWork unitOfWork,ILogger<WalletService> logger,
 
         await unitOfWork.SaveAsync();
     }
-    public async Task<Result<object>> PaymobCallback(PaymobCallback payload, string hmacHeader)
+    public async Task<Result<object>> RecieveCallback(object payload, string hmacHeader)
     {
         try
         {
             logger.LogInformation("Paymob callback received with payload: {payload}", System.Text.Json.JsonSerializer.Serialize(payload));
             unitOfWork.BeginTransaction();
 
-            if (await servicemanager.payMobService.PaymobCallback(payload, hmacHeader))
+            if (await servicemanager.paymentGateway.RecieveCallback(payload, hmacHeader))
             {
-                var customerid = payload.obj.payment_key_claims.billing_data.apartment;
+                var customerid = await servicemanager.paymentGateway.ExtractCustomerIdAsync(payload);
+                var amount = await servicemanager.paymentGateway.ExtractAmountAsync(payload);
 
                 var notif = new NotifDTO
                 {
                     UserId = customerid,
-                    Message = $"Your card has been successfully debited with {Convert.ToInt32(payload.obj.amount_cents) / 100} pounds."
+                    Message = $"Your card has been successfully debited with {amount} pounds."
                 };
 
                 await servicemanager.notifService.CreateNotif(notif);
+                //await servicemanager.notifService.NotifyCustomerByJobPostId(customerid, $"Your card has been successfully debited with {Convert.ToInt32(payload.obj.amount_cents) / 100} pounds.");
 
-                await UpdateBalance(Convert.ToInt32(payload.obj.amount_cents) / 100, customerid);
+                await UpdateBalance(amount, customerid);
 
                 unitOfWork.Commit();
 

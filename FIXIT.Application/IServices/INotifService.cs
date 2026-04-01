@@ -5,4 +5,6 @@ public interface INotifService
     Task<Result<List<NotifDTO>>> GetNotifsByUserId(string userId);
     Task<Result<NotifDTO>> CreateNotif(NotifDTO notifDTO);
     Task<Result<NotifDTO>> MarkNotifAsRead(int notifid);
+    Task NotifyCustomerByJobPostId(int jobPostId, string message);
+    Task NotifyProviderByOfferId(int offerId, string message);
 }

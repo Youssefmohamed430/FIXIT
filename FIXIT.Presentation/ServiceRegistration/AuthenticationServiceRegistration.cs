@@ -29,7 +29,7 @@ public static class AuthenticationServiceRegistration
                 ValidAudience = config["JWT:Audience"],
 
                 IssuerSigningKey = new SymmetricSecurityKey(
-                    Encoding.UTF8.GetBytes(config["JWT:Key"])
+                    Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("JWTKey")!)
                 ),
 
                 ClockSkew = TimeSpan.Zero

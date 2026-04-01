@@ -59,4 +59,31 @@ public class NotifService(IUnitOfWork unitOfWork) : INotifService
 
         return Result<NotifDTO>.Success(notifDTO);
     }
+    public async Task NotifyCustomerByJobPostId(int jobPostId, string message)
+    {
+        var customerId = unitOfWork.GetRepository<JobPost>()
+            .Find(j => j.Id == jobPostId)?.CustomerId;
+
+        if (customerId is null) return;
+
+        await CreateNotif(new NotifDTO
+        {
+            UserId = customerId,
+            Message = message
+        });
+    }
+
+    public async Task NotifyProviderByOfferId(int offerId, string message)
+    {
+        var providerId = unitOfWork.GetRepository<Offer>()
+            .Find(o => o.Id == offerId)?.ProviderId;
+
+        if (providerId is null) return;
+
+        await CreateNotif(new NotifDTO
+        {
+            UserId = providerId,
+            Message = message
+        });
+    }
 }

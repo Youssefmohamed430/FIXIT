@@ -19,3 +19,4 @@ global using FIXIT.Infrastructure;
 global using FIXIT.Domain.Entities;
 global using Microsoft.AspNetCore.Identity;
 global using FIXIT.Presentation.Filters;
+global using Microsoft.AspNetCore.SignalR;

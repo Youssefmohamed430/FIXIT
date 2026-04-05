@@ -7,7 +7,6 @@ public class EscrowPaymentController(IServiceManager serviceManager) : Controlle
 {
     //[Authorize(Roles = "Customer")]
     //[HttpPost("AcceptOrder/{orderId}")]
-    //[ServiceFilter(typeof(IdempotencyKeyFilter))]
     //public async Task<IActionResult> AcceptOrder(int orderId, [FromHeader(Name = "Idempotency-Key")] string Key)
     //{
     //    var result = await serviceManager.escrowPaymentService.ChangeWorkOrderStatus(orderId,WorkStatus.Accepted);
@@ -24,7 +23,8 @@ public class EscrowPaymentController(IServiceManager serviceManager) : Controlle
 
     [Authorize]
     [HttpPut("ChangeWorkOrderStatus/{orderId}/{newStatus}")]
-    public async Task<IActionResult> ChangeWorkOrderStatus(int orderId,WorkStatus newStatus)
+    [ServiceFilter(typeof(IdempotencyKeyFilter))]
+    public async Task<IActionResult> ChangeWorkOrderStatus(int orderId,WorkStatus newStatus,[FromHeader(Name = "Idempotency-Key")] string Key)
     {
         var result = await serviceManager.escrowPaymentService.ChangeWorkOrderStatus(orderId, newStatus);
         return result.IsSuccess ? Ok(result) : BadRequest(result);

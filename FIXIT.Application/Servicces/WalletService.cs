@@ -1,10 +1,15 @@
-﻿namespace FIXIT.Application.Servicces;
+﻿using FIXIT.Application.IServices;
 
-public class WalletService(IUnitOfWork unitOfWork,ILogger<WalletService> logger,IServiceManager servicemanager) : IWallettService
+namespace FIXIT.Application.Servicces;
+
+public class WalletService
+    (IUnitOfWork unitOfWork,ILogger<WalletService> logger,IServiceManager servicemanager,IEnumerable<IPaymentGateway> PayHandler) : IWallettService
 {
-    public Task<string> ChargeWallet(double amount, string customerid)
+    public async Task<string> ChargeWallet(double amount, string customerid,PaymentWay paymentWay)
     {
-        return servicemanager.paymentGateway.Pay((int)amount, customerid);
+        var handler = PayHandler.FirstOrDefault(p => p.paymentWay == paymentWay);
+
+        return await handler.Pay((int)amount, customerid);
     }
     public async Task<Result<WalletDTO>> CreateWalletForUser(WalletDTO walletDTO)
     {
@@ -105,14 +110,16 @@ public class WalletService(IUnitOfWork unitOfWork,ILogger<WalletService> logger,
 
         await unitOfWork.SaveAsync();
     }
-    public async Task<Result<object>> RecieveCallback(object payload, string hmacHeader)
+    public async Task<Result<object>> RecieveCallback(object payload, string hmacHeader,PaymentWay paymentWay)
     {
         try
         {
             logger.LogInformation("Paymob callback received with payload: {payload}", System.Text.Json.JsonSerializer.Serialize(payload));
             unitOfWork.BeginTransaction();
 
-            if (await servicemanager.paymentGateway.RecieveCallback(payload, hmacHeader))
+            var handler = PayHandler.FirstOrDefault(p => p.paymentWay == paymentWay);
+
+            if (await handler.RecieveCallback(payload, hmacHeader))
             {
                 var customerid = await servicemanager.paymentGateway.ExtractCustomerIdAsync(payload);
                 var amount = await servicemanager.paymentGateway.ExtractAmountAsync(payload);

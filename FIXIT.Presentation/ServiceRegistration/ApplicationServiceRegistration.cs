@@ -18,7 +18,8 @@ public static class ApplicationServiceRegistration
         //services.AddScoped<IEscrowPaymentService, EscrowPaymentService>();
         services.AddScoped<IEscrowPaymentServiceV2, EscrowPaymentServiceV2>();
         services.AddScoped<INotifService, NotifService>();
-        services.AddScoped<IPayMobService, PayMobService>();
+        services.AddScoped<IPaymentGateway, PayMobService>();
+        services.AddScoped<IPaymentGateway, StripeService>();
         services.AddScoped<IServiceManager, ServiceManager>();
 
         services.AddScoped<IUserRoleHandler, CustomerRoleHandler>();

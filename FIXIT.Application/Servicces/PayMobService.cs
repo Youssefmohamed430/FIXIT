@@ -3,7 +3,7 @@ using System.Net.Http.Json;
 
 namespace FIXIT.Application.Services;
 
-public class PayMobService : IPayMobService
+public class PayMobService : IPaymentGateway
 {
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly ILogger<PayMobService> _logger;
@@ -14,6 +14,7 @@ public class PayMobService : IPayMobService
     private readonly string _baseUrl = "https://accept.paymob.com/api/";
     private readonly IUnitOfWork _unitOfWork;
     private readonly IServiceManager serviceManager;
+    public PaymentWay paymentWay => PaymentWay.Paymob;
 
 
     public PayMobService(

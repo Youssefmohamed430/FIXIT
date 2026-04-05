@@ -12,6 +12,5 @@ public interface IServiceManager
     public IOrderService orderService { get; }
     public IEscrowPaymentServiceV2 escrowPaymentService { get; }
     public INotifService notifService { get; }
-    public IPayMobService payMobService { get; }
     public IPaymentGateway paymentGateway { get; }
 }

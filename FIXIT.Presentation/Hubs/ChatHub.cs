@@ -1,11 +1,18 @@
 ﻿
 namespace FIXIT.Presentation.Hubs;
 
-public class ChatHub : Hub
+public class ChatHub(IServiceManager serviceManager) : Hub
 {
-    public async Task SendMsg(string id,string msg)
+    public async Task JoinChat(string chatId)
     {
+        await Groups.AddToGroupAsync(Context.ConnectionId, chatId);
+    }
 
-        await Clients.Caller.SendAsync(msg);
+    public async Task SendMsg(MessageDto messageDto)
+    {
+        var result = await serviceManager.ChatService.SendMsg(messageDto);
+
+        await Clients.Group(messageDto.ChatId.ToString())
+            .SendAsync("ReceiveMessage", result.Value);
     }
 }

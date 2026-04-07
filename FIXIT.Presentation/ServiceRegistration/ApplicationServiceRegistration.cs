@@ -20,6 +20,7 @@ public static class ApplicationServiceRegistration
         services.AddScoped<INotifService, NotifService>();
         services.AddScoped<IPaymentGateway, PayMobService>();
         services.AddScoped<IPaymentGateway, StripeService>();
+        services.AddScoped<IChatService, ChatService>();
         services.AddScoped<IServiceManager, ServiceManager>();
 
         services.AddScoped<IUserRoleHandler, CustomerRoleHandler>();

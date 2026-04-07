@@ -21,6 +21,7 @@ public class ServiceManager : IServiceManager
     private readonly Lazy<INotifService> _notifService;
     //private readonly Lazy<IPayMobService> _paymobservice;
     private readonly Lazy<IPaymentGateway> _paymentGateway;
+    private readonly Lazy<IChatService> _ChatService;
 
 
     #endregion
@@ -74,6 +75,9 @@ public class ServiceManager : IServiceManager
         _paymentGateway = new Lazy<IPaymentGateway>(
             () => _serviceProvider.GetRequiredService<IPaymentGateway>()
         );
+        _ChatService = new Lazy<IChatService>(
+            () => _serviceProvider.GetRequiredService<IChatService>()
+        );
     }
     #endregion
 
@@ -90,5 +94,6 @@ public class ServiceManager : IServiceManager
     public INotifService notifService => _notifService.Value;
     //public IPayMobService payMobService => _paymobservice.Value;
     public IPaymentGateway paymentGateway => _paymentGateway.Value;
+    public IChatService ChatService => _ChatService.Value;
     #endregion
 }

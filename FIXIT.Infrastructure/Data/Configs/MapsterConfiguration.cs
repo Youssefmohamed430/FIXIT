@@ -119,6 +119,22 @@ public static class MapsterConfiguration
             .Map(dest => dest.Name, src => src.User.Name)
             .Map(dest => dest.email, src => src.User.Email);
 
+        TypeAdapterConfig<Chat, ChatDTO>
+            .NewConfig()
+            .Map(dest => dest.ChatId, src => src.Id)
+            .Map(dest => dest.Participants, src => src.Participants)
+            .Map(dest => dest.Messages, src => src.Messages);
+
+        TypeAdapterConfig<ChatParticipant, ChatUserDto>
+            .NewConfig()
+            .Map(dest => dest.UserId, src => src.UserId)
+            .Map(dest => dest.Name, src => src.User.Name)
+            .Map(dest => dest.ImageUrl, src => src.User != null ? src.User.Img : null);
+
+        TypeAdapterConfig<ChatMessage, MessageDto>
+            .NewConfig()
+            .Map(dest => dest.Message, src => src.Message);
+
 
         TypeAdapterConfig.GlobalSettings.Scan(Assembly.GetExecutingAssembly());
     }

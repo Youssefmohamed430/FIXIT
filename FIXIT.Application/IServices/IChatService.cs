@@ -2,9 +2,8 @@
 
 public interface IChatService
 {
-    Task<Result<ChatDTO>> GetChat(string id,string ParticpentId);
-    //Task<Result<ChatDTO>> GetAllChats(string id,string ParticpentId);
-    Task<Result<ChatDTO>> CreateChat(ChatDTO chatDTO);
+    Task<Result<ChatDTO>> GetOrCreateChat(CreateChatDTO chatDTO);
+    Task<Result<List<ChatDTO>>> GetAllChats(string userId);
     Task<Result<object>> DeleteChat(int ChatId);
-    Task<Result<ChatDTO>> SendMsg(CreateChatDTO chatDTO);
+    Task<Result<MessageDto>> SendMsg(MessageDto chatDTO);
 }

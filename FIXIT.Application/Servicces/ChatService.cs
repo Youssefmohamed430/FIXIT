@@ -1,30 +1,127 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Security.AccessControl;
 
 namespace FIXIT.Application.Servicces;
 
-public class ChatService : IChatService
+public class ChatService(IUnitOfWork unitOfWork) : IChatService
 {
-    public Task<Result<ChatDTO>> CreateChat(ChatDTO chatDTO)
+    public async Task<Result<List<ChatDTO>>> GetAllChats(string userId)
     {
-        throw new NotImplementedException();
+        var chatsQuery = await unitOfWork
+            .GetRepository<Chat>()
+            .FindAllAsync<ChatDTO>(
+                c => c.Participants.Any(p => p.UserId == userId) && !c.IsDeleted,
+                new[] { "Participants.User", "Messages" }
+            );
+
+        var chats = await chatsQuery.ToListAsync();
+
+        foreach (var chat in chats)
+        {
+            chat.Participants = chat.Participants
+                .Where(p => p.UserId != userId)
+                .ToList();
+
+            chat.Messages = chat.Messages?
+                .OrderByDescending(m => m.SentAt)
+                .Take(1)
+                .ToList();
+        }
+
+        return Result<List<ChatDTO>>.Success(chats);
+    }
+    public async Task<Result<ChatDTO>> GetOrCreateChat(CreateChatDTO chatDTO)
+    {
+        var chatRepo = unitOfWork.GetRepository<Chat>();
+
+        var existingChat = await chatRepo.FindAsync(
+            c => c.Participants.Any(p => p.UserId == chatDTO.SenderId) &&
+                 c.Participants.Any(p => p.UserId == chatDTO.ReceiverId),
+            new[] { "Participants.User", "Messages" }
+        );
+
+        if (existingChat != null)
+        {
+            var existingDto = existingChat.Adapt<ChatDTO>();
+
+            existingDto.Messages = existingDto.Messages?
+                .OrderBy(m => m.SentAt)
+                .ToList();
+
+            return Result<ChatDTO>.Success(existingDto);
+        }
+
+        var chat = await CreateChat(chatDTO);
+
+        return chat;
     }
 
-    public Task<Result<object>> DeleteChat(int ChatId)
+    private async Task<Result<ChatDTO>> CreateChat(CreateChatDTO CreatedchatDTO)
     {
-        throw new NotImplementedException();
+        var chat = await CreateChatEntity(CreatedchatDTO);
+
+        var createdChat = await unitOfWork
+            .GetRepository<Chat>()
+            .FindAsync(
+                c => c.Id == chat.Id,
+                new[] { "Participants.User", "Messages" }
+            );
+
+        return Result<ChatDTO>.Success(createdChat.Adapt<ChatDTO>());
+    }
+    private async Task<Chat> CreateChatEntity(CreateChatDTO chatDTO)
+    {
+        var chat = new Chat();
+
+        await unitOfWork.GetRepository<Chat>().AddAsync(chat);
+        await unitOfWork.SaveAsync();
+
+        await CreateParticipants(chatDTO, chat);
+
+        return chat;
     }
 
-    public Task<Result<ChatDTO>> GetChat(string id, string ParticpentId)
+
+    private async Task CreateParticipants(CreateChatDTO chatDTO, Chat chat)
     {
-        throw new NotImplementedException();
+        var participantOne = new ChatParticipant
+        {
+            ChatId = chat.Id,
+            UserId = chatDTO.SenderId
+        };
+
+        var participantTwo = new ChatParticipant
+        {
+            ChatId = chat.Id,
+            UserId = chatDTO.ReceiverId
+        };
+
+        await unitOfWork.GetRepository<ChatParticipant>().AddAsync(participantOne);
+        await unitOfWork.GetRepository<ChatParticipant>().AddAsync(participantTwo);
+
+        await unitOfWork.SaveAsync();
     }
 
-    public Task<Result<ChatDTO>> SendMsg(CreateChatDTO chatDTO)
+
+    public async Task<Result<MessageDto>> SendMsg(MessageDto msgDto)
     {
-        throw new NotImplementedException();
+        var msg = msgDto.Adapt<ChatMessage>();
+
+        await unitOfWork.GetRepository<ChatMessage>().AddAsync(msg);
+        await unitOfWork.SaveAsync();
+
+        msgDto.Id = msg.Id;
+        return Result<MessageDto>.Success(msgDto);
+    }
+    public async Task<Result<object>> DeleteChat(int ChatId)
+    {
+        var chat = await unitOfWork.GetRepository<Chat>().FindAsync(c => c.Id == ChatId);
+
+        if (chat == null)
+            return Result<object>.Failure(new Error("Chat not found"));
+
+        unitOfWork.GetRepository<Chat>().DeleteAsync(chat);
+        await unitOfWork.SaveAsync();
+
+        return Result<object>.Success(null);
     }
 }

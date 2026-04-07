@@ -1,3 +1,5 @@
+using FIXIT.Presentation.Hubs;
+
 try
 {
     Log.Logger.Information("Starting FIXIT API...");
@@ -44,6 +46,10 @@ try
     builder.Services.AddMemoryCache();
     builder.Services.RegisterMapsterConfiguration();
 
+    builder.Services.AddSignalR(options =>
+    {
+        options.EnableDetailedErrors = true;
+    });
 
     var app = builder.Build();
 
@@ -64,6 +70,8 @@ try
     app.UseRequestLocalization(localizationOptions);
 
     app.UseCors();
+
+    app.MapHub<ChatHub>("/chatHub");
 
     app.UseAuthentication();
 

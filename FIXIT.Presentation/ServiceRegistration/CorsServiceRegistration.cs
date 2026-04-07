@@ -8,11 +8,14 @@ public static class CorsServiceRegistration
         {
             options.AddDefaultPolicy(policy =>
             {
-                policy.AllowAnyOrigin()
-                      .AllowAnyMethod()
-                      .AllowAnyHeader()
-                      .WithOrigins("https://localhost:7083")
-                      .AllowCredentials();
+                policy
+                    .WithOrigins(
+                        "https://localhost:7083",
+                        "http://127.0.0.1:5500"
+                    )
+                    .AllowAnyMethod()
+                    .AllowAnyHeader()
+                    .AllowCredentials();
             });
         });
 

@@ -11,7 +11,7 @@ public class BaseRepository<T>(AppDbContext _context) : IBaseRepository<T> where
     }
 
     public void DeleteAsync(T entity)
-        => _context.Update(entity);
+        => _context.Remove(entity);
 
     public T Find(Expression<Func<T, bool>> criteria, string[] includes = null)
     {

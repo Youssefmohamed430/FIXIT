@@ -19,7 +19,7 @@ public static class ApplicationServiceRegistration
         services.AddScoped<IEscrowPaymentServiceV2, EscrowPaymentServiceV2>();
         services.AddScoped<INotifService, NotifService>();
         services.AddScoped<IPaymentGateway, PayMobService>();
-        services.AddScoped<IPaymentGateway, StripeService>();
+        services.AddScoped<IPaymentGateway, FawaterakPaymentService>();
         services.AddScoped<IChatService, ChatService>();
         services.AddScoped<IServiceManager, ServiceManager>();
 

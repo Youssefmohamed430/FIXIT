@@ -1,6 +1,6 @@
 ﻿namespace FIXIT.Application.IServices;
 
-public enum PaymentWay { Paymob = 1 , Stripe = 2}
+public enum PaymentWay { Paymob = 1 , Fawaterek = 2}
 public interface IPaymentGateway
 {
     PaymentWay paymentWay { get; }

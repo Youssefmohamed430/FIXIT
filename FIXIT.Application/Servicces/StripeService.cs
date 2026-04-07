@@ -14,7 +14,7 @@ public class StripeService : IPaymentGateway
     private readonly string _webhookSecret;
     private readonly string _successUrl;
     private readonly string _cancelUrl;
-    public PaymentWay paymentWay => PaymentWay.Stripe;
+    public PaymentWay paymentWay => PaymentWay.Fawaterek;
 
 
     public StripeService(ILogger<StripeService> logger)

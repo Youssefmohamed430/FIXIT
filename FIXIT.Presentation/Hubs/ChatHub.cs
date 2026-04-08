@@ -7,10 +7,6 @@ public class ChatHub(IServiceManager serviceManager) : Hub
     {
         var result = await serviceManager.ChatService.SendMsg(messageDto);
 
-        await Clients.User(messageDto.SenderId)
-            .SendAsync("ReceiveMessage", result.Value);
-
-        await Clients.User(messageDto.RecieverId)
-            .SendAsync("ReceiveMessage", result.Value);
+        await Clients.All.SendAsync("ReceiveMessage", result.Value);
     }
 }

@@ -104,12 +104,20 @@ public class ChatService(IUnitOfWork unitOfWork) : IChatService
 
     public async Task<Result<MessageDto>> SendMsg(MessageDto msgDto)
     {
+        var sender = unitOfWork.GetRepository<ApplicationUser>()
+            .Find(u => u.Id == msgDto.SenderId);
+
+        var reciever = unitOfWork.GetRepository<ApplicationUser>()
+            .Find(u => u.Id == msgDto.RecieverId);
+
         var msg = msgDto.Adapt<ChatMessage>();
 
         await unitOfWork.GetRepository<ChatMessage>().AddAsync(msg);
         await unitOfWork.SaveAsync();
 
         msgDto.Id = msg.Id;
+        msgDto.SenderName = sender.Name;
+        msgDto.RecieverName = reciever.Name;
         return Result<MessageDto>.Success(msgDto);
     }
     public async Task<Result<object>> DeleteChat(int ChatId)

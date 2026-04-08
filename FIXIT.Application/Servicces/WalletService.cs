@@ -110,19 +110,22 @@ public class WalletService
 
         await unitOfWork.SaveAsync();
     }
-    public async Task<Result<object>> RecieveCallback(object payload, string hmacHeader,PaymentWay paymentWay)
+    public async Task<Result<object>> RecieveCallback(
+    object payload,
+    Dictionary<string, string> headers,
+    PaymentWay paymentWay)
     {
         try
         {
-            logger.LogInformation("Paymob callback received with payload: {payload}", System.Text.Json.JsonSerializer.Serialize(payload));
+            logger.LogInformation("Callback received for {PaymentWay}", paymentWay);
             unitOfWork.BeginTransaction();
 
             var handler = PayHandler.FirstOrDefault(p => p.paymentWay == paymentWay);
 
-            if (await handler.RecieveCallback(payload, hmacHeader))
+            if (await handler.RecieveCallback(payload, headers))  // ← بنمرر الـ Dictionary
             {
-                var customerid = await servicemanager.paymentGateway.ExtractCustomerIdAsync(payload);
-                var amount = await servicemanager.paymentGateway.ExtractAmountAsync(payload);
+                var customerid = await handler.ExtractCustomerIdAsync(payload);
+                var amount = await handler.ExtractAmountAsync(payload);
 
                 var notif = new NotifDTO
                 {
@@ -131,25 +134,23 @@ public class WalletService
                 };
 
                 await servicemanager.notifService.CreateNotif(notif);
-                //await servicemanager.notifService.NotifyCustomerByJobPostId(customerid, $"Your card has been successfully debited with {Convert.ToInt32(payload.obj.amount_cents) / 100} pounds.");
-
                 await UpdateBalance(amount, customerid);
 
                 unitOfWork.Commit();
-
-                return Result<object>.Success( null!);
+                return Result<object>.Success(null!);
             }
             else
             {
                 unitOfWork.Commit();
-
-                return Result<object>.Failure(new Error("Payment.Fail", "Sorry, The payment process was failed."));
+                return Result<object>.Failure(
+                    new Error("Payment.Fail", "Sorry, The payment process was failed."));
             }
         }
         catch (Exception ex)
         {
             unitOfWork.Rollback();
-            return Result<object>.Failure(new Error("Payment.Error", $"Sorry, An error occurred during the payment process. {ex.Message}"));
+            return Result<object>.Failure(
+                new Error("Payment.Error", $"Sorry, An error occurred. {ex.Message}"));
         }
     }
     public async Task<Result<WalletDTO>> UpdateBalance(decimal amount, string Customerid)

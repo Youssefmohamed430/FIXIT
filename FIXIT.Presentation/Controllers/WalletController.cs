@@ -53,52 +53,51 @@ public class WalletController(IServiceManager serviceManager,ILogger<WalletContr
     [AllowAnonymous]
     public async Task<IActionResult> RecieveCallback()
     {
-        if (Request.Headers.ContainsKey("Stripe-Signature"))
-        {
-            var json = await new StreamReader(Request.Body).ReadToEndAsync();
-            var signature = Request.Headers["Stripe-Signature"];
-
-            try
-            {
-                //var result = serviceManager._walletService.RecieveCallback(json, signature);
-
-                //var stripeEvent = EventUtility.ConstructEvent(
-                //    json,
-                //    signature,
-                //    Environment.GetEnvironmentVariable("STRIPE_WEBHOOK_SECRET")
-                //);
-
-                //if (stripeEvent.Type == "payment_intent.succeeded")
-                //{
-                //    // TODO: update wallet
-                //}
-
-                return Ok();
-            }
-            catch (Exception ex)
-            {
-                logger.LogError(ex, "Stripe webhook error");
-                return BadRequest();
-            }
-        }
-        else if (Request.Query.ContainsKey("hmac"))
+        // Fawaterak Webhook
+        if (Request.Headers.ContainsKey("Authorization"))
         {
             try
             {
-                var payload = await Request.ReadFromJsonAsync<PaymobCallback>();
+                var payload = await Request.ReadFromJsonAsync<WebHookModel>();
+                logger.LogInformation("Received Fawaterak callback: {@Payload}", payload);
 
-                logger.LogInformation("Received Paymob callback: {@Payload}", payload);
-
-                var hmacHeader = Request.Query["hmac"].FirstOrDefault();
+                var headers = new Dictionary<string, string>
+                {   
+                    { "Authorization", Request.Headers["Authorization"].ToString() }
+                };
 
                 var result = await serviceManager._walletService
-                    .RecieveCallback(payload, hmacHeader, PaymentWay.Paymob);
+                    .RecieveCallback(payload, headers, PaymentWay.Fawaterek);
 
                 return result.IsSuccess ? Ok(result) : BadRequest(result);
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, "Error logging Paymob callback");
+                logger.LogError(ex, "Error processing Fawaterak callback");
+                return BadRequest();
+            }
+        }
+        // Paymob Webhook
+        else if (Request.Query.ContainsKey("hmac"))
+        {
+            try
+            {
+                var payload = await Request.ReadFromJsonAsync<PaymobCallback>();
+                logger.LogInformation("Received Paymob callback: {@Payload}", payload);
+
+                var headers = new Dictionary<string, string>
+            {
+                { "hmac", Request.Query["hmac"].FirstOrDefault() ?? "" }
+            };
+
+                var result = await serviceManager._walletService
+                    .RecieveCallback(payload, headers, PaymentWay.Paymob);
+
+                return result.IsSuccess ? Ok(result) : BadRequest(result);
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error processing Paymob callback");
                 return BadRequest();
             }
         }

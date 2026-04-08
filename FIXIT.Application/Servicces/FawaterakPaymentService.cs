@@ -110,6 +110,11 @@ public class FawaterakPaymentService : IPaymentGateway
                     Price = amountcents,
                     Quantity = 1
                 }
+            },
+            PayLoad = new EInvoiceRequestModel.InvoicePayload
+            {
+                Amount = amountcents,
+                UserId = UserId
             }
         };
         return eInvoice;
@@ -117,10 +122,12 @@ public class FawaterakPaymentService : IPaymentGateway
     #endregion
 
     #region WebHook Verification
-    public bool VerifyWebhook(WebHookModel webHook)
+    public async Task<bool> RecieveCallback(object webhook, Dictionary<string, string> headers) 
     {
+        var token = headers["Authorization"];
+        var webHook = (WebHookModel)webhook;
         var generatedHashKey =
-            GenerateHashKeyForWebhookVerification(webHook.InvoiceId, webHook.InvoiceKey, webHook.PaymentMethod);
+             GenerateHashKeyForWebhookVerification(webHook.InvoiceId, webHook.InvoiceKey, webHook.PaymentMethod);
         return generatedHashKey == webHook.HashKey;
     }
 
@@ -184,18 +191,15 @@ public class FawaterakPaymentService : IPaymentGateway
         return result?.Url!;
     }
 
-    public Task<bool> RecieveCallback(object payload, string hmacHeader)
+    public async Task<decimal> ExtractAmountAsync(object payload)
     {
-        throw new NotImplementedException();
+        var webHook = (WebHookModel)payload;
+        return webHook.Payload!.Amount;
     }
 
-    public Task<decimal> ExtractAmountAsync(object payload)
+    public async Task<string> ExtractCustomerIdAsync(object payload)
     {
-        throw new NotImplementedException();
-    }
-
-    public Task<string> ExtractCustomerIdAsync(object payload)
-    {
-        throw new NotImplementedException();
+        var webHook = (WebHookModel)payload;
+        return webHook.Payload!.UserId!;
     }
 }

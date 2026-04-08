@@ -238,7 +238,7 @@ public class PayMobService : IPaymentGateway
     }
 
     // التحقق من Callback
-    public async Task<bool> RecieveCallback(object payload, string hmacHeader)
+    public async Task<bool> RecieveCallback(object payload, Dictionary<string, string> headers)
     {
         try
         {
@@ -273,6 +273,7 @@ public class PayMobService : IPaymentGateway
                              $"{paymobPayload.obj.success.ToString().ToLower()}";
 
             // حساب HMAC
+            var hmacHeader = headers["hmac"];
             using var hmac = new HMACSHA512(Encoding.UTF8.GetBytes(_hmacSecretKey));
             var hash = hmac.ComputeHash(Encoding.UTF8.GetBytes(dataString));
             string calculatedHmac = BitConverter.ToString(hash).Replace("-", "").ToLower();

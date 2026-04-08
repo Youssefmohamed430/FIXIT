@@ -1,4 +1,5 @@
 ﻿using Newtonsoft.Json;
+using System.Text.Json.Serialization;
 
 namespace FIXIT.Application.DTOs;
 
@@ -60,10 +61,10 @@ public RedirectionUrlsModel? RedirectionUrls { get; set; }
 /// </summary>
 public class InvoicePayload
 {
-    /// <summary>
-    /// Your internal order ID
-    /// </summary>
-    public string OrderId { get; set; }
+        [JsonPropertyName("UserId")]
+        public string? UserId { get; set; }
+        [JsonPropertyName("Amount")]
+        public decimal Amount { get; set; }
 }
 
 /// <summary>

@@ -11,8 +11,10 @@ public class WebhookPayload
     /// <summary>
     /// Order ID from your system
     /// </summary>
-    [JsonPropertyName("OrderId")]
-    public string? OrderId { get; set; }
+    [JsonPropertyName("UserId")]
+    public string? UserId { get; set; }
+    [JsonPropertyName("Amount")]
+    public decimal Amount { get; set; }
 }
 
 /// <summary>

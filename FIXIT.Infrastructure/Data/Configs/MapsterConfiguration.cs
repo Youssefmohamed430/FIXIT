@@ -129,7 +129,10 @@ public static class MapsterConfiguration
             .NewConfig()
             .Map(dest => dest.UserId, src => src.UserId)
             .Map(dest => dest.Name, src => src.User.Name)
-            .Map(dest => dest.ImageUrl, src => src.User != null ? src.User.Img : null);
+            .Map(dest => dest.ImageUrl,
+                 src => src.User != null && src.User.Img != null
+                        ? src.User.Img.Value  
+                        : null);
 
         TypeAdapterConfig<ChatMessage, MessageDto>
             .NewConfig()

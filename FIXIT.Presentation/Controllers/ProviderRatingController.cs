@@ -10,7 +10,7 @@ public class ProviderRatingController(IServiceManager serviceManager) : Controll
     [HttpGet("GetProviderRatings/{providerId}")]
     public async Task<IActionResult> GetProviderRatings(string providerId)
     {
-        var result = await serviceManager.providerRatingService.GetProviderRatings(providerId);
+        var result = await serviceManager._providerRatingService.GetProviderRatings(providerId);
         return result.IsSuccess ? Ok(result) : BadRequest(result);
     }
 
@@ -18,7 +18,7 @@ public class ProviderRatingController(IServiceManager serviceManager) : Controll
     [HttpPost("AddProviderRating")]
     public async Task<IActionResult> AddProviderRating([FromBody] ProviderRatingDTO providerRatingDTO)
     {
-            var result = await serviceManager.providerRatingService.AddProviderRating(providerRatingDTO);
+            var result = await serviceManager._providerRatingService.AddProviderRating(providerRatingDTO);
             return result.IsSuccess ? Ok(result) : BadRequest(result);
     }
 
@@ -26,7 +26,7 @@ public class ProviderRatingController(IServiceManager serviceManager) : Controll
     [HttpPut("UpdateProviderRating/{id}")]
     public async Task<IActionResult> UpdateProviderRating(int id, [FromBody] ProviderRatingDTO providerRatingDTO)
     {
-        var result = await serviceManager.providerRatingService.UpdateProviderRating(providerRatingDTO,id);
+        var result = await serviceManager._providerRatingService.UpdateProviderRating(providerRatingDTO,id);
         return result.IsSuccess ? Ok(result) : BadRequest(result);
     }
 
@@ -35,14 +35,14 @@ public class ProviderRatingController(IServiceManager serviceManager) : Controll
     [Authorize(Roles = "Customer")]
     public async Task<IActionResult> DeleteProviderRating(int id)
     {
-        var result = await serviceManager.providerRatingService.DeleteProviderRating(id);
+        var result = await serviceManager._providerRatingService.DeleteProviderRating(id);
         return result.IsSuccess ? Ok(result) : BadRequest(result);
     }
 
     [HttpGet("GetAverageRates/{providerId}")]
     public async Task<IActionResult> GetAverageRates(string providerId)
     {
-        var result = await serviceManager.providerRatingService.GetAverageRates(providerId);
+        var result = await serviceManager._providerRatingService.GetAverageRates(providerId);
         return result.IsSuccess ? Ok(result) : BadRequest(result);
     }
 }

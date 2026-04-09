@@ -21,6 +21,7 @@ public static class ApplicationServiceRegistration
         services.AddScoped<IPaymentGateway, PayMobService>();
         services.AddScoped<IPaymentGateway, FawaterakPaymentService>();
         services.AddScoped<IChatService, ChatService>();
+        services.AddScoped<IProviderRatingService, ProviderRatingService>();
         services.AddScoped<IServiceManager, ServiceManager>();
 
         services.AddScoped<IUserRoleHandler, CustomerRoleHandler>();

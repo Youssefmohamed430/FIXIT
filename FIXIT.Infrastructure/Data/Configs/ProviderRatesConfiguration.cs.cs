@@ -13,6 +13,12 @@ public class ProviderRatesConfiguration : IEntityTypeConfiguration<ProviderRates
                .HasForeignKey(p => p.ProviderId)
                .IsRequired();
 
+        builder.HasOne(p => p.Customer)
+                .WithMany(c => c.Rates)
+                .HasForeignKey(p => p.CustomerId)
+                .OnDelete(DeleteBehavior.Restrict)
+                .IsRequired();
+
         builder.OwnsOne(j => j.Rate, rate =>
         {
             rate.Property(i => i.Value)

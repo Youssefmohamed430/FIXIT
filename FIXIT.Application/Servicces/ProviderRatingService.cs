@@ -51,7 +51,7 @@ public class ProviderRatingService(IUnitOfWork unitOfWork) : IProviderRatingServ
     public Task<Result<decimal>> GetAverageRates(string providerId)
     {
         var AverageRates =  GetProviderRatings(providerId)
-            .Result.Value.Average(p => p.Rate.Value);
+            .Result.Value.Average(p => p.Rate);
 
         return Task.FromResult(Result<decimal>.Success(AverageRates));
     }

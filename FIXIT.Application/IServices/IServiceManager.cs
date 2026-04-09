@@ -14,4 +14,5 @@ public interface IServiceManager
     public INotifService notifService { get; }
     public IChatService ChatService { get; }
     public IPaymentGateway paymentGateway { get; }
+    public IProviderRatingService _providerRatingService { get;  }
 }

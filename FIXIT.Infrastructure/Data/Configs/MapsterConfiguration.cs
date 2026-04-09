@@ -139,11 +139,16 @@ public static class MapsterConfiguration
             .Map(dest => dest.Message, src => src.Message);
 
         TypeAdapterConfig<ProviderRates, ProviderRatingDTO>
+        .NewConfig()
+        .Map(dest => dest.ProviderName, src => src.Provider.User.Name)
+        .Map(dest => dest.CustomerName, src => src.Customer.User.Name)
+        .Map(dest => dest.Rate, src => src.Rate != null ? src.Rate.Value : 0);
+
+        TypeAdapterConfig<ProviderRatingDTO, ProviderRates>
             .NewConfig()
-            .Map(dest => dest.ProviderName, src => src.Provider.User.Name)
-            .Map(dest => dest.CustomerName, src => src.Customer.User.Name)
-            .Map(dest => dest.Rate,
-                    src => src.Rate != null ? Rate.Create(src.Rate.Value) : null);
+            .Map(dest => dest.Rate, src => Rate.Create(src.Rate))
+            .Map(dest => dest.ProviderId, src => src.ProviderId)
+            .Map(dest => dest.CustomerId, src => src.CustomerID);
 
 
         TypeAdapterConfig.GlobalSettings.Scan(Assembly.GetExecutingAssembly());

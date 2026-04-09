@@ -41,11 +41,13 @@ public class ProviderRatingService(IUnitOfWork unitOfWork) : IProviderRatingServ
         var existingProviderRating = await unitOfWork.GetRepository<ProviderRates>()
                 .FindAsync(p => p.Id == id);
 
-        var updatedProviderRating = UpdatedproviderRating.Adapt(existingProviderRating);
+        existingProviderRating.Rate = Rate.Create(UpdatedproviderRating.Rate) ?? existingProviderRating.Rate;
+        existingProviderRating.Comment = UpdatedproviderRating.Comment ?? existingProviderRating.Comment;
+
 
         await unitOfWork.SaveAsync();
 
-        return Result<ProviderRatingDTO>.Success(updatedProviderRating.Adapt<ProviderRatingDTO>());
+        return Result<ProviderRatingDTO>.Success(UpdatedproviderRating.Adapt<ProviderRatingDTO>());
     }
 
     public Task<Result<decimal>> GetAverageRates(string providerId)

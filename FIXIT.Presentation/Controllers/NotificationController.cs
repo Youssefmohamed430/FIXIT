@@ -11,7 +11,7 @@ public class NotificationController(IServiceManager serviceManager) : Controller
         var result = await serviceManager.notifService.GetNotifsByUserId(Id);
         return result.IsSuccess ? Ok(result) : BadRequest(result);
     }
-    [HttpPut]
+    [HttpPut("MarkasRead/{notifid}")]
     public async Task<IActionResult> MarkNotifAsRead(int notifid)
     {
         var result = await serviceManager.notifService.MarkNotifAsRead(notifid);

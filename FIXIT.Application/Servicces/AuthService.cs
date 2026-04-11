@@ -17,42 +17,78 @@ public class AuthService(UserManager<ApplicationUser> _userManager,IServiceManag
     {
         logger.LogInformation("Login attempt for user {UserName}", loginDTO.UserName);
 
-        var result = await _signInManager.PasswordSignInAsync(
-              loginDTO.UserName, loginDTO.Password, isPersistent: false, lockoutOnFailure: true);
+        var user = await _userManager.Users
+            .Include(u => u.refreshTokens)
+            .FirstOrDefaultAsync(u => u.UserName == loginDTO.UserName);
+
+        if (user == null)
+            return new AuthModel { Message = "Invalid username or password", IsAuthenticated = false };
+
+        var result = await _signInManager.CheckPasswordSignInAsync(user, loginDTO.Password, lockoutOnFailure: true);
 
         if (result.Succeeded)
         {
-            (ApplicationUser? user, JwtSecurityToken token, RefreshToken refreshtoken)
-                = await HandleUserLogIn(loginDTO);
+            var token = await _jwtservice.CreateJwtToken(user);
+            var refreshtoken = await HandleRefreshToken(user, token);
 
             return new AuthModelFactory()
                 .CreateAuthModel(user.Id, user.UserName, user.Email, token.ValidTo,
                     token.Claims.Where(c => c.Type == "roles").Select(c => c.Value).ToList(),
-                    new JwtSecurityTokenHandler().WriteToken(token), refreshtoken.Token, EgyptTimeHelper.ConvertFromUtc(refreshtoken.ExpiresOn));
+                    new JwtSecurityTokenHandler().WriteToken(token), refreshtoken.Token,
+                    EgyptTimeHelper.ConvertFromUtc(refreshtoken.ExpiresOn));
         }
         else if (result.IsLockedOut)
         {
             logger.LogWarning("User {UserName} account locked out", loginDTO.UserName);
-
             return new AuthModel { Message = "Account locked due to multiple invalid attempts.", IsAuthenticated = false };
         }
-        else
-        {
-            logger.LogWarning("Invalid login for {UserName}", loginDTO.UserName);
 
-            return new AuthModel { Message = "Invalid username or password", IsAuthenticated = false };
-        }
+        logger.LogWarning("Invalid login for {UserName}", loginDTO.UserName);
+        return new AuthModel { Message = "Invalid username or password", IsAuthenticated = false };
     }
+    #region Old Version Login Method
+    //public async Task<AuthModel> Login(LoginDTO loginDTO)
+    //{
+    //    logger.LogInformation("Login attempt for user {UserName}", loginDTO.UserName);
 
-    private async Task<(ApplicationUser? user, JwtSecurityToken token, RefreshToken refreshtoken)> HandleUserLogIn(LoginDTO loginDTO)
-    {
-        var user = await _userManager.FindByNameAsync(loginDTO.UserName);
+    //    var result = await _signInManager.PasswordSignInAsync(
+    //          loginDTO.UserName, loginDTO.Password, isPersistent: false, lockoutOnFailure: true);
 
-        var token = await _jwtservice.CreateJwtToken(user);
+    //    if (result.Succeeded)
+    //    {
+    //        (ApplicationUser? user, JwtSecurityToken token, RefreshToken refreshtoken)
+    //            = await HandleUserLogIn(loginDTO);
 
-        var refreshtoken = await HandleRefreshToken(user, token);
-        return (user, token, refreshtoken);
-    }
+    //        return new AuthModelFactory()
+    //            .CreateAuthModel(user.Id, user.UserName, user.Email, token.ValidTo,
+    //                token.Claims.Where(c => c.Type == "roles").Select(c => c.Value).ToList(),
+    //                new JwtSecurityTokenHandler().WriteToken(token), refreshtoken.Token, EgyptTimeHelper.ConvertFromUtc(refreshtoken.ExpiresOn));
+    //    }
+    //    else if (result.IsLockedOut)
+    //    {
+    //        logger.LogWarning("User {UserName} account locked out", loginDTO.UserName);
+
+    //        return new AuthModel { Message = "Account locked due to multiple invalid attempts.", IsAuthenticated = false };
+    //    }
+    //    else
+    //    {
+    //        logger.LogWarning("Invalid login for {UserName}", loginDTO.UserName);
+
+    //        return new AuthModel { Message = "Invalid username or password", IsAuthenticated = false };
+    //    }
+    //}
+
+    //private async Task<(ApplicationUser? user, JwtSecurityToken token, RefreshToken refreshtoken)> HandleUserLogIn(LoginDTO loginDTO)
+    //{
+    //    var user = await _userManager.FindByNameAsync(loginDTO.UserName);
+
+    //    var token = await _jwtservice.CreateJwtToken(user);
+
+    //    var refreshtoken = await HandleRefreshToken(user, token);
+    //    return (user, token, refreshtoken);
+    //}
+    #endregion
+
     #endregion
 
     #region Register

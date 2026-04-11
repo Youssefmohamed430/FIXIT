@@ -122,7 +122,7 @@ public class WalletService
 
             var handler = PayHandler.FirstOrDefault(p => p.paymentWay == paymentWay);
 
-            if (await handler.RecieveCallback(payload, headers))  // ← بنمرر الـ Dictionary
+            if (await handler.RecieveCallback(payload, headers)) 
             {
                 var customerid = await handler.ExtractCustomerIdAsync(payload);
                 var amount = await handler.ExtractAmountAsync(payload);

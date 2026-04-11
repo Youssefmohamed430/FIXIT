@@ -2,7 +2,7 @@
 namespace FIXIT.Domain.Entities;
 
 public enum WorkStatus
-{ Pending = 1,Accepted = 2,InProgress = 3,CompletedByProvider = 4,Completed = 5,RevisionRequested = 6,Cancelled = 7}
+{ Pending = 1,Accepted = 2,InProgress = 3,CompletedByProvider = 4,Completed = 5,Cancelled = 7}
 public enum PaymentStatus {Pending = 1,Held = 2, Paid = 3, Failed = 4, Refunded = 5}
 public class Order
 {

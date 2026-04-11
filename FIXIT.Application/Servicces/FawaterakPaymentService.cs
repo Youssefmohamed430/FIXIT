@@ -21,7 +21,7 @@ public class FawaterakPaymentService : IPaymentGateway
     public FawaterakPaymentService(ILogger<FawaterakPaymentService> _logger, IHttpClientFactory httpClientFactory,IUnitOfWork _unitofwork)
     {
         _httpClientFactory = httpClientFactory;
-        ApiKey = Environment.GetEnvironmentVariable("Fawaterek_API_KEY")!;
+        ApiKey = Environment.GetEnvironmentVariable("Fawaterek_API_KEY")?.Trim()!;
         BaseUrl = "https://staging.fawaterk.com/api/v2";
         ProviderKey = Environment.GetEnvironmentVariable("PROVIDER_KEY")!;
         unitOfWork = _unitofwork;
@@ -46,7 +46,7 @@ public class FawaterakPaymentService : IPaymentGateway
         _logger.LogInformation("📦 Request Body: {Body}", json);
 
         var request = new HttpRequestMessage(HttpMethod.Post, url);
-        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", ApiKey);
+        request.Headers.Add("Authorization", $"Bearer {ApiKey}");
         request.Content = new StringContent(json, Encoding.UTF8, "application/json");
 
         try

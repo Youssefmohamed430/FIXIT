@@ -25,7 +25,7 @@ public class AcceptedOrderHandler(
         {
             logger.LogError("Failed to transfer money to escrow for order id {OrderId}. Error: {ErrorMessage}", order.Id, TransferResult.Error.Descriprion);
             order.PaymentStatus = PaymentStatus.Failed;
-            result = Result<OrderDTO>.Failure(new Error("Payment.Failed", "Failed to transfer money to escrow because {error}", TransferResult.Error.Descriprion));
+            result = Result<OrderDTO>.Failure(new Error("Payment.Failed", $"Failed to transfer money to escrow because {TransferResult.Error.Descriprion}"));
             await serviceManager.notifService.NotifyCustomerByJobPostId(order.JobPostId, $"Your order has been accepted but the payment transfer to escrow failed for order id {order.Id}.");
         }
         else

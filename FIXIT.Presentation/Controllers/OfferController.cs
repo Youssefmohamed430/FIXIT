@@ -19,7 +19,7 @@ public class OfferController(IServiceManager serviceManager) : ControllerBase
     }
     [Authorize]
     [Cacheable("Offers.ByProviderName")]
-    [HttpGet("ByProviderName/{name}")]
+    [HttpGet("ByProviderName/{name}/{jobPostId}")]
     public async Task<IActionResult> GetOffersByProviderName(string name, int jobPostId)
     {
         var result = await serviceManager.offerService.GetOffersByProviderName(name,jobPostId);
@@ -28,7 +28,7 @@ public class OfferController(IServiceManager serviceManager) : ControllerBase
     }
     [Authorize]
     [Cacheable("Offers.ByStatus")]
-    [HttpGet("ByStatus/{status}")]
+    [HttpGet("ByStatus/{status}/{jobPostId}")]
     public async Task<IActionResult> GetOffersByStatus(OfferStatus status, int jobPostId)
     {
         var result = await serviceManager.offerService.GetOffersByStatus(status, jobPostId);
@@ -37,7 +37,7 @@ public class OfferController(IServiceManager serviceManager) : ControllerBase
     }
     [Authorize]
     [Cacheable("Offers.ByPriceRange")]
-    [HttpGet("ByPriceRange/{start}/{end}")]
+    [HttpGet("ByPriceRange/{start}/{end}/{jobPostId}")]
     public async Task<IActionResult> GetOffersByPriceRange(decimal start, decimal end, int jobPostId)
     {
         var result = await serviceManager.offerService.GetOffersByPriceRange(start, end,jobPostId);

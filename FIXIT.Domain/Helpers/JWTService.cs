@@ -1,14 +1,18 @@
 ﻿
+using Microsoft.Extensions.Logging;
+
 namespace FIXIT.Domain.Helpers;
 
 public class JWTService
 {
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly JWT _jwt;
-    public JWTService(UserManager<ApplicationUser> userManager, IOptions<JWT> jwt)
+    private readonly ILogger<JWTService> _logger;
+    public JWTService(UserManager<ApplicationUser> userManager, IOptions<JWT> jwt, ILogger<JWTService> logger)
     {
         this._userManager = userManager;
         this._jwt = jwt.Value;
+        this._logger = logger;
     }
     public async Task<JwtSecurityToken> CreateJwtToken(ApplicationUser user)
     {
@@ -33,12 +37,14 @@ public class JWTService
             .GetBytes(Environment.GetEnvironmentVariable("JWTKey")!));
         var signingCredentials = new SigningCredentials(symmetricSecurityKey, SecurityAlgorithms.HmacSha256);
 
+        _logger.LogInformation("Creating JWT token for user {UserId} with claims: {Claims} ,Expiration Time For JwtToken is {expireson}", user.Id, claims.Select(c => new { c.Type, c.Value }),_jwt.DurationInSeconds);
+
         var jwtSecurityToken = new JwtSecurityToken
             (
                 issuer: _jwt.Issuer,
                 audience: _jwt.Audience,
                 claims: claims,
-                expires: DateTime.UtcNow.AddSeconds(_jwt.DurationInMinutes),
+                expires: DateTime.UtcNow.AddSeconds(_jwt.DurationInSeconds),
                 signingCredentials: signingCredentials
             );
 

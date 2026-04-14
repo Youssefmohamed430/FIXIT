@@ -8,6 +8,8 @@ public static class AuthenticationServiceRegistration
 {
     public static IServiceCollection AddJwtAuthentication(this IServiceCollection services, IConfiguration config)
     {
+        services.Configure<JWT>(config.GetSection("JWT"));
+
         services.AddAuthentication(options =>
         {
             options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -32,7 +34,7 @@ public static class AuthenticationServiceRegistration
                     Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("JWTKey")!)
                 ),
 
-                ClockSkew = TimeSpan.Zero
+                ClockSkew = TimeSpan.Zero,
             };
         });
 

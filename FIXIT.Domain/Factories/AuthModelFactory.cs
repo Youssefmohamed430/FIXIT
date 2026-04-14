@@ -11,7 +11,7 @@ public class AuthModelFactory
             Username = username,
             Email = email,
             IsAuthenticated = true,
-            //ExpiresOn = expiresOn,
+            ExpiresOn = expiresOn,
             Roles = roles,
             Token = JWTSecurityToken,
             RefreshToken = refreshToken,

@@ -67,12 +67,11 @@ public class AuthController
     }
 
     [HttpPost("RefreshToken")]
-    public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequest request)
+    public async Task<IActionResult> RefreshToken()
     {
-        if (string.IsNullOrEmpty(request.Token))
-            return Unauthorized(new { Message = "No refresh token provided." });
+        var refreshToken = Request.Cookies["refreshToken"];
 
-        var result = await serviceManager.AuthService.RefreshToken(request.Token);
+        var result = await serviceManager.AuthService.RefreshToken(refreshToken);
 
         if (!result.IsAuthenticated)
             return BadRequest(result.Message);

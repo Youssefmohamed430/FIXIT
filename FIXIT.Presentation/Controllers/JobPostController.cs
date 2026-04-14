@@ -7,7 +7,7 @@ public class JobPostController(IServiceManager serviceManger) : ControllerBase
     #region Get All Posts
     [HttpGet("ById/{Id}")]
     [Cacheable("posts.CustomerId")]
-    [Authorize]
+    [Authorize(Roles = "Customer")]
 
     public IActionResult GetPostsByCustomerId(string Id)
     {

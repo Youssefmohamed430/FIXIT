@@ -1,5 +1,7 @@
 ﻿
 
+using System.Security.Claims;
+
 namespace FIXIT.Application.Servicces;
 public enum UserRole
 {

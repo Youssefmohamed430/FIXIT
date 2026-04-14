@@ -20,27 +20,27 @@ public class OfferController(IServiceManager serviceManager) : ControllerBase
     [Authorize]
     [Cacheable("Offers.ByProviderName")]
     [HttpGet("ByProviderName/{name}")]
-    public async Task<IActionResult> GetOffersByProviderName(string name)
+    public async Task<IActionResult> GetOffersByProviderName(string name, int jobPostId)
     {
-        var result = await serviceManager.offerService.GetOffersByProviderName(name);
+        var result = await serviceManager.offerService.GetOffersByProviderName(name,jobPostId);
 
         return result.IsSuccess ? Ok(result) : BadRequest(result);
     }
     [Authorize]
     [Cacheable("Offers.ByStatus")]
     [HttpGet("ByStatus/{status}")]
-    public async Task<IActionResult> GetOffersByStatus(OfferStatus status)
+    public async Task<IActionResult> GetOffersByStatus(OfferStatus status, int jobPostId)
     {
-        var result = await serviceManager.offerService.GetOffersByStatus(status);
+        var result = await serviceManager.offerService.GetOffersByStatus(status, jobPostId);
 
         return result.IsSuccess ? Ok(result) : BadRequest(result);
     }
     [Authorize]
     [Cacheable("Offers.ByPriceRange")]
     [HttpGet("ByPriceRange/{start}/{end}")]
-    public async Task<IActionResult> GetOffersByPriceRange(decimal start, decimal end)
+    public async Task<IActionResult> GetOffersByPriceRange(decimal start, decimal end, int jobPostId)
     {
-        var result = await serviceManager.offerService.GetOffersByPriceRange(start, end);
+        var result = await serviceManager.offerService.GetOffersByPriceRange(start, end,jobPostId);
 
         return result.IsSuccess ? Ok(result) : BadRequest(result);
     }
@@ -72,14 +72,5 @@ public class OfferController(IServiceManager serviceManager) : ControllerBase
 
         return result.IsSuccess ? Ok(result) : BadRequest(result);
     }
-
-    //[Authorize(Roles = "Customer")]
-    //[HttpPost("AcceptOffer/{offerid}")]
-    //public async Task<IActionResult> AcceptOffer(int offerid)
-    //{
-    //    var result = await serviceManager.offerService.AcceptOffer(offerid);
-   
-    //    return result.IsSuccess ? Ok(result) : BadRequest(result);
-    //}
     #endregion
 }

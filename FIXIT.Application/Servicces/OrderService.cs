@@ -7,7 +7,7 @@ public class OrderService(IUnitOfWork unitOfWork,IServiceManager serviceManager,
     public async Task<Result<List<OrderDTO>>> GetOrdersByProviderId(string Id)
     {
         var Orders = await unitOfWork.GetRepository<Order>()
-            .FindAllAsync<OrderDTO>(o => o.Offer.ProviderId == Id,new string[] {"Offer"});
+            .FindAllAsync<OrderDTO>(o => o.Offer.ProviderId == Id && !o.IsDeleted,new string[] {"Offer"});
 
         if (Orders == null)
             return Result<List<OrderDTO>>.Failure(new Error("Orders.NotFound.ProviderId", "Orders for this provider not found"));
@@ -17,7 +17,7 @@ public class OrderService(IUnitOfWork unitOfWork,IServiceManager serviceManager,
     public async Task<Result<List<OrderDTO>>> GetOrdersByCustomerId(string Id)
     {
         var Orders = await unitOfWork.GetRepository<Order>()
-                    .FindAllAsync<OrderDTO>(o => o.JobPost.CustomerId == Id,new string[] { "JobPost" });
+                    .FindAllAsync<OrderDTO>(o => o.JobPost.CustomerId == Id && !o.IsDeleted,new string[] { "JobPost" });
 
         if (Orders == null)
             return Result<List<OrderDTO>>.Failure(new Error("Orders.NotFound.CustomerId", "Orders for this customer not found"));
@@ -75,7 +75,7 @@ public class OrderService(IUnitOfWork unitOfWork,IServiceManager serviceManager,
         await serviceManager.notifService.NotifyProviderByOfferId(order.OfferId, $"Your request to view your post on {order.JobPost.Customer.User.Name}'s page has been deleted.");
 
         logger.LogInformation("Deleted order with Id: {OrderId}", id);
-        return Result<object>.Success(order);
+        return Result<object>.Success(null!);
     }
     #endregion
 }

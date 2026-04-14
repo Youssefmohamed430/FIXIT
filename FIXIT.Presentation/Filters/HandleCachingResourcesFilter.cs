@@ -3,7 +3,6 @@ namespace FIXIT.Presentation;
 
 public class HandleCachingResourcesFilter(IMemoryCache cache, ILogger<HandleCachingResourcesFilter> logger) : IResourceFilter
 {
-    // استخرج الـ key بناءً على الـ attribute + الـ request path
     private string GetCacheKey(HttpContext httpContext, CacheableAttribute cacheAttr)
     {
         var path = httpContext.Request.Path.ToString();

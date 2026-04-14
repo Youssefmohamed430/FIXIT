@@ -34,20 +34,21 @@ public class OfferService(IUnitOfWork unitOfWork,IServiceManager serviceManager,
         "Offers.NotFound.Id",
         "No offers found for the given Job Post.");
 
-    public Task<Result<List<OfferDTO>>> GetOffersByPriceRange(decimal start, decimal end) =>
+    public Task<Result<List<OfferDTO>>> GetOffersByPriceRange(decimal start, decimal end,int jobpostid) =>
         GetOffersAsync(
             o => o.Price.Amount >= start &&
-                 o.Price.Amount <= end,
+                 o.Price.Amount <= end &&
+                 o.JobPostId == jobpostid,
             "Offers.NotFound.Price",
             "No offers found for the given Price Range.");
 
-    public Task<Result<List<OfferDTO>>> GetOffersByProviderName(string name) =>
+    public Task<Result<List<OfferDTO>>> GetOffersByProviderName(string name, int jobPostId) =>
         GetOffersAsync(
             o => o.ServiceProvider.User.Name == name,
             "Offers.NotFound.ProviderName",
             "No offers found for the given Provider.");
 
-    public Task<Result<List<OfferDTO>>> GetOffersByStatus(OfferStatus status) =>
+    public Task<Result<List<OfferDTO>>> GetOffersByStatus(OfferStatus status, int jobPostId) =>
         GetOffersAsync(
             o => o.status == status,
             "Offers.NotFound.Status",
@@ -104,7 +105,7 @@ public class OfferService(IUnitOfWork unitOfWork,IServiceManager serviceManager,
             await unitOfWork.GetRepository<Offer>().UpdateAsync(offerToUpdate);
             await unitOfWork.SaveAsync();
 
-            await SendNotification(offer.JobPostId, "An offer on your job post has been updated.");
+            await SendNotification(offerToUpdate.JobPostId, "An offer on your job post has been updated.");
             logger.LogInformation("Offer with ID: {OfferId} updated successfully.", offerId);
             return Result<OfferDTO>.Success(offerToUpdate.Adapt<OfferDTO>());
         }

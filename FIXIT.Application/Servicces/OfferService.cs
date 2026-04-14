@@ -44,13 +44,15 @@ public class OfferService(IUnitOfWork unitOfWork,IServiceManager serviceManager,
 
     public Task<Result<List<OfferDTO>>> GetOffersByProviderName(string name, int jobPostId) =>
         GetOffersAsync(
-            o => o.ServiceProvider.User.Name == name,
+            o => o.ServiceProvider.User.Name == name &&
+            o.JobPostId == jobPostId,
             "Offers.NotFound.ProviderName",
             "No offers found for the given Provider.");
 
     public Task<Result<List<OfferDTO>>> GetOffersByStatus(OfferStatus status, int jobPostId) =>
         GetOffersAsync(
-            o => o.status == status,
+            o => o.status == status &&
+            o.JobPostId == jobPostId,
             "Offers.NotFound.Status",
             "No offers found for the given Status.");
     #endregion

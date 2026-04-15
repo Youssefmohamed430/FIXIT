@@ -10,6 +10,13 @@
     <Content Remove="appsettings.json" />
   </ItemGroup>
 
+	<ItemGroup>
+		<Content Include="..\FIXIT.Domain\Resources\**\*.json">
+			<CopyToOutputDirectory>Always</CopyToOutputDirectory>
+			<Link>Resources\%(Filename)%(Extension)</Link>
+		</Content>
+	</ItemGroup>
+
   <ItemGroup>
     <EmbeddedResource Include="appsettings.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -48,10 +55,6 @@
     <ProjectReference Include="..\FIXIT.Application\FIXIT.Application.csproj" />
     <ProjectReference Include="..\FIXIT.Infrastructure\FIXIT.Infrastructure.csproj" />
     <ProjectReference Include="..\FIXIT.Presentation\FIXIT.Presentation.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="wwwroot\images\" />
   </ItemGroup>
 
   <ItemGroup>

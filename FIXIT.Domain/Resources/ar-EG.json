@@ -1,3 +1,65 @@
 ﻿{
-  "Hello": "! FIXIT مرحبا بك في تطبيق "
+  "Welcome": "! FIXIT مرحبا بك في تطبيق",
+
+  "Auth.InvalidCredentials": "اسم المستخدم أو كلمة المرور غير صحيحة.",
+  "Auth.AccountLocked": "تم قفل الحساب بسبب محاولات تسجيل دخول متعددة فاشلة.",
+  "Auth.EmailAlreadyRegistered": "البريد الإلكتروني مسجل بالفعل.",
+  "Auth.UserNameAlreadyRegistered": "اسم المستخدم مسجل بالفعل.",
+  "Auth.VerificationSent": "تم إرسال كود التحقق إلى بريدك الإلكتروني.",
+  "Auth.CodeVerified": "تم التحقق من الكود بنجاح!",
+  "Auth.InvalidCode": "كود التحقق غير صحيح.",
+  "Auth.CodeExpired": "انتهت صلاحية كود التحقق أو غير صالح.",
+  "Auth.ResetLinkSent": "تم إرسال رابط إعادة تعيين كلمة المرور.",
+  "Auth.PasswordResetSuccess": "تم إعادة تعيين كلمة المرور بنجاح.",
+  "Auth.InvalidRequest": "طلب غير صالح.",
+  "Auth.TokenInvalid": "الرمز المميز غير صالح.",
+  "Auth.TokenInactive": "الرمز المميز غير نشط.",
+  "Auth.TokenRequired": "الرمز المميز مطلوب!",
+
+  "JobPost.NotFound.Id": "لا توجد منشورات لهذا العميل.",
+  "JobPost.NotFound.Name": "لا توجد منشورات لهذا الاسم.",
+  "JobPost.NotFound.DateRange": "لا توجد منشورات في هذا النطاق الزمني.",
+  "JobPost.NotFound.ServiceType": "لا توجد منشورات لهذا النوع من الخدمة.",
+  "JobPost.NotFound.Status": "لا توجد منشورات بهذه الحالة.",
+  "JobPost.Created": "تم إنشاء المنشور بنجاح.",
+  "JobPost.Updated": "تم تحديث المنشور بنجاح.",
+  "JobPost.Deleted": "تم حذف المنشور بنجاح.",
+
+  "Offer.NotFound": "لا توجد عروض.",
+  "Offer.Created": "تم إنشاء العرض بنجاح.",
+  "Offer.Updated": "تم تحديث العرض بنجاح.",
+  "Offer.Deleted": "تم حذف العرض بنجاح.",
+
+  "Order.NotFound": "الطلب غير موجود.",
+  "Order.Created": "تم إنشاء الطلب بنجاح.",
+  "Order.Deleted": "تم حذف الطلب بنجاح.",
+  "Order.NewOffer": "تم إنشاء طلب جديد لعرضك بسعر {0}.",
+  "Order.CustomerCreated": "تم إنشاء طلبك بنجاح.",
+
+  "Escrow.Accepted": "تم قبول طلبك وتم تجميد المبلغ في الضمان للطلب رقم {0}.",
+  "Escrow.AcceptedProvider": "لقد قبلت الطلب رقم {0}. يرجى البدء في العمل.",
+  "Escrow.PaymentFailed": "فشل تحويل الأموال إلى الضمان.",
+  "Escrow.Cancelled": "تم إلغاء طلبك وإعادة المبلغ.",
+  "Escrow.CancelledProvider": "تم إلغاء أحد الطلبات.",
+  "Escrow.Completed": "تم إتمام طلبك بنجاح.",
+  "Escrow.CompletedProvider": "تم تحويل المبلغ إلى محفظتك.",
+  "Escrow.StatusChanged": "تم تغيير حالة طلبك إلى {0}.",
+
+  "Wallet.NotFound": "لم يتم العثور على المحفظة.",
+  "Wallet.InsufficientBalance": "الرصيد غير كافٍ.",
+  "Wallet.ChargedSuccess": "تم شحن المحفظة بنجاح بمبلغ {0} جنيه.",
+  "Wallet.WithdrawSuccess": "تم سحب {0} جنيه بنجاح إلى الرقم {1}.",
+  "Wallet.PaymentFailed": "عملية الدفع فشلت.",
+  "Wallet.CardDebited": "تم خصم {0} جنيه من بطاقتك بنجاح.",
+  "Wallet.TransferFailed": "فشل تحويل الأموال.",
+
+  "User.NotFound": "المستخدم غير موجود.",
+  "User.NoImage": "لا توجد صورة لهذا المستخدم.",
+
+  "Notif.NotFound": "الإشعار غير موجود.",
+  "Notif.NotFound.UserId": "لا توجد إشعارات لهذا المستخدم.",
+
+  "Rating.NotFound": "تقييم المزود غير موجود.",
+
+  "Chat.NotFound": "المحادثة غير موجودة."
 }

@@ -1,5 +1,6 @@
 ﻿
 
+using Microsoft.Extensions.Localization;
 using System.Security.Claims;
 
 namespace FIXIT.Application.Servicces;
@@ -11,7 +12,8 @@ public enum UserRole
 
 public class AuthService(UserManager<ApplicationUser> _userManager,IServiceManager serviceManager,
         JWTService _jwtservice, SignInManager<ApplicationUser> _signInManager,IConfiguration _configuration,
-        IMemoryCache _cache, ILogger<AuthService> logger, IUnitOfWork unitOfWork,IEnumerable<IUserRoleHandler> _roleHandlers)
+        IMemoryCache _cache, ILogger<AuthService> logger, 
+        IUnitOfWork unitOfWork,IEnumerable<IUserRoleHandler> _roleHandlers, IStringLocalizer<AuthService> _localizer)
         : IAuthService
 {
     #region Login
@@ -36,13 +38,13 @@ public class AuthService(UserManager<ApplicationUser> _userManager,IServiceManag
         {
             logger.LogWarning("User {UserName} account locked out", loginDTO.UserName);
 
-            return new AuthModel { Message = "Account locked due to multiple invalid attempts.", IsAuthenticated = false };
+            return new AuthModel { Message = _localizer["Auth.AccountLocked"], IsAuthenticated = false };
         }
         else
         {
             logger.LogWarning("Invalid login for {UserName}", loginDTO.UserName);
 
-            return new AuthModel { Message = "Invalid username or password", IsAuthenticated = false };
+            return new AuthModel { Message = _localizer["Auth.InvalidCredentials"], IsAuthenticated = false };
         }
     }
 
@@ -67,7 +69,7 @@ public class AuthService(UserManager<ApplicationUser> _userManager,IServiceManag
 
         await HandleVerification(registermodel);
 
-        return new AuthModel { Message = "Verification code sent to email.", IsAuthenticated = true };
+        return new AuthModel { Message = _localizer["Auth.VerificationSent"], IsAuthenticated = true };
     }
     
     private async Task HandleVerification(RegisterDTO registermodel)
@@ -83,7 +85,7 @@ public class AuthService(UserManager<ApplicationUser> _userManager,IServiceManag
         var userByEmail = await _userManager.FindByEmailAsync(registermodel.Email!);
         
         if (userByEmail is not null && !userByEmail.IsDeleted)
-            return (flowControl: false, value: new AuthModel() { Message = "Email Is Already Registerd" });
+            return (flowControl: false, value: new AuthModel() { Message = _localizer["Auth.EmailAlreadyRegistered"] });
        
         return (flowControl: true, value: null)!;
     }
@@ -93,7 +95,7 @@ public class AuthService(UserManager<ApplicationUser> _userManager,IServiceManag
         var userByUserName = await _userManager.FindByNameAsync(registermodel.UserName!);
 
         if (userByUserName is not null && !userByUserName.IsDeleted)
-            return (flowControl: false, value: new AuthModel() { Message = "User Name Is Already Registerd" });
+            return (flowControl: false, value: new AuthModel() { Message = _localizer["Auth.UserNameAlreadyRegistered"] });
 
         return (flowControl: true, value: null)!;
     }
@@ -147,7 +149,7 @@ public class AuthService(UserManager<ApplicationUser> _userManager,IServiceManag
     HandleUser(string email)
     {
         if (!_cache.TryGetValue($"User:{email}", out RegisterDTO? model))
-            return (false, new AuthModel() { Message = "Verification code expired or invalid." }, null, null, null);
+            return (false, new AuthModel() { Message = _localizer["Auth.CodeExpired"] }, null, null, null);
 
         var user = model.Adapt<ApplicationUser>();
         var result = await _userManager.CreateAsync(user, model.Password!);
@@ -183,15 +185,15 @@ public class AuthService(UserManager<ApplicationUser> _userManager,IServiceManag
 
         await serviceManager.EmailService.SendEmailAsync(user.Email, "Reset Password", htmlBody);
 
-        return new AuthModel { Message = "Reset password link has been sent.", IsAuthenticated = true };
+        return new AuthModel { Message = _localizer["Auth.ResetLinkSent"], IsAuthenticated = true };
     }
 
     private string HandleForgotEmailBody(string Email, string token)
     {
-        //var imagePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Waselny.jpg");
-        //var imageBytes = File.ReadAllBytes(imagePath);
-        //var base64Image = Convert.ToBase64String(imageBytes);
-        //var imageDataUrl = $"data:image/jpeg;base64,{base64Image}";
+        var imagePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "FIXIT.jpg");
+        var imageBytes = File.ReadAllBytes(imagePath);
+        var base64Image = Convert.ToBase64String(imageBytes);
+        var imageDataUrl = $"data:image/jpeg;base64,{base64Image}";
 
 
         var baseUrl = _configuration["AppSettings:BaseUrl"] ?? "https://localhost:7083";
@@ -199,7 +201,7 @@ public class AuthService(UserManager<ApplicationUser> _userManager,IServiceManag
 
         var htmlPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "FogotPasswordEmailTemplate.html");
         var htmlBody = File.ReadAllText(htmlPath);
-        //htmlBody = htmlBody.Replace("{{LogoImage}}", imageDataUrl);
+        htmlBody = htmlBody.Replace("{{LogoImage}}", imageDataUrl);
         htmlBody = htmlBody.Replace("{{ResetLink}}", resetLink);
         return htmlBody;
     }
@@ -208,7 +210,7 @@ public class AuthService(UserManager<ApplicationUser> _userManager,IServiceManag
         var user = await _userManager.FindByEmailAsync(resetPassModel.Email);
 
         if (user == null)
-            return new AuthModel { Message = "Invalid request." };
+            return new AuthModel { Message = _localizer["Auth.InvalidRequest"] };
 
         var decodedToken = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(resetPassModel.token));
 
@@ -220,7 +222,7 @@ public class AuthService(UserManager<ApplicationUser> _userManager,IServiceManag
             return new AuthModel { Message = errors };
         }
 
-        return new AuthModel { IsAuthenticated = true, Message = "Password reset successfully." };
+        return new AuthModel { IsAuthenticated = true, Message = _localizer["Auth.PasswordResetSuccess"] };
     }
     #endregion
 
@@ -305,12 +307,12 @@ public class AuthService(UserManager<ApplicationUser> _userManager,IServiceManag
                 .SingleOrDefaultAsync(u => u.refreshTokens.Any(t => t.Token == token));
 
         if (user == null)
-            return new AuthModel { Message = "Invalid token." };
+            return new AuthModel { Message = _localizer["Auth.TokenInvalid"] };
 
         var refreshToken = user.refreshTokens.Single(t => t.Token == token);
 
         if (!refreshToken.IsActive)
-            return new AuthModel { Message = "InActive token." };
+            return new AuthModel { Message = _localizer["Auth.TokenInactive"] };
 
         refreshToken.RevokedOn = EgyptTimeHelper.ConvertToUtc(EgyptTimeHelper.Now);
 

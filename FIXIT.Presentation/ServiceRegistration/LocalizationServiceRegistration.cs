@@ -14,16 +14,24 @@ public static class LocalizationServiceRegistration
 
         services.AddSingleton<IStringLocalizerFactory, JsonStringLocalizerFactory>();
 
+        var supportedCultures = new[]
+        {
+            new CultureInfo("en-US"),
+            new CultureInfo("ar-EG"),
+        };
+
         services.Configure<RequestLocalizationOptions>(options =>
         {
-            var supportedCultures = new[]
-            {
-                new CultureInfo("en-US"),
-                new CultureInfo("ar-EG"),
-            };
-
-            options.DefaultRequestCulture = new RequestCulture(culture: supportedCultures[0]);
+            options.DefaultRequestCulture = new RequestCulture("en-US");
             options.SupportedCultures = supportedCultures;
+            options.SupportedUICultures = supportedCultures;
+
+            options.RequestCultureProviders = new List<IRequestCultureProvider>
+            {
+                new QueryStringRequestCultureProvider(),  // ?culture=ar-EG
+                new CookieRequestCultureProvider(),
+                new AcceptLanguageHeaderRequestCultureProvider() // Accept-Language: ar-EG
+            };
         });
 
         return services;

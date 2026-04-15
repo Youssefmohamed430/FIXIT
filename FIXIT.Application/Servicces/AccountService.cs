@@ -1,19 +1,21 @@
 ﻿
+using Microsoft.Extensions.Localization;
+
 namespace FIXIT.Application.Servicces;
 
-public class AccountService(IUnitOfWork unitOfWork,ILogger<AccountService> logger) : IAccountService
+public class AccountService(IUnitOfWork unitOfWork,ILogger<AccountService> logger, IStringLocalizer<AccountService> _localizer) : IAccountService
 {
     public async Task<Result<UserDTO>> GetImg(string Id)
     {
         var user = await unitOfWork.GetRepository<ApplicationUser>().FindAsync(u => u.Id == Id);
 
         if (user is null)
-            return Result<UserDTO>.Failure(new Error("User.NotFound", "User not found"));
+            return Result<UserDTO>.Failure(new Error("User.NotFound", _localizer["User.NotFound"]));
 
         var imgPath = user.Img?.Value;
 
         if (imgPath == null)
-            return Result<UserDTO>.Failure(new Error("User.NoImage", "User has no image"));
+            return Result<UserDTO>.Failure(new Error("User.NoImage", _localizer["User.NoImage"]));
 
         var userdto = new UserDTO { ImgPath = imgPath };
 
@@ -25,7 +27,7 @@ public class AccountService(IUnitOfWork unitOfWork,ILogger<AccountService> logge
         var existingUser = await unitOfWork.GetRepository<ApplicationUser>().FindAsync(u => u.Id == Id);
 
         if (existingUser is null)
-            return Result<UserDTO>.Failure(new Error("User.NotFound", "User not found"));
+            return Result<UserDTO>.Failure(new Error("User.NotFound", _localizer["User.NotFound"]));
 
         existingUser.UpdateFrom(
             user.Name,
@@ -48,7 +50,7 @@ public class AccountService(IUnitOfWork unitOfWork,ILogger<AccountService> logge
         var user = await unitOfWork.GetRepository<ApplicationUser>().FindAsync(u => u.Id == Id);
 
         if (user is null)
-            return Result<UserDTO>.Failure(new Error("User.NotFound", "User not found"));
+            return Result<UserDTO>.Failure(new Error("User.NotFound", _localizer["User.NotFound"]));
 
         string fileName = await HandleFoldersandFile(imgFile);
 

@@ -1,3 +1,65 @@
 ﻿{
-  "Welcome" :  "Welcome to FIXIT Application"
+  "Welcome": "Welcome to FIXIT Application",
+
+  "Auth.InvalidCredentials": "Invalid username or password.",
+  "Auth.AccountLocked": "Account locked due to multiple invalid attempts.",
+  "Auth.EmailAlreadyRegistered": "Email is already registered.",
+  "Auth.UserNameAlreadyRegistered": "Username is already registered.",
+  "Auth.VerificationSent": "Verification code sent to your email.",
+  "Auth.CodeVerified": "Code verified successfully!",
+  "Auth.InvalidCode": "Invalid verification code.",
+  "Auth.CodeExpired": "Verification code expired or invalid.",
+  "Auth.ResetLinkSent": "Reset password link has been sent.",
+  "Auth.PasswordResetSuccess": "Password reset successfully.",
+  "Auth.InvalidRequest": "Invalid request.",
+  "Auth.TokenInvalid": "Invalid token.",
+  "Auth.TokenInactive": "Inactive token.",
+  "Auth.TokenRequired": "Token is required!",
+
+  "JobPost.NotFound.Id": "No posts found for the given customer ID.",
+  "JobPost.NotFound.Name": "No posts found for the given customer name.",
+  "JobPost.NotFound.DateRange": "No posts found for the given date range.",
+  "JobPost.NotFound.ServiceType": "No posts found for the given service type.",
+  "JobPost.NotFound.Status": "No posts found for the given status.",
+  "JobPost.Created": "Job post created successfully.",
+  "JobPost.Updated": "Job post updated successfully.",
+  "JobPost.Deleted": "Job post deleted successfully.",
+
+  "Offer.NotFound": "No offers found.",
+  "Offer.Created": "Offer created successfully.",
+  "Offer.Updated": "Offer updated successfully.",
+  "Offer.Deleted": "Offer deleted successfully.",
+
+  "Order.NotFound": "Order not found.",
+  "Order.Created": "Order created successfully.",
+  "Order.Deleted": "Order deleted successfully.",
+  "Order.NewOffer": "A new order has been created for your offer with price {0}.",
+  "Order.CustomerCreated": "Your order has been created.",
+
+  "Escrow.Accepted": "Your order has been accepted and payment is held in escrow for order id {0}.",
+  "Escrow.AcceptedProvider": "You have accepted an order with id {0}. Please start working on it.",
+  "Escrow.PaymentFailed": "Failed to transfer money to escrow.",
+  "Escrow.Cancelled": "Your order has been cancelled and payment refunded.",
+  "Escrow.CancelledProvider": "An order has been cancelled.",
+  "Escrow.Completed": "Your order has been completed.",
+  "Escrow.CompletedProvider": "Payment has been transferred to your wallet.",
+  "Escrow.StatusChanged": "The work status of your order has been changed to {0}.",
+
+  "Wallet.NotFound": "Wallet not found for this user.",
+  "Wallet.InsufficientBalance": "You do not have enough balance.",
+  "Wallet.ChargedSuccess": "Wallet charged successfully with {0} EGP.",
+  "Wallet.WithdrawSuccess": "You have successfully withdrawn {0} EGP to mobile number {1}.",
+  "Wallet.PaymentFailed": "Sorry, the payment process failed.",
+  "Wallet.CardDebited": "Your card has been successfully debited with {0} EGP.",
+  "Wallet.TransferFailed": "Money transfer failed.",
+
+  "User.NotFound": "User not found.",
+  "User.NoImage": "User has no image.",
+
+  "Notif.NotFound": "Notification not found.",
+  "Notif.NotFound.UserId": "Notifications for this user not found.",
+
+  "Rating.NotFound": "Provider rating not found.",
+
+  "Chat.NotFound": "Chat not found."
 }

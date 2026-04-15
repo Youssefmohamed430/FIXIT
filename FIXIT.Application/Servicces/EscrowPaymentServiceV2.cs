@@ -1,5 +1,6 @@
 ﻿
 using FIXIT.Domain.Entities;
+using Microsoft.Extensions.Localization;
 
 namespace FIXIT.Application.Servicces;
 
@@ -9,6 +10,7 @@ public class EscrowPaymentServiceV2 : IEscrowPaymentServiceV2
     private readonly IUnitOfWork unitOfWork;
     private readonly IServiceManager serviceManager;
     private readonly ILogger<EscrowPaymentService> logger;
+    private IStringLocalizer<EscrowPaymentServiceV2> _localizer;
     public EscrowPaymentServiceV2(IUnitOfWork _unitOfWork, IServiceManager _serviceManager, ILogger<EscrowPaymentService> _logger,IEnumerable<IOrderStatusHandler> handlers)
     {
         logger = _logger;
@@ -27,15 +29,15 @@ public class EscrowPaymentServiceV2 : IEscrowPaymentServiceV2
 
         if (order is null)
             return Result<OrderDTO>.Failure(
-                new Error("Order.NotFound", "Order not found."));
+                new Error("Order.NotFound", _localizer["Order.NotFound"]));
 
         if (_handlers.TryGetValue(newStatus, out var handler))
             result = await handler.HandleAsync(order);
         else
         {
             order.WorkStatus = newStatus;
-            await serviceManager.notifService.NotifyCustomerByJobPostId(order.JobPostId, $"The work status of your order has been changed to {newStatus}.");
-            await serviceManager.notifService.NotifyProviderByOfferId(order.OfferId, $"The work status of the order you are working on has been changed to {newStatus}.");
+            await serviceManager.notifService.NotifyCustomerByJobPostId(order.JobPostId, _localizer["Escrow.StatusChanged",newStatus] );
+            await serviceManager.notifService.NotifyProviderByOfferId(order.OfferId, _localizer["Escrow.StatusChanged", newStatus]);
             result = Result<OrderDTO>.Success(order.Adapt<OrderDTO>());
         }
 

@@ -1,8 +1,10 @@
 ﻿
 
+using Microsoft.Extensions.Localization;
+
 namespace FIXIT.Application.Servicces;
 
-public class ProviderRatingService(IUnitOfWork unitOfWork) : IProviderRatingService
+public class ProviderRatingService(IUnitOfWork unitOfWork,IStringLocalizer<ProviderRatingService> _localizer) : IProviderRatingService
 {
     public async Task<Result<List<ProviderRatingDTO>>> GetProviderRatings(string providerId)
     {
@@ -28,7 +30,7 @@ public class ProviderRatingService(IUnitOfWork unitOfWork) : IProviderRatingServ
                 .FindAsync(p => p.Id == id);
 
         if (existingProviderRating == null)
-            return Result<bool>.Failure(new Error("Provider rating not found"));
+            return Result<bool>.Failure(new Error(_localizer["Rating.NotFound"]));
 
         existingProviderRating.IsDeleted = true;
 

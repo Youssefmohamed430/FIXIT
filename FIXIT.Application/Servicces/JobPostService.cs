@@ -1,7 +1,9 @@
 ﻿
+using Microsoft.Extensions.Localization;
+
 namespace FIXIT.Application.Servicces;
 
-public class JobPostService(IUnitOfWork unitOfWork,ILogger<JobPostService> logger) : IJobPostService
+public class JobPostService(IUnitOfWork unitOfWork,ILogger<JobPostService> logger,IStringLocalizer<JobPostService> _localizer) : IJobPostService
 {
     #region Get Posts
 
@@ -30,28 +32,28 @@ public class JobPostService(IUnitOfWork unitOfWork,ILogger<JobPostService> logge
         => await GetPostsAsync(
             j => j.CustomerId == Id,
             "Posts.NotFound.Id",
-            "No posts found for the given customer ID.");
+            _localizer["JobPost.NotFound.Id"]);
     public async Task<Result<List<JobPostDTO>>> GetPostsByCustomerName(string Name)
         => await GetPostsAsync(
             j => j.Customer.User.Name == Name,
             "Posts.NotFound.Name",
-            "No posts found for the given customer Name.");
+            _localizer["JobPost.NotFound.Name"]);
     public async Task<Result<List<JobPostDTO>>> GetPostByDateRange(DateTime startDate, DateTime endDate)
         => await GetPostsAsync(
             j => j.CreatedAt >= startDate && j.CreatedAt <= endDate,
             "Posts.NotFound.DateRange",
-            "No posts found for the given Date Range.");
+            _localizer["No posts found for the given date range."]);
     public async Task<Result<List<JobPostDTO>>> GetPostByServiceType(string type) 
         => await GetPostsAsync(
             j => j.ServiceType == type,
             "Posts.NotFound.ServiceType",
-            "No posts found for the given Servcie Type.");
+            _localizer["JobPost.NotFound.ServiceType"]);
 
     public async Task<Result<List<JobPostDTO>>> GetPostByStatus(JobPostStatus status) 
         => await GetPostsAsync(
             j => j.Status == status,
             "Posts.NotFound.Status",
-            "No posts found for the given Status.");
+            _localizer["JobPost.NotFound.Status"]);
     #endregion
 
     #region Create - Update - Delete
@@ -110,7 +112,7 @@ public class JobPostService(IUnitOfWork unitOfWork,ILogger<JobPostService> logge
         if (post is null)
         {
             logger.LogWarning("Attempted to update JobPost with ID: {JobPostId}, but it was not found", id);
-            return Result<Object>.Failure(new Error("Posts.NotFound.Id", "No post found for the given ID."));
+            return Result<Object>.Failure(new Error("Posts.NotFound.Id", _localizer["JobPost.NotFound.Id"]));
         }
 
         post.Description = jobPostDTO.Description ?? post.Description;

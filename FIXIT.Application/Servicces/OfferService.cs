@@ -1,9 +1,11 @@
 ﻿
 using FIXIT.Domain.Entities;
+using Microsoft.Extensions.Localization;
 
 namespace FIXIT.Application.Servicces;
 
-public class OfferService(IUnitOfWork unitOfWork,IServiceManager serviceManager,ILogger<OfferService> logger) : IOfferService
+public class OfferService(IUnitOfWork unitOfWork,IServiceManager serviceManager
+    ,ILogger<OfferService> logger,IStringLocalizer<OfferService> _localizer) : IOfferService
 {
     #region Gets Offers
 
@@ -32,7 +34,7 @@ public class OfferService(IUnitOfWork unitOfWork,IServiceManager serviceManager,
     GetOffersAsync(
         o => o.JobPostId == id,
         "Offers.NotFound.Id",
-        "No offers found for the given Job Post.");
+        _localizer["Offer.NotFound.Id"]);
 
     public Task<Result<List<OfferDTO>>> GetOffersByPriceRange(decimal start, decimal end,int jobpostid) =>
         GetOffersAsync(
@@ -40,21 +42,21 @@ public class OfferService(IUnitOfWork unitOfWork,IServiceManager serviceManager,
                  o.Price.Amount <= end &&
                  o.JobPostId == jobpostid,
             "Offers.NotFound.Price",
-            "No offers found for the given Price Range.");
+            _localizer["Offer.NotFound.Price"]);
 
     public Task<Result<List<OfferDTO>>> GetOffersByProviderName(string name, int jobPostId) =>
         GetOffersAsync(
             o => o.ServiceProvider.User.Name == name &&
             o.JobPostId == jobPostId,
             "Offers.NotFound.ProviderName",
-            "No offers found for the given Provider.");
+           _localizer["Offer.NotFound.ProviderName"]);
 
     public Task<Result<List<OfferDTO>>> GetOffersByStatus(OfferStatus status, int jobPostId) =>
         GetOffersAsync(
             o => o.status == status &&
             o.JobPostId == jobPostId,
             "Offers.NotFound.Status",
-            "No offers found for the given Status.");
+            _localizer["Offer.NotFound.Status"]);
     #endregion
 
     #region Create, Update, Delete Offers
@@ -67,7 +69,7 @@ public class OfferService(IUnitOfWork unitOfWork,IServiceManager serviceManager,
 
             await unitOfWork.SaveAsync();
 
-            await SendNotification(offer.JobPostId,$"New Offer Has been added to your jobPost with price {offer.Price}.");
+            await SendNotification(offer.JobPostId,_localizer["Offer.Notif" , offer.Price]);
 
             logger.LogInformation("Offer created successfully with ID: {OfferId}", Newoffer.Id);
 
@@ -77,7 +79,7 @@ public class OfferService(IUnitOfWork unitOfWork,IServiceManager serviceManager,
         {
             logger.LogError(ex, "Failed to create offer for JobPostId: {JobPostId} by ProviderId: {ProviderId}", offer.JobPostId, offer.ProviderId);
             return Result<OfferDTO>.Failure(
-                new Error("Offers.CreateFailed", $"Failed to create offer: {ex.Message}"));
+                new Error("Offers.CreateFailed", _localizer["Offer.CreatedFailed", ex.Message]));
         }
     }
 
@@ -98,7 +100,7 @@ public class OfferService(IUnitOfWork unitOfWork,IServiceManager serviceManager,
 
         if (offerToUpdate is null)
             return Result<OfferDTO>.Failure(
-                new Error("Offers.NotFound.Id", "No offer found with the given ID."));
+                new Error("Offers.NotFound.Id", _localizer["Offer.NotFound"]));
 
         UpdateHandling(offer, offerToUpdate);
 
@@ -115,7 +117,7 @@ public class OfferService(IUnitOfWork unitOfWork,IServiceManager serviceManager,
         {
             logger.LogError(ex, "Failed to update offer with ID: {OfferId}", offerId);
             return Result<OfferDTO>.Failure(
-                new Error("Offers.UpdateFailed", $"Failed to update offer: {ex.Message}"));
+                new Error("Offers.UpdateFailed", _localizer["Offer.UpdatedFailed", ex.Message]));
         }
     }
 

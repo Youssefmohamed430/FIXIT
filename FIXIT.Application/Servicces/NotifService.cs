@@ -1,7 +1,9 @@
 ﻿
+using Microsoft.Extensions.Localization;
+
 namespace FIXIT.Application.Servicces;
 
-public class NotifService(IUnitOfWork unitOfWork) : INotifService
+public class NotifService(IUnitOfWork unitOfWork,IStringLocalizer<NotifService> _localizer) : INotifService
 {
     public async Task<Result<NotifDTO>> CreateNotif(NotifDTO notifDTO)
     {
@@ -32,7 +34,7 @@ public class NotifService(IUnitOfWork unitOfWork) : INotifService
             .FindAllAsync<NotifDTO>(n => n.UserId == userId,new string[] { "Notif" });
 
         if(notifs == null)
-            return Result<List<NotifDTO>>.Failure(new Error("Notifs.NotFound.UserId", "Notifications for this user not found"));
+            return Result<List<NotifDTO>>.Failure(new Error("Notifs.NotFound.UserId", _localizer["Notif.NotFound.UserId"]));
 
         return Result<List<NotifDTO>>.Success(notifs.ToList());
     }
@@ -43,7 +45,7 @@ public class NotifService(IUnitOfWork unitOfWork) : INotifService
             .FindAsync(n => n.NotifId == notifid);
 
         if(notif == null)
-            return Result<NotifDTO>.Failure(new Error("Notif.NotFound", "Notification not found"));
+            return Result<NotifDTO>.Failure(new Error("Notif.NotFound", _localizer["Notif.NotFound"]));
 
         notif.IsRead = true;
         await unitOfWork.GetRepository<UserNotification>().UpdateAsync(notif);

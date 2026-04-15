@@ -1,7 +1,9 @@
 ﻿
+using Microsoft.Extensions.Localization;
+
 namespace FIXIT.Application.Servicces;
 
-public class OrderService(IUnitOfWork unitOfWork,IServiceManager serviceManager,ILogger<OrderService> logger) : IOrderService
+public class OrderService(IUnitOfWork unitOfWork,IServiceManager serviceManager,ILogger<OrderService> logger,IStringLocalizer<OrderService> _localizer) : IOrderService
 {
     #region Get Orders
     public async Task<Result<List<OrderDTO>>> GetOrdersByProviderId(string Id)
@@ -10,7 +12,7 @@ public class OrderService(IUnitOfWork unitOfWork,IServiceManager serviceManager,
             .FindAllAsync<OrderDTO>(o => o.Offer.ProviderId == Id && !o.IsDeleted,new string[] {"Offer"});
 
         if (Orders == null)
-            return Result<List<OrderDTO>>.Failure(new Error("Orders.NotFound.ProviderId", "Orders for this provider not found"));
+            return Result<List<OrderDTO>>.Failure(new Error("Orders.NotFound.ProviderId", _localizer["Orders.NotFound.ProviderId"]));
 
         return Result<List<OrderDTO>>.Success(Orders.ToList());
     }
@@ -20,7 +22,7 @@ public class OrderService(IUnitOfWork unitOfWork,IServiceManager serviceManager,
                     .FindAllAsync<OrderDTO>(o => o.JobPost.CustomerId == Id && !o.IsDeleted,new string[] { "JobPost" });
 
         if (Orders == null)
-            return Result<List<OrderDTO>>.Failure(new Error("Orders.NotFound.CustomerId", "Orders for this customer not found"));
+            return Result<List<OrderDTO>>.Failure(new Error("Orders.NotFound.CustomerId", _localizer["Orders.NotFound.CustomerId"]));
 
         return Result<List<OrderDTO>>.Success(Orders.ToList());
     }
@@ -34,16 +36,20 @@ public class OrderService(IUnitOfWork unitOfWork,IServiceManager serviceManager,
         {
             var newOrder = order.Adapt<Order>();
 
-            newOrder.TotalAmount = unitOfWork.GetRepository<Offer>()
-                .FindAsync(o => o.Id == order.OfferId).Result.Price;
-            
+            var offer = unitOfWork.GetRepository<Offer>()
+                .FindAsync(o => o.Id == order.OfferId).Result;
 
-            await serviceManager.notifService.NotifyCustomerByJobPostId(order.JobPostId, $"Your order has been created.");
-            await serviceManager.notifService.NotifyProviderByOfferId(order.OfferId, $"A new order has been created for your offer with price {newOrder.TotalAmount}.");
+            newOrder.TotalAmount = offer.Price;
+
+            await serviceManager.notifService.NotifyCustomerByJobPostId(order.JobPostId, _localizer["Order.CustomerCreated"]);
+            await serviceManager.notifService.NotifyProviderByOfferId(order.OfferId, _localizer["Order.NewOffer",newOrder.TotalAmount]);
             
             logger.LogInformation("Creating order for JobPostId: {JobPostId} and OfferId: {OfferId}", order.JobPostId, order.OfferId);
+            
+            offer.status = OfferStatus.Accepted;
 
             await unitOfWork.GetRepository<Order>().AddAsync(newOrder);
+            await unitOfWork.GetRepository<Offer>().UpdateAsync(offer);
             await unitOfWork.SaveAsync();
 
             return Result<CreateOrderDTO>.Success(order);
@@ -51,7 +57,7 @@ public class OrderService(IUnitOfWork unitOfWork,IServiceManager serviceManager,
         catch (Exception ex)
         {
             logger.LogError(ex, "Failed to create order for JobPostId: {JobPostId} and OfferId: {OfferId}", order.JobPostId, order.OfferId);
-            return Result<CreateOrderDTO>.Failure(new Error("Orders.CreateFailed", $"Failed to create order: {ex.Message}"));
+            return Result<CreateOrderDTO>.Failure(new Error("Orders.CreateFailed", _localizer["Orders.CreateFailed",ex.Message]));
         }
     }
 
@@ -63,7 +69,7 @@ public class OrderService(IUnitOfWork unitOfWork,IServiceManager serviceManager,
         if (order == null)
         {
             logger.LogWarning("Attempted to delete order with Id: {OrderId}, but it was not found", id);
-            return Result<object>.Failure(new Error("Order.NotFound","Order not found"));
+            return Result<object>.Failure(new Error("Order.NotFound", _localizer["Order.NotFound"]));
         }
 
         order.IsDeleted = true;
@@ -71,8 +77,8 @@ public class OrderService(IUnitOfWork unitOfWork,IServiceManager serviceManager,
         await unitOfWork.GetRepository<Order>().UpdateAsync(order);
         await unitOfWork.SaveAsync();
 
-        await serviceManager.notifService.NotifyCustomerByJobPostId(order.JobPostId, "The request was successfully deleted");
-        await serviceManager.notifService.NotifyProviderByOfferId(order.OfferId, $"Your request to view your post on {order.JobPost.Customer.User.Name}'s page has been deleted.");
+        await serviceManager.notifService.NotifyCustomerByJobPostId(order.JobPostId, _localizer["Order.Deleted"]);
+        await serviceManager.notifService.NotifyProviderByOfferId(order.OfferId, _localizer["Order.DeletedNotifProvider", order.JobPost.Customer.User.Name]);
 
         logger.LogInformation("Deleted order with Id: {OrderId}", id);
         return Result<object>.Success(null!);

@@ -26,15 +26,27 @@
   "JobPost.Deleted": "تم حذف المنشور بنجاح.",
 
   "Offer.NotFound": "لا توجد عروض.",
+  "Offer.NotFound.Id": "لا توجد عروض لهذا المنشور",
+  "Offer.NotFound.Price": "لا توجد عروض لذلك المدي من الاسعار",
+  "Offer.NotFound.ProviderName": "لا توجد عروض باسم مقدم الخدمة ",
+  "Offer.NotFound.Status": "لا توجد عروض لهذه الحالة",
   "Offer.Created": "تم إنشاء العرض بنجاح.",
   "Offer.Updated": "تم تحديث العرض بنجاح.",
   "Offer.Deleted": "تم حذف العرض بنجاح.",
+  "Offer.Notif": "تمت اضافة عرض جديد علي منشورك مع سعر {0}",
+  "Offer.CreatedFailed": "فشل انشاء عرضك {0}",
+  "Offer.UpdatedFailed": "فشل تعديل العرض {0}",
 
   "Order.NotFound": "الطلب غير موجود.",
   "Order.Created": "تم إنشاء الطلب بنجاح.",
   "Order.Deleted": "تم حذف الطلب بنجاح.",
   "Order.NewOffer": "تم إنشاء طلب جديد لعرضك بسعر {0}.",
   "Order.CustomerCreated": "تم إنشاء طلبك بنجاح.",
+  "Orders.NotFound.ProviderId": "لا يوجد طلبات متاحة",
+  "Orders.NotFound.CustomerId": "لا يوجد طلبات متاحة",
+  "Orders.CreateFailed": "فشل انشاء طلب {0}",
+  "Order.DeletedNotifProvider": "تم حذف الطلب للعرض الخاص بك علي صفحة العميل {0}",
+
 
   "Escrow.Accepted": "تم قبول طلبك وتم تجميد المبلغ في الضمان للطلب رقم {0}.",
   "Escrow.AcceptedProvider": "لقد قبلت الطلب رقم {0}. يرجى البدء في العمل.",

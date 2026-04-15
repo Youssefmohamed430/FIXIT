@@ -1,8 +1,9 @@
-﻿using System.Security.AccessControl;
+﻿using Microsoft.Extensions.Localization;
+using System.Security.AccessControl;
 
 namespace FIXIT.Application.Servicces;
 
-public class ChatService(IUnitOfWork unitOfWork) : IChatService
+public class ChatService(IUnitOfWork unitOfWork,IStringLocalizer<ChatService> _localizer) : IChatService
 {
     public async Task<Result<List<ChatDTO>>> GetAllChats(string userId)
     {
@@ -125,7 +126,7 @@ public class ChatService(IUnitOfWork unitOfWork) : IChatService
         var chat = await unitOfWork.GetRepository<Chat>().FindAsync(c => c.Id == ChatId);
 
         if (chat == null)
-            return Result<object>.Failure(new Error("Chat not found"));
+            return Result<object>.Failure(new Error(_localizer["Chat.NotFound"]));
 
         unitOfWork.GetRepository<Chat>().DeleteAsync(chat);
         await unitOfWork.SaveAsync();

@@ -8,6 +8,10 @@ on:
     branches:
       - main
 
+permissions:          # ← ده اللي كان ناقص
+  contents: read
+  packages: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -26,14 +30,14 @@ jobs:
       uses: docker/login-action@v3
       with:
         registry: ghcr.io
-        username: ${{ github.repository_owner }}
+        username: ${{ github.actor }}      # ← أفضل من repository_owner
         password: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Build and push Docker image
       uses: docker/build-push-action@v5
       with:
         context: .
-        push: true
+        push: ${{ github.event_name == 'push' }}   # ← push فقط لما يكون merge مش PR
         tags: |
           ghcr.io/${{ env.OWNER }}/fixit:latest
           ghcr.io/${{ env.OWNER }}/fixit:${{ github.sha }}

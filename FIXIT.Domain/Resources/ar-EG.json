@@ -56,6 +56,7 @@
   "Escrow.Completed": "تم إتمام طلبك بنجاح.",
   "Escrow.CompletedProvider": "تم تحويل المبلغ إلى محفظتك.",
   "Escrow.StatusChanged": "تم تغيير حالة طلبك إلى {0}.",
+  "Escrow.PaymentFailedV2": "فشل تحويل الاموال الي الضمان بسبب {0}",
 
   "Wallet.NotFound": "لم يتم العثور على المحفظة.",
   "Wallet.InsufficientBalance": "الرصيد غير كافٍ.",

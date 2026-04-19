@@ -28,6 +28,7 @@
 - [Database Schema](#database-schema)
 - [Authentication & Security](#authentication--security)
 - [Payment Integrations](#payment-integrations)
+- [Payment Flow Diagrams](#payment-flow-diagrams)
 - [Real-Time Chat (SignalR)](#real-time-chat-signalr)
 - [Caching & Filters](#caching--filters)
 - [Localization (i18n)](#localization-i18n)
@@ -367,6 +368,191 @@ else if (Request.Query.ContainsKey("hmac"))         // → Paymob
 On successful callback → credit customer wallet → create notification.
 
 ---
+
+## Payment Flow Diagrams
+
+### 1️⃣ Wallet Charging Flow (Paymob / Fawaterak)
+
+How a customer tops up their wallet balance using an external payment gateway.
+
+```mermaid
+sequenceDiagram
+    actor Customer
+    participant API as FIXIT API
+    participant GW as Payment Gateway<br/>(Paymob / Fawaterak)
+    participant DB as Database
+
+    Customer->>API: PUT /Wallet/{amount}/{customerId}/{paymentWay}
+    Note over API: IdempotencyKeyFilter checks<br/>for duplicate requests
+
+    API->>GW: Request payment iFrame / Invoice link
+    Note over GW: Paymob: Auth → CreateOrder → GetPaymentKey<br/>Fawaterak: CreateInvoiceLink
+
+    GW-->>API: Returns iFrame URL / Invoice URL
+    API-->>Customer: { iframeUrl: "https://..." }
+
+    Customer->>GW: Completes payment on Gateway UI
+    Note over Customer,GW: Customer enters card details<br/>on gateway-hosted page
+
+    GW->>API: POST /Wallet/callback (Webhook)
+    Note over API: Route by header:<br/>Authorization → Fawaterak<br/>?hmac → Paymob
+
+    API->>API: Verify HMAC / HashKey signature
+    Note over API: Paymob: HMAC-SHA512<br/>Fawaterak: HMAC-SHA256
+
+    alt Verification Passed
+        API->>DB: Credit customer Wallet balance
+        API->>DB: Create Notification "Card debited"
+        API-->>GW: 200 OK
+    else Verification Failed
+        API-->>GW: 400 Bad Request
+    end
+```
+
+---
+
+### 2️⃣ Escrow Payment Flow (Order Lifecycle)
+
+The full money lifecycle from order creation to provider payment.
+
+```mermaid
+sequenceDiagram
+    actor Customer
+    actor Provider
+    participant API as FIXIT API
+    participant CW as Customer Wallet
+    participant PW as Platform Wallet
+    participant PRW as Provider Wallet
+    participant DB as Database
+
+    Customer->>API: POST /Order {jobPostId, offerId}
+    API->>DB: Create Order (WorkStatus=Pending, PaymentStatus=Pending)
+    API->>DB: Set Offer.Status = Accepted
+    API->>DB: Notify Customer + Provider
+    API-->>Customer: Order created
+
+    Customer->>API: PUT /EscrowPayment/ChangeWorkOrderStatus/{id}/Accepted
+    Note over API: AcceptedOrderHandler
+
+    API->>CW: Check balance >= TotalAmount
+    alt Insufficient Balance
+        API-->>Customer: Payment Failed
+    else Sufficient Balance
+        API->>CW: Debit TotalAmount
+        API->>PW: Credit TotalAmount
+        API->>DB: Order { WorkStatus=Accepted, PaymentStatus=Held }
+        API->>DB: Notify Customer + Provider
+        API-->>Customer: Money held in escrow
+    end
+
+    Provider->>API: PUT /EscrowPayment/ChangeWorkOrderStatus/{id}/Completed
+    Note over API: CompletedOrderHandler<br/>Platform takes 10% commission
+
+    API->>API: ProviderAmount = TotalAmount x 90%<br/>Commission = TotalAmount x 10%
+    API->>PW: Debit ProviderAmount
+    API->>PRW: Credit ProviderAmount
+    API->>DB: Order { WorkStatus=Completed, PaymentStatus=Paid }
+    API->>DB: Save ProviderAmount + PlatformCommission
+    API->>DB: Notify Customer + Provider
+    API-->>Provider: Payment received
+
+    Note over Customer,Provider: --- OR if cancelled ---
+
+    Customer->>API: PUT /EscrowPayment/ChangeWorkOrderStatus/{id}/Cancelled
+    Note over API: CancelledOrderHandler
+    API->>PW: Debit TotalAmount
+    API->>CW: Credit TotalAmount
+    API->>DB: Order { WorkStatus=Cancelled, PaymentStatus=Refunded }
+    API->>DB: Notify Customer + Provider
+    API-->>Customer: Money refunded
+```
+
+---
+
+### 3️⃣ Wallet Transfer Internal Logic
+
+How `TransferMoney` works inside `WalletService`:
+
+```mermaid
+flowchart TD
+    A([TransferMoney Called]) --> B[BeginTransaction]
+    B --> C[Load Sender Wallet]
+    C --> D[Load Receiver Wallet]
+    D --> E{Sender Balance\n>= Transfer Amount?}
+
+    E -- No --> F[Throw InsufficientBalance]
+    F --> G[Rollback Transaction]
+    G --> H([Return Failure])
+
+    E -- Yes --> I[Deduct from Sender Wallet]
+    I --> J[Add to Receiver Wallet]
+    J --> K[Create Debit WalletTransaction\nfor Sender]
+    K --> L[Create Credit WalletTransaction\nfor Receiver]
+    L --> M[SaveChanges]
+    M --> N[Commit Transaction]
+    N --> O([Return Success])
+```
+
+---
+
+### 4️⃣ Paymob Webhook Verification
+
+How FIXIT verifies Paymob callbacks to prevent fraud:
+
+```mermaid
+flowchart TD
+    A([POST /Wallet/callback]) --> B{Has ?hmac\nquery param?}
+    B -- Yes --> D[Parse PaymobCallback JSON]
+    B -- No --> C{Has Authorization\nheader?}
+    C -- Yes --> E[Parse WebHookModel JSON]
+    C -- No --> F([400 Unknown Provider])
+
+    D --> G[Build data string from\n20 transaction fields]
+    G --> H[HMAC-SHA512 using\nHMAC_SECRET_KEY]
+    H --> I{Computed HMAC\n== ?hmac param?}
+    I -- No --> J([Return Failure\nHMAC mismatch])
+    I -- Yes --> K{obj.success == true?}
+    K -- No --> L([Return Payment Failed])
+    K -- Yes --> M[Extract CustomerId\nfrom billing_data.apartment]
+    M --> N[Extract Amount\nfrom amount_cents div 100]
+    N --> O[Credit Customer Wallet]
+    O --> P[Create Notification]
+    P --> Q([Return Success])
+
+    E --> R[Generate HashKey\nHMAC-SHA256\nInvoiceId+InvoiceKey+PaymentMethod]
+    R --> S{Generated HashKey\n== webhook.HashKey?}
+    S -- No --> T([Return Failure\nHash mismatch])
+    S -- Yes --> M
+```
+
+---
+
+### 5️⃣ Escrow State Machine
+
+```mermaid
+stateDiagram-v2
+    direction LR
+
+    [*] --> Pending : Order Created\nPaymentStatus = Pending
+
+    Pending --> Accepted : Customer Accepts\nMoney to Escrow\nPaymentStatus = Held
+
+    Accepted --> InProgress : Provider Starts Work
+
+    InProgress --> CompletedByProvider : Provider Marks Done
+
+    CompletedByProvider --> Completed : Customer Confirms\n90pct to Provider\n10pct to Platform\nPaymentStatus = Paid
+
+    Accepted --> Cancelled : Customer Cancels\nFull Refund\nPaymentStatus = Refunded
+
+    InProgress --> Cancelled : Customer Cancels\nFull Refund\nPaymentStatus = Refunded
+
+    Completed --> [*]
+    Cancelled --> [*]
+```
+
+---
+
 
 ## Real-Time Chat (SignalR)
 

@@ -14,7 +14,7 @@ public class WalletController(IServiceManager serviceManager,ILogger<WalletContr
     {
         var result = await serviceManager._walletService.GetWalletByUserId(Id);
 
-        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
+        return result.IsSuccess ? Ok(result) : BadRequest(result);
     }
     [HttpPut("{amount}/{Customerid}/{paymentWay}")]
     [ServiceFilter(typeof(IdempotencyKeyFilter))]
@@ -29,7 +29,7 @@ public class WalletController(IServiceManager serviceManager,ILogger<WalletContr
         }
         catch (Exception ex)
         {
-            return BadRequest(new { message = ex.Message });
+            return BadRequest(Result<object>.Failure(new Error(ex.Message)));
         }
     }
 
@@ -41,11 +41,11 @@ public class WalletController(IServiceManager serviceManager,ILogger<WalletContr
         try
         {
             var result = await serviceManager._walletService.Withdraw(withdrawDTO);
-            return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
+            return result.IsSuccess ? Ok(result) : BadRequest(result);
         }
         catch (Exception ex)
         {
-            return BadRequest(new { message = ex.Message });
+            return BadRequest(Result<object>.Failure(new Error(ex.Message)));
         }
     }
 

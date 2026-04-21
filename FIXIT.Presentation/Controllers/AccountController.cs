@@ -11,7 +11,7 @@ public class AccountController(IServiceManager serviceManager) : ControllerBase
     {
         var result = await serviceManager._accountService.GetImg(id);
 
-        return result.IsSuccess ? Ok(result.Value.ImgPath) : NotFound(result.Error);
+        return result.IsSuccess ? Ok(result) : NotFound(result);
     }
 
     [HttpPost("UploadImage")]
@@ -19,14 +19,14 @@ public class AccountController(IServiceManager serviceManager) : ControllerBase
     {
         var result = await serviceManager._accountService.UploadImg(model.UserId, model.Image);
 
-        return result.IsSuccess ? Ok("Uploading Success!") : BadRequest(result.Error);
+        return result.IsSuccess ? Ok(Result<object>.Success("Uploading Success!")) : BadRequest(result);
     }
 
     [HttpPut("UpdateUserInfo/{id}")]
     public async Task<IActionResult> UpdateUserInfo(string id,[FromBody] UserDTO user)
     {
         var result = await serviceManager._accountService.UpdateUserInfo(id, user);
-        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
+        return result.IsSuccess ? Ok(result) : BadRequest(result);
     }
 }
 public class ImageUploadModel

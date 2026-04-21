@@ -17,7 +17,7 @@ public class AuthController
         if (!string.IsNullOrEmpty(result.RefreshToken))
             SetRefreshTokenInCookie(result.RefreshToken, result.RefreshTokenExpiration);
 
-        return result.IsAuthenticated ? Ok(result) : BadRequest(result.Message);
+        return result.IsAuthenticated ? Ok(result) : BadRequest(result);
     }
     [HttpPost("Register")]
     public async Task<IActionResult> Register(RegisterDTO model)
@@ -27,14 +27,14 @@ public class AuthController
 
         var result = await serviceManager.AuthService.Register(model);
 
-        return result.IsAuthenticated ? Ok(result) : BadRequest(result.Message);
+        return result.IsAuthenticated ? Ok(result) : BadRequest(result);
     }
     [HttpPost("ForgetPassword/{Email}")]
     public async Task<IActionResult> ForgetPassword(string Email)
     {
         var result = await serviceManager.AuthService.ForgotPassword(Email);
 
-        return result.IsAuthenticated ? Ok(result) : BadRequest(result.Message);
+        return result.IsAuthenticated ? Ok(result) : BadRequest(result);
     }
     [HttpPost("ResetPassword")]
     public async Task<IActionResult> ResetPassword(ResetPassModelDto resetPassModel)
@@ -44,7 +44,7 @@ public class AuthController
 
         var result = await serviceManager.AuthService.ResetPassword(resetPassModel);
 
-        return result.IsAuthenticated ? Ok(result.Message) : BadRequest(result.Message);
+        return result.IsAuthenticated ? Ok(result) : BadRequest(result);
     }
     [HttpPost("VerifyCode/{submittedCode}")]
     public async Task<IActionResult> VerifyCode([FromQuery] string email, string submittedCode)
@@ -56,14 +56,14 @@ public class AuthController
             var Userresult = await serviceManager.AuthService.CreateUser(email);
 
             if(Userresult.IsAuthenticated == false)
-                return BadRequest(Userresult.Message); 
+                return BadRequest(Userresult); 
 
             SetRefreshTokenInCookie(Userresult.RefreshToken, Userresult.RefreshTokenExpiration);
 
             return Ok(Userresult);
         }
         else
-            return BadRequest(new { Message = "Invalid verification code." });
+            return BadRequest(Result<object>.Failure(new Error("Invalid verification code.")));
     }
 
     [HttpPost("RefreshToken")]
@@ -74,12 +74,12 @@ public class AuthController
         var result = await serviceManager.AuthService.RefreshToken(refreshToken);
 
         if (!result.IsAuthenticated)
-            return BadRequest(result.Message);
+            return BadRequest(result);
 
         if (!string.IsNullOrEmpty(result.RefreshToken))
             SetRefreshTokenInCookie(result.RefreshToken, result.RefreshTokenExpiration);
 
-        return result.IsAuthenticated ? Ok(result) : Unauthorized(result.Message);
+        return result.IsAuthenticated ? Ok(result) : Unauthorized(result);
 
     }
     [HttpPost("revokeToken")]

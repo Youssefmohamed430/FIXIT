@@ -13,7 +13,7 @@ public class JobPostController(IServiceManager serviceManger) : ControllerBase
     {
         var result = serviceManger.jobPostService.GetPostsByCustomerId(Id).Result;
 
-        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
+        return result.IsSuccess ? Ok(result) : BadRequest(result);
     }
     [HttpGet("ByName/{Name}")]
     [Cacheable("posts.CustomerName")]
@@ -22,7 +22,7 @@ public class JobPostController(IServiceManager serviceManger) : ControllerBase
     {
         var result = serviceManger.jobPostService.GetPostsByCustomerName(Name).Result;
 
-        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
+        return result.IsSuccess ? Ok(result) : BadRequest(result);
     }
     [HttpGet("ByDateRange")]
     [Cacheable("posts.DateRange")]
@@ -30,7 +30,7 @@ public class JobPostController(IServiceManager serviceManger) : ControllerBase
     public IActionResult GetPostsByDateRange(DateTime start, DateTime end)
     {
         var result = serviceManger.jobPostService.GetPostByDateRange(start, end).Result;
-        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
+        return result.IsSuccess ? Ok(result) : BadRequest(result);
     }
     [HttpGet("ByServiceType/{type}")]
     [Cacheable("posts.ServiceType")]
@@ -38,7 +38,7 @@ public class JobPostController(IServiceManager serviceManger) : ControllerBase
     public IActionResult GetPostsByServiceType(string type)
     {
         var result = serviceManger.jobPostService.GetPostByServiceType(type).Result;
-        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
+        return result.IsSuccess ? Ok(result) : BadRequest(result);
     }
     #endregion
 
@@ -49,7 +49,7 @@ public class JobPostController(IServiceManager serviceManger) : ControllerBase
     public IActionResult CreatePost([FromForm] CreateJobPostDTO jobPost)
     {
         var result = serviceManger.jobPostService.CreateJobPost(jobPost).Result;
-        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
+        return result.IsSuccess ? Ok(result) : BadRequest(result);
     }
     [HttpPut("{id}")]
     [Authorize(Roles = "Customer")]
@@ -57,7 +57,7 @@ public class JobPostController(IServiceManager serviceManger) : ControllerBase
     public IActionResult UpdatePost(int id, [FromBody] JobPostDTO jobPost)
     {
         var result = serviceManger.jobPostService.UpdateJobPost(id, jobPost).Result;
-        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
+        return result.IsSuccess ? Ok(result) : BadRequest(result);
     }
     [HttpDelete("{id}")]
     [Authorize(Roles = "Customer")]
@@ -65,7 +65,7 @@ public class JobPostController(IServiceManager serviceManger) : ControllerBase
     public IActionResult DeletePost(int id)
     {
         var result = serviceManger.jobPostService.DeleteJobPost(id).Result;
-        return result.IsSuccess ? Ok(result.Value) : BadRequest(result.Error);
+        return result.IsSuccess ? Ok(result) : BadRequest(result);
     }
     #endregion
 }

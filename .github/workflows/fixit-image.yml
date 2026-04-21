@@ -8,15 +8,15 @@ on:
     branches:
       - main
 
-permissions:          # ← ده اللي كان ناقص
+permissions:
   contents: read
   packages: write
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    steps:
 
+    steps:
     - name: Checkout code
       uses: actions/checkout@v3
 
@@ -30,14 +30,29 @@ jobs:
       uses: docker/login-action@v3
       with:
         registry: ghcr.io
-        username: ${{ github.actor }}      # ← أفضل من repository_owner
+        username: ${{ github.actor }}
         password: ${{ secrets.GITHUB_TOKEN }}
 
+    # 👇 هنا بنمرر الـ secrets كـ build args
     - name: Build and push Docker image
       uses: docker/build-push-action@v5
       with:
         context: .
-        push: ${{ github.event_name == 'push' }}   # ← push فقط لما يكون merge مش PR
+        push: ${{ github.event_name == 'push' }}
         tags: |
           ghcr.io/${{ env.OWNER }}/fixit:latest
           ghcr.io/${{ env.OWNER }}/fixit:${{ github.sha }}
+        build-args: |
+          CLIENTGOOGLEID=${{ secrets.CLIENTGOOGLEID }}
+          CLIENTGOOGLESECRET=${{ secrets.CLIENTGOOGLESECRET }}
+          CONSTR=${{ secrets.CONSTR }}
+          EMAILPASSWORD=${{ secrets.EMAILPASSWORD }}
+          FATAWEREK_API_KEY=${{ secrets.FATAWEREK_API_KEY }}
+          HMAC_SECRET_KEY=${{ secrets.HMAC_SECRET_KEY }}
+          JWTKEY=${{ secrets.JWTKEY }}
+          PAYMOP_API_KEY=${{ secrets.PAYMOP_API_KEY }}
+          PAYMOP_API_PUBLICKEY=${{ secrets.PAYMOP_API_PUBLICKEY }}
+          PAYMOP_API_SECRETKEY=${{ secrets.PAYMOP_API_SECRETKEY }}
+          PAYMOP_IFRAME_ID=${{ secrets.PAYMOP_IFRAME_ID }}
+          PAYMOP_INTEGRATION_ID=${{ secrets.PAYMOP_INTEGRATION_ID }}
+          PROVIDER_KEY=${{ secrets.PROVIDER_KEY }}

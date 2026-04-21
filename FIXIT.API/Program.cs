@@ -6,7 +6,7 @@ try
 
     var builder = WebApplication.CreateBuilder(args);
 
-    Env.Load();
+    if (File.Exists(".env")) Env.Load();
 
     var config = new ConfigurationBuilder()
                     .AddJsonFile("appsettings.json")

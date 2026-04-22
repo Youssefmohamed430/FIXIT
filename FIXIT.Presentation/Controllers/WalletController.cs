@@ -6,6 +6,7 @@ namespace FIXIT.Presentation.Controllers;
 
 [ApiController]
 [Route("[controller]")]
+[EnableRateLimiting("GeneralPolicy")]
 public class WalletController(IServiceManager serviceManager,ILogger<WalletController> logger) : ControllerBase
 {
     [HttpGet("{Id}")]
@@ -18,6 +19,8 @@ public class WalletController(IServiceManager serviceManager,ILogger<WalletContr
     }
     [HttpPut("{amount}/{Customerid}/{paymentWay}")]
     [ServiceFilter(typeof(IdempotencyKeyFilter))]
+    [EnableRateLimiting("PaymentPolicy")]
+
     public async Task<IActionResult> ChargeWallet([FromHeader(Name = "Idempotency-Key")] string Key,double amount, string Customerid,PaymentWay paymentWay)
     {
         try
@@ -51,6 +54,7 @@ public class WalletController(IServiceManager serviceManager,ILogger<WalletContr
 
     [HttpPost("callback")]
     [AllowAnonymous]
+    [DisableRateLimiting]
     public async Task<IActionResult> RecieveCallback()
     {
         // Fawaterak Webhook

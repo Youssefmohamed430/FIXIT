@@ -3,6 +3,7 @@ namespace FIXIT.Presentation.Controllers;
 
 [ApiController]
 [Route("[controller]")]
+[EnableRateLimiting("GeneralPolicy")]
 public class EscrowPaymentController(IServiceManager serviceManager) : ControllerBase
 {
     #region Older Endpoints

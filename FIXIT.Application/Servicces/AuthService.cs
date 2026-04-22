@@ -190,7 +190,8 @@ public class AuthService(UserManager<ApplicationUser> _userManager,IServiceManag
 
     private string HandleForgotEmailBody(string Email, string token)
     {
-        var imagePath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "FIXIT.jpg");
+        var basePath = AppContext.BaseDirectory;
+        var imagePath = Path.Combine(basePath, "wwwroot", "FIXIT.jpg");
         var imageBytes = File.ReadAllBytes(imagePath);
         var base64Image = Convert.ToBase64String(imageBytes);
         var imageDataUrl = $"data:image/jpeg;base64,{base64Image}";
@@ -208,12 +209,19 @@ public class AuthService(UserManager<ApplicationUser> _userManager,IServiceManag
     public async Task<AuthModel> ResetPassword(ResetPassModelDto resetPassModel)
     {
         var user = await _userManager.FindByEmailAsync(resetPassModel.Email);
-
         if (user == null)
             return new AuthModel { Message = _localizer["Auth.InvalidRequest"] };
 
-        var decodedToken = Encoding.UTF8.GetString(WebEncoders.Base64UrlDecode(resetPassModel.token));
-
+        string decodedToken;
+        try
+        {
+            decodedToken = Encoding.UTF8.GetString(
+                WebEncoders.Base64UrlDecode(resetPassModel.token));
+        }
+        catch (FormatException)
+        {
+            return new AuthModel { Message = _localizer["Auth.InvalidRequest"] };
+        }
         var result = await _userManager.ResetPasswordAsync(user, decodedToken, resetPassModel.NewPassword);
 
         if (!result.Succeeded)

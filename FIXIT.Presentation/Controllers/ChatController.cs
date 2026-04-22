@@ -2,6 +2,7 @@
 
 [ApiController]
 [Route("[controller]")]
+[EnableRateLimiting("GeneralPolicy")]
 public class ChatController(IServiceManager serviceManager) : ControllerBase
 {
     [HttpGet("{UserId}")]

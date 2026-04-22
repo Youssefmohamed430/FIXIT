@@ -4,6 +4,7 @@ namespace FIXIT.Presentation.Controllers;
 [ApiController]
 [Route("[controller]")]
 [Authorize]
+[EnableRateLimiting("GeneralPolicy")]
 public class AccountController(IServiceManager serviceManager) : ControllerBase
 {
     [HttpGet("{id}")]

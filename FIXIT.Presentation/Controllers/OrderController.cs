@@ -2,6 +2,7 @@
 
 [ApiController]
 [Route("[controller]")]
+[EnableRateLimiting("GeneralPolicy")]
 public class OrderController(IServiceManager serviceManager) : ControllerBase
 {
     [Authorize(Roles = "Provider")]

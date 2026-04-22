@@ -3,6 +3,8 @@
 [ApiController]
 [Route("[controller]")]
 [Authorize]
+[EnableRateLimiting("GeneralPolicy")]
+
 public class NotificationController(IServiceManager serviceManager) : ControllerBase
 {
     [HttpGet("{Id}")]

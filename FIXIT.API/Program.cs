@@ -53,6 +53,7 @@ try
 
     var app = builder.Build();
 
+
     if (app.Environment.IsDevelopment())
     {
         app.MapOpenApi();
@@ -70,6 +71,8 @@ try
     app.UseRequestLocalization(localizationOptions);
 
     app.UseCors();
+
+    app.UseRateLimiter();
 
     app.MapHub<ChatHub>("/chatHub");
 

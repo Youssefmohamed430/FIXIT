@@ -20,3 +20,6 @@ global using FIXIT.Domain.Entities;
 global using Microsoft.AspNetCore.Identity;
 global using FIXIT.Presentation.Filters;
 global using Microsoft.AspNetCore.SignalR;
+global using Microsoft.AspNetCore.Builder;
+global using Microsoft.AspNetCore.RateLimiting;
+global using System.Threading.RateLimiting;

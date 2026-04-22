@@ -5,12 +5,14 @@ namespace FIXIT.Presentation.Controllers;
 
 [ApiController]
 [Route("[controller]")]
+[EnableRateLimiting("GeneralPolicy")]
 public class OfferController(IServiceManager serviceManager) : ControllerBase
 {
     #region Gets Offers
     [Authorize]
     [HttpGet("ByJobPostId/{id}")]
     [Cacheable("Offers.ByJobPostId")]
+
     public async Task<IActionResult> GetOffersByJobPostId(int id)
     {
         var result = await serviceManager.offerService.GetOffersByJobPostId(id);

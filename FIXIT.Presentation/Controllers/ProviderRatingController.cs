@@ -4,6 +4,7 @@ namespace FIXIT.Presentation.Controllers;
 
 [ApiController]
 [Route("[controller]")]
+[EnableRateLimiting("GeneralPolicy")]
 public class ProviderRatingController(IServiceManager serviceManager) : ControllerBase
 {
     [Authorize(Roles = "Provider")]

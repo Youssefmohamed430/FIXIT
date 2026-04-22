@@ -2,6 +2,8 @@
 namespace FIXIT.Presentation.Controllers;
 [ApiController]
 [Route("[controller]")]
+[EnableRateLimiting("GeneralPolicy")]
+
 public class JobPostController(IServiceManager serviceManger) : ControllerBase
 {
     #region Get All Posts

@@ -3,6 +3,8 @@ namespace FIXIT.Presentation.Controllers;
 
 [Route("[controller]")]
 [ApiController]
+[EnableRateLimiting("AuthPolicy")]
+
 public class AuthController
     (IServiceManager serviceManager,AppDbContext dbContext) : ControllerBase
 {
@@ -67,6 +69,7 @@ public class AuthController
     }
 
     [HttpPost("RefreshToken")]
+    [EnableRateLimiting("GeneralPolicy")]
     public async Task<IActionResult> RefreshToken()
     {
         var refreshToken = Request.Cookies["refreshToken"];
@@ -83,6 +86,7 @@ public class AuthController
 
     }
     [HttpPost("revokeToken")]
+    [DisableRateLimiting]
     public async Task<IActionResult> RevokeToken([FromBody] RevokeToken model)
     {
         var token = model.Token ?? Request.Cookies["refreshToken"];

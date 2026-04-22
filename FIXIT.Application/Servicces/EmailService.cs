@@ -28,7 +28,5 @@ public class EmailService : IEmailService
         { IsBodyHtml = true };
 
         await client.SendMailAsync(message);
-
-        logger.LogError("Happend Error at Email Service");
     }
 }

@@ -7,12 +7,13 @@ public class AccountService(IUnitOfWork unitOfWork,ILogger<AccountService> logge
 {
     public async Task<Result<UserDTO>> GetImg(string Id)
     {
-        var user = await unitOfWork.GetRepository<ApplicationUser>().FindAsync(u => u.Id == Id);
+        var user = await unitOfWork.GetRepository<ApplicationUser>()
+            .FindWithAttributesAsync<UserDTO>(u => u.Id == Id, u => new UserDTO { ImgPath = u.Img!.Value });
 
         if (user is null)
             return Result<UserDTO>.Failure(new Error("User.NotFound", _localizer["User.NotFound"]));
 
-        var imgPath = user.Img?.Value;
+        var imgPath = user.ImgPath;
 
         if (imgPath == null)
             return Result<UserDTO>.Failure(new Error("User.NoImage", _localizer["User.NoImage"]));

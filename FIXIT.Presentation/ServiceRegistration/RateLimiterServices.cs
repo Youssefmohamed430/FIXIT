@@ -2,7 +2,7 @@
 
 public static class RateLimiterServices
 {
-    public static IServiceCollection AddRateLimiter(this IServiceCollection services)
+    public static IServiceCollection AddRateLimiterSrvice(this IServiceCollection services)
     {
         services.AddRateLimiter(options =>
         {

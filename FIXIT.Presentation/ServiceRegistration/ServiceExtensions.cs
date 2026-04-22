@@ -19,6 +19,7 @@ public static class ServiceExtensions
         services.AddCorsServices();
         services.AddIdentityServices();
         services.AddLocalizationServices();
+        services.AddRateLimiterSrvice();
 
         return services;
     }

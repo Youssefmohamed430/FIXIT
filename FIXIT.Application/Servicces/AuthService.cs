@@ -190,19 +190,11 @@ public class AuthService(UserManager<ApplicationUser> _userManager,IServiceManag
 
     private string HandleForgotEmailBody(string Email, string token)
     {
-        var basePath = AppContext.BaseDirectory;
-        var imagePath = Path.Combine(basePath, "wwwroot", "FIXIT.jpg");
-        var imageBytes = File.ReadAllBytes(imagePath);
-        var base64Image = Convert.ToBase64String(imageBytes);
-        var imageDataUrl = $"data:image/jpeg;base64,{base64Image}";
-
-
         var baseUrl = _configuration["AppSettings:BaseUrl"] ?? "https://localhost:7083";
         var resetLink = $"{baseUrl}/reset-password?email={Uri.EscapeDataString(Email)}&token={token}";
 
         var htmlPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "FogotPasswordEmailTemplate.html");
         var htmlBody = File.ReadAllText(htmlPath);
-        htmlBody = htmlBody.Replace("{{LogoImage}}", imageDataUrl);
         htmlBody = htmlBody.Replace("{{ResetLink}}", resetLink);
         return htmlBody;
     }

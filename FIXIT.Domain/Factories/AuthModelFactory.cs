@@ -1,4 +1,4 @@
-﻿
+
 namespace FIXIT.Domain.Factories;
 
 public class AuthModelFactory
@@ -11,7 +11,7 @@ public class AuthModelFactory
             Username = username,
             Email = email,
             IsAuthenticated = true,
-            ExpiresOn = expiresOn,
+            ExpiresOn = EgyptTimeHelper.ConvertFromUtc(expiresOn),
             Roles = roles,
             Token = JWTSecurityToken,
             RefreshToken = refreshToken,

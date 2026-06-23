@@ -19,7 +19,7 @@ public class OrderService(IUnitOfWork unitOfWork,IServiceManager serviceManager,
     public async Task<Result<List<OrderDTO>>> GetOrdersByCustomerId(string Id)
     {
         var Orders = await unitOfWork.GetRepository<Order>()
-                    .FindAllAsync<OrderDTO>(o => o.JobPost.CustomerId == Id && !o.IsDeleted,new string[] { "JobPost" });
+                    .FindAllAsync<OrderDTO>(o => o.JobPost.CustomerId == Id && !o.IsDeleted,new string[] { "JobPost","Offer"});
 
         if (Orders == null)
             return Result<List<OrderDTO>>.Failure(new Error("Orders.NotFound.CustomerId", _localizer["Orders.NotFound.CustomerId"]));

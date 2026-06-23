@@ -45,7 +45,9 @@ public static class MapsterConfiguration
         .Map(dest => dest.ProviderAmount,
              src => src.ProviderAmount.Amount)
         .Map(dest => dest.PlatformCommission,
-             src => src.PlatformCommission.Amount);
+             src => src.PlatformCommission.Amount)
+        .Map(dest => dest.ProviderId,
+             src => src.Offer.ProviderId);
 
         TypeAdapterConfig<OrderDTO, Order>
         .NewConfig()
@@ -54,7 +56,9 @@ public static class MapsterConfiguration
         .Map(dest => dest.ProviderAmount.Amount,
              src => src.ProviderAmount)
         .Map(dest => dest.PlatformCommission.Amount,
-             src => src.PlatformCommission);
+             src => src.PlatformCommission)
+        .Map(dest => dest.Offer.ProviderId,
+             src => src.ProviderId);
 
         TypeAdapterConfig<Offer, OfferDTO>
         .NewConfig()

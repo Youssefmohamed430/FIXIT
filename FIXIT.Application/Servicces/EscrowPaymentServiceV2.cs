@@ -11,12 +11,15 @@ public class EscrowPaymentServiceV2 : IEscrowPaymentServiceV2
     private readonly IServiceManager serviceManager;
     private readonly ILogger<EscrowPaymentService> logger;
     private IStringLocalizer<EscrowPaymentServiceV2> _localizer;
-    public EscrowPaymentServiceV2(IUnitOfWork _unitOfWork, IServiceManager _serviceManager, ILogger<EscrowPaymentService> _logger,IEnumerable<IOrderStatusHandler> handlers)
+    public EscrowPaymentServiceV2(IUnitOfWork _unitOfWork, IServiceManager _serviceManager, 
+        ILogger<EscrowPaymentService> _logger,IEnumerable<IOrderStatusHandler> handlers
+        ,IStringLocalizer<EscrowPaymentServiceV2> localizer)
     {
         logger = _logger;
         unitOfWork = _unitOfWork;
         serviceManager = _serviceManager;
         _handlers = handlers.ToDictionary(h => h.Status);
+        _localizer = localizer;
     }
     public async Task<Result<OrderDTO>> ChangeWorkOrderStatus(
         int orderId, WorkStatus newStatus)

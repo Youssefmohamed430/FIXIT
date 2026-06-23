@@ -52,11 +52,14 @@ public class ProviderRatingService(IUnitOfWork unitOfWork,IStringLocalizer<Provi
         return Result<ProviderRatingDTO>.Success(UpdatedproviderRating.Adapt<ProviderRatingDTO>());
     }
 
-    public Task<Result<decimal>> GetAverageRates(string providerId)
+    public async Task<Result<decimal>> GetAverageRates(string providerId)
     {
-        var AverageRates =  GetProviderRatings(providerId)
-            .Result.Value.Average(p => p.Rate);
-
-        return Task.FromResult(Result<decimal>.Success(AverageRates));
+        var ratingsResult = await GetProviderRatings(providerId);
+        
+        if (!ratingsResult.IsSuccess || ratingsResult.Value == null || !ratingsResult.Value.Any())
+            return Result<decimal>.Success(0m);
+        
+        var averageRates = ratingsResult.Value.Average(p => p.Rate);
+        return Result<decimal>.Success(averageRates);
     }
 }

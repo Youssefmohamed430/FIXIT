@@ -2,17 +2,20 @@
 
 public static class CorsServiceRegistration
 {
-    public static IServiceCollection AddCorsServices(this IServiceCollection services)
+    public static IServiceCollection AddCorsServices(
+    this IServiceCollection services,
+    IConfiguration configuration)
     {
+        var allowedOrigins =
+            configuration.GetSection("Cors:AllowedOrigins")
+                         .Get<string[]>() ?? [];
+
         services.AddCors(options =>
         {
             options.AddDefaultPolicy(policy =>
             {
                 policy
-                    .WithOrigins(
-                        "https://localhost:7083",
-                        "http://127.0.0.1:5500"
-                    )
+                    .WithOrigins(allowedOrigins)
                     .AllowAnyMethod()
                     .AllowAnyHeader()
                     .AllowCredentials();

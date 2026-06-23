@@ -15,7 +15,7 @@ public static class ServiceExtensions
         services.AddControllerServices();
         services.AddDatabaseServices(connectionString);
         services.AddApplicationServices();
-        services.AddCorsServices();
+        services.AddCorsServices(config);
         services.AddIdentityServices();
         services.AddJwtAuthentication(config);
         services.AddLocalizationServices();

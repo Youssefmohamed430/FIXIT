@@ -105,14 +105,20 @@ public class JobPostService(IUnitOfWork unitOfWork,ILogger<JobPostService> logge
         return fileName;
     }
 
-    public async Task<Result<Object>> UpdateJobPost(int id, JobPostDTO jobPostDTO)
+    public async Task<Result<Object>> UpdateJobPost(int postid,string userid, JobPostDTO jobPostDTO)
     {
-        var post = await unitOfWork.GetRepository<JobPost>().FindAsync(p => p.Id == id);
+        var post = await unitOfWork.GetRepository<JobPost>().FindAsync(p => p.Id == postid);
 
         if (post is null)
         {
             logger.LogWarning("Attempted to update JobPost with ID: {JobPostId}, but it was not found", id);
             return Result<Object>.Failure(new Error("Posts.NotFound.Id", _localizer["JobPost.NotFound.Id"]));
+        }
+
+        if (post.CustomerId != userid)
+        {
+            logger.LogWarning("This action is forbidden");
+            return Result<Object>.Failure(new Error("DeletePost.Forbidden", "Delete this Post is forbidden"));
         }
 
         post.Description = jobPostDTO.Description ?? post.Description;
@@ -127,16 +133,21 @@ public class JobPostService(IUnitOfWork unitOfWork,ILogger<JobPostService> logge
         return Result<Object>.Success(null!);
     }
 
-    public async Task<Result<Object>> DeleteJobPost(int id)
+    public async Task<Result<Object>> DeleteJobPost(int postid,string userid)
     {
-        var post = await unitOfWork.GetRepository<JobPost>().FindAsync(p => p.Id == id);
+        var post = await unitOfWork.GetRepository<JobPost>().FindAsync(p => p.Id == postid);
 
         if (post is null)
         {
-            logger.LogWarning("Attempted to delete JobPost with ID: {JobPostId}, but it was not found", id);
+            logger.LogWarning("Attempted to delete JobPost with ID: {JobPostId}, but it was not found", postid);
             return Result<Object>.Failure(new Error("Posts.NotFound.Id", "No post found for the given ID."));
         }
-        
+        if(post.CustomerId != userid)
+        {
+            logger.LogWarning("This action is forbidden");
+            return Result<Object>.Failure(new Error("DeletePost.Forbidden", "Delete this Post is forbidden"));
+        }
+
         post.IsDeleted = true;
 
         await unitOfWork.GetRepository<JobPost>().UpdateAsync(post);

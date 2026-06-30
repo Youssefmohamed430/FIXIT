@@ -1,4 +1,6 @@
 ﻿
+using System.Security.Claims;
+
 namespace FIXIT.Presentation.Controllers;
 [ApiController]
 [Route("[controller]")]
@@ -58,7 +60,8 @@ public class JobPostController(IServiceManager serviceManger) : ControllerBase
 
     public IActionResult UpdatePost(int id, [FromBody] JobPostDTO jobPost)
     {
-        var result = serviceManger.jobPostService.UpdateJobPost(id, jobPost).Result;
+        var userId = User.FindFirst("uid")?.Value;
+        var result = serviceManger.jobPostService.UpdateJobPost(id, userId,jobPost).Result;
         return result.IsSuccess ? Ok(result) : BadRequest(result);
     }
     [HttpDelete("{id}")]
@@ -66,7 +69,8 @@ public class JobPostController(IServiceManager serviceManger) : ControllerBase
 
     public IActionResult DeletePost(int id)
     {
-        var result = serviceManger.jobPostService.DeleteJobPost(id).Result;
+        var userId = User.FindFirst("uid")?.Value;
+        var result = serviceManger.jobPostService.DeleteJobPost(id,userId).Result;
         return result.IsSuccess ? Ok(result) : BadRequest(result);
     }
     #endregion

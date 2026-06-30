@@ -28,6 +28,7 @@ public class AcceptedOrderHandler(
             logger.LogInformation("Order id {OrderId} accepted successfully. Money transferred to escrow.", order.Id);
             order.WorkStatus = WorkStatus.Accepted;
             order.PaymentStatus = PaymentStatus.Held;
+            order.JobPost.Status = JobPostStatus.Closed;
             result = Result<OrderDTO>.Success(order.Adapt<OrderDTO>());
             await serviceManager.notifService.NotifyCustomerByJobPostId(order.JobPostId, _localizer["Escrow.Accepted", order.Id]);
             await serviceManager.notifService.NotifyProviderByOfferId(order.OfferId, _localizer["Escrow.AcceptedProvider",order.Id]);

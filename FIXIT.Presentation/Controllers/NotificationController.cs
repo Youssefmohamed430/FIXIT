@@ -8,6 +8,7 @@
 public class NotificationController(IServiceManager serviceManager) : ControllerBase
 {
     [HttpGet("{Id}")]
+    [Cacheable("notifs.Notifications")]
     public async Task<IActionResult> GetNotifs(string Id)
     {
         var result = await serviceManager.notifService.GetNotifsByUserId(Id);

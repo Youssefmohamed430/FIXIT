@@ -5,6 +5,23 @@ namespace FIXIT.Application.Servicces;
 
 public class AccountService(IUnitOfWork unitOfWork,ILogger<AccountService> logger, IStringLocalizer<AccountService> _localizer) : IAccountService
 {
+    public async Task<Result<UserDTO>> GetUserInfo(string Id)
+    {
+        var user = await unitOfWork.GetRepository<ApplicationUser>()
+            .FindWithAttributesAsync<UserDTO>(u => u.Id == Id, u => new UserDTO
+            {
+                Name = u.Name,
+                UserName = u.UserName,
+                Phone = u.PhoneNumber,
+                Email = u.Email,
+                Longitude = u.Location.X,
+                Latitude = u.Location.Y,
+                ImgPath = u.Img!.Value
+            });
+        if (user is null)
+            return Result<UserDTO>.Failure(new Error("User.NotFound", _localizer["User.NotFound"]));
+        return Result<UserDTO>.Success(user);
+    }
     public async Task<Result<UserDTO>> GetImg(string Id)
     {
         var user = await unitOfWork.GetRepository<ApplicationUser>()

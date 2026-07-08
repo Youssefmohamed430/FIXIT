@@ -1,4 +1,5 @@
 using FIXIT.Presentation.Hubs;
+using Microsoft.Extensions.FileProviders;
 
 try
 {
@@ -79,6 +80,13 @@ try
     app.UseAuthentication();
 
     app.UseAuthorization();
+
+    app.UseStaticFiles(new StaticFileOptions
+    {
+        FileProvider = new PhysicalFileProvider(
+        Path.Combine(builder.Environment.ContentRootPath, "images")),
+        RequestPath = "/images"
+    });
 
     app.MapControllers();
 

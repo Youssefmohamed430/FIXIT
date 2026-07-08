@@ -111,7 +111,7 @@ public class JobPostService(IUnitOfWork unitOfWork,ILogger<JobPostService> logge
 
         if (post is null)
         {
-            logger.LogWarning("Attempted to update JobPost with ID: {JobPostId}, but it was not found", id);
+            logger.LogWarning("Attempted to update JobPost with ID: {JobPostId}, but it was not found", postid);
             return Result<Object>.Failure(new Error("Posts.NotFound.Id", _localizer["JobPost.NotFound.Id"]));
         }
 

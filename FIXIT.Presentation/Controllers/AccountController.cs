@@ -15,6 +15,14 @@ public class AccountController(IServiceManager serviceManager) : ControllerBase
         return result.IsSuccess ? Ok(result) : NotFound(result);
     }
 
+    [HttpGet]
+    public async Task<IActionResult> GetUserInfo()
+    {
+        var userId = User.FindFirst("uid")?.Value;
+        var result = await serviceManager._accountService.GetUserInfo(userId);
+        return result.IsSuccess ? Ok(result) : NotFound(result);
+    }
+
     [HttpPost("UploadImage")]
     public async Task<IActionResult> UploadImage([FromForm] ImageUploadModel model)
     {

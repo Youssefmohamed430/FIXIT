@@ -49,7 +49,7 @@ public class JobPostController(IServiceManager serviceManger) : ControllerBase
     #region Create - Update - Delete
     [HttpPost]
     [Authorize(Roles = "Customer")]
-
+    [InvalidatesCache("posts.CustomerId", "/JobPost/ById")]
     public IActionResult CreatePost([FromForm] CreateJobPostDTO jobPost)
     {
         var result = serviceManger.jobPostService.CreateJobPost(jobPost).Result;
@@ -57,6 +57,7 @@ public class JobPostController(IServiceManager serviceManger) : ControllerBase
     }
     [HttpPut("{id}")]
     [Authorize(Roles = "Customer")]
+    [InvalidatesCache("posts.CustomerId", "/JobPost/ById")]
 
     public IActionResult UpdatePost(int id, [FromBody] JobPostDTO jobPost)
     {
@@ -66,6 +67,7 @@ public class JobPostController(IServiceManager serviceManger) : ControllerBase
     }
     [HttpDelete("{id}")]
     [Authorize(Roles = "Customer")]
+    [InvalidatesCache("posts.CustomerId", "/JobPost/ById")]
 
     public IActionResult DeletePost(int id)
     {

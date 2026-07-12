@@ -14,12 +14,12 @@ public class AuthController
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
-        var result = await serviceManager.AuthService.Login(model);
+        (var result , string token , string RefreshToken , DateTime RefreshTokenExpiration) = await serviceManager?.AuthService?.Login(model)!;
 
-        if (!string.IsNullOrEmpty(result.RefreshToken))
-            SetRefreshTokenInCookie(result.RefreshToken, result.RefreshTokenExpiration);
+        if (!string.IsNullOrEmpty(RefreshToken))
+            SetRefreshTokenInCookie(RefreshToken, RefreshTokenExpiration);
 
-        return result.IsAuthenticated ? Ok(result) : BadRequest(result);
+        return result == null ? Ok(new { Token = token }) : BadRequest(result);
     }
     [HttpPost("Register")]
     public async Task<IActionResult> Register(RegisterDTO model)

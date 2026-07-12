@@ -3,7 +3,8 @@ namespace FIXIT.Application.IServices;
 
 public interface IAuthService
 {
-    Task<AuthModel> Login(LoginDTO loginDTO);
+    //Task<AuthModel> Login(LoginDTO loginDTO);
+    Task<(AuthModel? authmodel, string token, string? refreshtoken, DateTime RefreshTokenExpiration)> Login(LoginDTO loginDTO);
     Task<AuthModel> Register(RegisterDTO registermodel);
     Task<AuthModel> ForgotPassword(string Email);
     Task<AuthModel> ResetPassword(ResetPassModelDto resetPassModel);

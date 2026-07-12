@@ -1,6 +1,7 @@
 ﻿
 
 using Microsoft.Extensions.Localization;
+using System.Diagnostics.CodeAnalysis;
 using System.Security.Claims;
 
 namespace FIXIT.Application.Servicces;
@@ -17,61 +18,67 @@ public class AuthService(UserManager<ApplicationUser> _userManager,IServiceManag
         : IAuthService
 {
     #region Login
-    public async Task<AuthModel> Login(LoginDTO loginDTO)
+
+    public async Task<(AuthModel? authmodel, string token,string? refreshtoken,DateTime RefreshTokenExpiration )> Login(LoginDTO loginDTO)
     {
-        logger.LogInformation("Login attempt for user {UserName}", loginDTO.UserName);
+        var user = await _userManager.Users
+            .Include(u => u.refreshTokens)
+            .SingleOrDefaultAsync(u => u.UserName == loginDTO.UserName);
 
-        var result = await _signInManager.PasswordSignInAsync(
-              loginDTO.UserName, loginDTO.Password, isPersistent: false, lockoutOnFailure: true);
+        if (user == null || user.IsDeleted)
+            return (new AuthModel { Message = _localizer["Auth.InvalidCredentials"] }, null!, null!, DateTime.MinValue);
 
-        if (result.Succeeded)
-        {
-            (ApplicationUser? user, JwtSecurityToken token, RefreshToken refreshtoken)
-                = await HandleUserLogIn(loginDTO);
-
-            return new AuthModelFactory()
-                .CreateAuthModel(user.Id, user.UserName, user.Email, token.ValidTo,
-                    token.Claims.Where(c => c.Type == "roles").Select(c => c.Value).ToList(),
-                    new JwtSecurityTokenHandler().WriteToken(token), refreshtoken.Token, EgyptTimeHelper.ConvertFromUtc(refreshtoken.ExpiresOn));
-        }
-        else if (result.IsLockedOut)
+        if (await _userManager.IsLockedOutAsync(user))
         {
             logger.LogWarning("User {UserName} account locked out", loginDTO.UserName);
-
-            return new AuthModel { Message = _localizer["Auth.AccountLocked"], IsAuthenticated = false };
+            return (new AuthModel { Message = _localizer["Auth.AccountLocked"] }, null!, null!, DateTime.MinValue);
         }
-        else
+
+        if (!await _userManager.CheckPasswordAsync(user, loginDTO.Password))
         {
-            logger.LogWarning("Invalid login for {UserName}", loginDTO.UserName);
-
-            return new AuthModel { Message = _localizer["Auth.InvalidCredentials"], IsAuthenticated = false };
+            await _userManager.AccessFailedAsync(user);
+            return (new AuthModel { Message = _localizer["Auth.InvalidCredentials"] }, null!, null!, DateTime.MinValue);
         }
-    }
-
-    private async Task<(ApplicationUser? user, JwtSecurityToken token, RefreshToken refreshtoken)> HandleUserLogIn(LoginDTO loginDTO)
-    {
-        var user = await _userManager.FindByNameAsync(loginDTO.UserName);
 
         var token = await _jwtservice.CreateJwtToken(user);
-
         var refreshtoken = await HandleRefreshToken(user, token);
-        return (user, token, refreshtoken);
+
+        return (null!, new JwtSecurityTokenHandler().WriteToken(token),refreshtoken.Token, EgyptTimeHelper.ConvertFromUtc(refreshtoken.ExpiresOn));
     }
     #endregion
+
     #region Register
     public async Task<AuthModel> Register(RegisterDTO registermodel)
     {
-        (bool flowControl, AuthModel value) = await IsUserNameFound(registermodel);
-        if (!flowControl) return value;
-
-        (flowControl, value) = await IsEmailFound(registermodel);
-        if (!flowControl) return value;
+        var value = await CheckUserConflict(registermodel);
+        if (value != null) return value;
 
         await HandleVerification(registermodel);
 
         return new AuthModel { Message = _localizer["Auth.VerificationSent"], IsAuthenticated = true };
     }
-    
+
+    private async Task<AuthModel?> CheckUserConflict(RegisterDTO registermodel)
+    {
+        var normalizedUserName = registermodel.UserName!.ToUpperInvariant();
+        var normalizedEmail = registermodel.Email!.ToUpperInvariant();
+
+        var matches = await _userManager.Users
+            .Where(u => !u.IsDeleted &&
+                       (u.NormalizedUserName == normalizedUserName ||
+                        u.NormalizedEmail == normalizedEmail))
+            .Select(u => new { u.NormalizedUserName, u.NormalizedEmail }) 
+            .ToListAsync(); 
+
+        if (matches.Any(u => u.NormalizedUserName == normalizedUserName))
+            return new AuthModel { Message = _localizer["Auth.UserNameAlreadyRegistered"] };
+
+        if (matches.Any(u => u.NormalizedEmail == normalizedEmail))
+            return new AuthModel { Message = _localizer["Auth.EmailAlreadyRegistered"] };
+
+        return null;
+    }
+
     private async Task HandleVerification(RegisterDTO registermodel)
     {
         await VerificationAccount(registermodel.Email!);
@@ -79,27 +86,6 @@ public class AuthService(UserManager<ApplicationUser> _userManager,IServiceManag
         var cacheKey = $"User:{registermodel.Email}";
         _cache.Set(cacheKey, registermodel, TimeSpan.FromMinutes(10));
     }
-
-    private async Task<(bool flowControl, AuthModel value)> IsEmailFound(RegisterDTO registermodel)
-    {
-        var userByEmail = await _userManager.FindByEmailAsync(registermodel.Email!);
-        
-        if (userByEmail is not null && !userByEmail.IsDeleted)
-            return (flowControl: false, value: new AuthModel() { Message = _localizer["Auth.EmailAlreadyRegistered"] });
-       
-        return (flowControl: true, value: null)!;
-    }
-
-    private async Task<(bool flowControl, AuthModel value)> IsUserNameFound(RegisterDTO registermodel)
-    {
-        var userByUserName = await _userManager.FindByNameAsync(registermodel.UserName!);
-
-        if (userByUserName is not null && !userByUserName.IsDeleted)
-            return (flowControl: false, value: new AuthModel() { Message = _localizer["Auth.UserNameAlreadyRegistered"] });
-
-        return (flowControl: true, value: null)!;
-    }
-
     public async Task<AuthModel> CreateUser(string email)
     {
         try
@@ -274,6 +260,8 @@ public class AuthService(UserManager<ApplicationUser> _userManager,IServiceManag
     #region Handle Refresh Token
     private async Task<RefreshToken> HandleRefreshToken(ApplicationUser user, JwtSecurityToken token)
     {
+        user.refreshTokens.RemoveAll(t => !t.IsActive);
+
         RefreshToken refreshtoken = null;
 
         if (user.refreshTokens.Any(t => t.IsActive))
